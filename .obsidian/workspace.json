@@ -1,0 +1,218 @@
+{
+  "main": {
+    "id": "4b87d7cd474d260c",
+    "type": "split",
+    "children": [
+      {
+        "id": "f40cacf84c4b8d69",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1460c8bd85b84aae",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Vista gráfica"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "82cf3305d1720310",
+    "type": "split",
+    "children": [
+      {
+        "id": "70705b2d52705bea",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a049b4300d3d9360",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "24804d88b8519271",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "8bdcaf167b4031eb",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c63d5003e5386137",
+    "type": "split",
+    "children": [
+      {
+        "id": "a53930ce3c091d4c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2dbc041e415f503a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes"
+            }
+          },
+          {
+            "id": "1e97e44b2a02562b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes"
+            }
+          },
+          {
+            "id": "5b5c52f8ee49091d",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "e12d90910fff93fb",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "b59b1045fc160ece",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "1460c8bd85b84aae",
+  "lastOpenFiles": [
+    "data/4. Anexo 20/A20_USO_CFDI.md",
+    "data/4. Anexo 20/A20_TIP_REL.md",
+    "data/4. Anexo 20/A20_TIP_FAC.md",
+    "data/4. Anexo 20/A20_TIP_COMP.md",
+    "data/4. Anexo 20/A20_REG_FIS.md",
+    "data/4. Anexo 20/A20_PRO_SER.md",
+    "data/4. Anexo 20/A20_PER.md",
+    "data/4. Anexo 20/A20_PAT_ADU.md",
+    "data/4. Anexo 20/A20_PAIS.md",
+    "data/4. Anexo 20/A20_OBJ_IMP.md",
+    "data/4. Anexo 20/A20_NUM_PED_ADU.md",
+    "data/4. Anexo 20/A20_MUN.md",
+    "data/4. Anexo 20/A20_MON.md",
+    "data/4. Anexo 20/A20_MET_PAG.md",
+    "data/4. Anexo 20/A20_MESES.md",
+    "data/4. Anexo 20/A20_LOC.md",
+    "data/4. Anexo 20/A20_IMP.md",
+    "data/4. Anexo 20/A20_FOR_PAG.md",
+    "data/4. Anexo 20/A20_EXP.md",
+    "data/4. Anexo 20/A20_EST.md",
+    "data/4. Anexo 20/A20_CP.md",
+    "data/4. Anexo 20/A20_COL.md",
+    "data/4. Anexo 20/A20_CLV_UNI.md",
+    "data/4. Anexo 20/A20_ADU.md",
+    "data/5. Carta Porte/CP_CLV_TRAN.md",
+    "data/5. Carta Porte/CP_CLV_UNI_PESO.md",
+    "data/5. Carta Porte/Sin confirmar 837491.crdownload",
+    "data/5. Carta Porte/Sin confirmar 535736.crdownload",
+    "data/5. Carta Porte/Sin confirmar 527107.crdownload",
+    "data/5. Carta Porte/Sin confirmar 578358.crdownload",
+    "data/5. Carta Porte/Sin confirmar 36997.crdownload",
+    "data/5. Carta Porte/Sin confirmar 980624.crdownload",
+    "data/5. Carta Porte/Sin confirmar 575769.crdownload",
+    "data/5. Carta Porte/Sin confirmar 278070.crdownload",
+    "data/5. Carta Porte/Sin confirmar 653868.crdownload",
+    "data/5. Carta Porte/Sin confirmar 789215.crdownload"
+  ]
+}

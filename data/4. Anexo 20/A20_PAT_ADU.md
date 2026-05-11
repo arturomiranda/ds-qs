@@ -1,10 +1,15 @@
-# Tabla: Tabla Patente Aduanal
+# Tabla: A20_PAT_ADU: Patente Aduanal
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 11
-Número de campos: 3
-Número de índices: 1
+Esta tabla maestra representa el repositorio oficial de patente aduanal según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_PAT_ADU`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 11
+- **Número de campos:** 3
+- **Número de índices:** 1
+- **Descripción:** Repositorio de patente aduanal según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -25,3 +30,6 @@ Número de índices: 1
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
 | `A20_NUM_PED_ADU_PAT` | ANEXO 20: Tabla Número Pedimiento Aduana | A20_NUM_PED_ADU@catalogos_sat_dat | PAT |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.

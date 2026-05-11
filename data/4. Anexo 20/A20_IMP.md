@@ -1,10 +1,15 @@
-# Tabla: Tabla Impuestos
+# Tabla: A20_IMP: Impuestos
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 82
-Número de campos: 7
-Número de índices: 4
+Esta tabla maestra representa el repositorio oficial de impuestos según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_IMP`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 82
+- **Número de campos:** 7
+- **Número de índices:** 4
+- **Descripción:** Repositorio de impuestos según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -26,3 +31,6 @@ Número de índices: 4
 | `NAME` | Alfabético | Acepta repetidas |
 | `WORDS` | Palabras | Palabras |
 | `PARTS` | Trozos de palabras | Trozos de palabras |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.

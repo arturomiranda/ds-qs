@@ -1,10 +1,14 @@
-# Tabla: Tabla Municipios
+# Tabla: A20_MUN: Municipios
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 51
-Número de campos: 6
-Número de indices: 5
+Esta tabla maestra representa el repositorio oficial de municipios según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_MUN`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 51
+- **Número de campos:** 6
+- **Descripción:** Repositorio de municipios según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -32,3 +36,7 @@ Número de indices: 5
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
 | `A20_CP_MUN` | ANEXO 20: Tabla Códigos Postales | A20_CP@catalogos_sat_dat | MUN |
+
+## 📝 Notas
+- El campo `CLV` define la clave estandarizada por el SAT, esencial para garantizar la validez técnica en el timbrado de facturas.
+- Mantiene una relación maestra con la tabla `A20_EST`, lo que garantiza la integridad de los datos de estado en todo el sistema.

@@ -1,10 +1,15 @@
-# Tabla:  Tabla Relación Transporte Tipo Estación
+# Tabla: CP_REL_TRA_TIP_EST: Relación Transporte Tipo Estación
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 14
-Número de campos: 5
-Número de indices: 3
+Esta tabla maestra representa el repositorio oficial de relación transporte tipo estación según los catálogos del SAT, fundamental para la correcta emisión del Complemento Carta Porte en los comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `CP_REL_TRA_TIP_EST`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 14
+- **Número de campos:** 5
+- **Número de índices:** 3
+- **Descripción:** Repositorio de relación transporte tipo estación según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -23,3 +28,8 @@ Número de indices: 3
 | `ID` | Código | Clave única |
 | `EST` | Estacion | Acepta repetidas |
 | `TRAN` | Transporte | Acepta repetidas |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación del complemento carta porte.
+- Mantiene una relación maestra con la tabla `CP_TIP_EST`, lo que garantiza la integridad de los datos de estación en todo el sistema.
+- Mantiene una relación maestra con la tabla `CP_CLV_TRAN`, lo que garantiza la integridad de los datos de transporte en todo el sistema.

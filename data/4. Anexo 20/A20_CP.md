@@ -1,10 +1,14 @@
-# Tabla: Tabla Códigos Postales
+# Tabla: A20_CP: Códigos Postales
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 21
-Número de campos: 6
-Número de indices: 4
+Esta tabla maestra representa el repositorio oficial de códigos postales según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_CP`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 21
+- **Número de campos:** 6
+- **Descripción:** Repositorio de códigos postales según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -31,3 +35,9 @@ Número de indices: 4
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
 | `A20_COL_CP` | ANEXO 20: Tabla Colonias | A20_COL@catalogos_sat_dat | CP |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.
+- Mantiene una relación maestra con la tabla `A20_EST`, lo que garantiza la integridad de los datos de estado en todo el sistema.
+- Mantiene una relación maestra con la tabla `A20_MUN`, lo que garantiza la integridad de los datos de municipio en todo el sistema.
+- Mantiene una relación maestra con la tabla `A20_LOC`, lo que garantiza la integridad de los datos de localidad en todo el sistema.

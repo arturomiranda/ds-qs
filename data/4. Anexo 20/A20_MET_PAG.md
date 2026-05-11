@@ -1,10 +1,14 @@
-# Tabla: Tabla Métodos de Pago
+# Tabla: A20_MET_PAG: Métodos de Pago
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 45
-Número de campos: 4
-Número de indices: 4
+Esta tabla maestra representa el repositorio oficial de métodos de pago según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_MET_PAG`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 45
+- **Número de campos:** 4
+- **Descripción:** Repositorio de métodos de pago según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -23,3 +27,6 @@ Número de indices: 4
 | `NAME` | Alfabético | Acepta repetidas |
 | `WORDS` | Palabras | Palabras |
 | `PARTS` | Trozos de palabras | Trozos de palabras |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.

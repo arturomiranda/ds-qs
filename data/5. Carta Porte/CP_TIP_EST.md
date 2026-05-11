@@ -1,10 +1,15 @@
-# Tabla: Tabla Clave Tipo Estación
+# Tabla: CP_TIP_EST: Clave Tipo Estación
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 265
-Número de campos: 4
-Número de indices: 4
+Esta tabla maestra representa el repositorio oficial de clave tipo estación según los catálogos del SAT, fundamental para la correcta emisión del Complemento Carta Porte en los comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `CP_TIP_EST`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 265
+- **Número de campos:** 4
+- **Número de índices:** 4
+- **Descripción:** Repositorio de clave tipo estación según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -29,3 +34,6 @@ Número de indices: 4
 | Identificador            | Nombre                                  | Tabla enlazada      | Índice |
 | :----------------------- | :-------------------------------------- | :------------------ | :----- |
 | `CP_REL_TRA_TIP_EST_EST` | Tabla Relación Transporte Tipo Estación | CP_REL_TRA_TIP_EST@ | EST    |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación del complemento carta porte.

@@ -1,10 +1,15 @@
-# Tabla: Tabla Países
+# Tabla: A20_PAIS: Países
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 45
-Número de campos: 4
-Número de índices: 4
+Esta tabla maestra representa el repositorio oficial de países según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_PAIS`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 45
+- **Número de campos:** 4
+- **Número de índices:** 4
+- **Descripción:** Repositorio de países según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -29,3 +34,6 @@ Número de índices: 4
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
 | `A20_EST_PAIS` | ANEXO 20: Tabla Estados | A20_EST@catalogos_s | PAIS |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.

@@ -1,10 +1,15 @@
-# Tabla: Tabla Aduana
+# Tabla: A20_ADU: Aduana
 
-Tipo: Maestro
-Reside en: Disco
-Longitud del registro: 265
-Número de campos: 4
-Número de índices: 4
+Esta tabla maestra representa el repositorio oficial de aduana según los catálogos del SAT, fundamental para la estandarización y validación de comprobantes fiscales (CFDI).
+
+## 📄 Información General
+- **ID de Tabla:** `A20_ADU`
+- **Tipo:** Maestro
+- **Reside en:** Disco
+- **Longitud del registro:** 265
+- **Número de campos:** 4
+- **Número de índices:** 4
+- **Descripción:** Repositorio de aduana según los catálogos del SAT.
 
 ## 🛠️ Estructura de Campos
 
@@ -29,3 +34,6 @@ Número de índices: 4
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
 | `A20_NUM_PED_ADU_ADU` | ANEXO 20: Tabla Número Pedimiento Aduana | A20_NUM_PED_ADU@catalogos_sat_dat | ADU |
+
+## 📝 Notas
+- El campo `ID` actúa como la llave primaria del SAT, esencial para la emisión y validación de CFDI.

@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "f40cacf84c4b8d69",
+        "id": "e2f222a33f32f94e",
         "type": "tabs",
         "children": [
           {
-            "id": "1460c8bd85b84aae",
+            "id": "fe19d428c66f549c",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Vista gráfica"
+              "type": "markdown",
+              "state": {
+                "file": "data/4. Anexo 20/A20_USO_CFDI.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "A20_USO_CFDI"
             }
           }
         ]
@@ -176,34 +180,35 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "1460c8bd85b84aae",
+  "active": "fe19d428c66f549c",
   "lastOpenFiles": [
-    "data/4. Anexo 20/A20_USO_CFDI.md",
-    "data/4. Anexo 20/A20_TIP_REL.md",
-    "data/4. Anexo 20/A20_TIP_FAC.md",
-    "data/4. Anexo 20/A20_TIP_COMP.md",
-    "data/4. Anexo 20/A20_REG_FIS.md",
-    "data/4. Anexo 20/A20_PRO_SER.md",
-    "data/4. Anexo 20/A20_PER.md",
-    "data/4. Anexo 20/A20_PAT_ADU.md",
-    "data/4. Anexo 20/A20_PAIS.md",
-    "data/4. Anexo 20/A20_OBJ_IMP.md",
-    "data/4. Anexo 20/A20_NUM_PED_ADU.md",
+    "data/4. Anexo 20/A20_EST.md",
+    "data/4. Anexo 20/A20_EXP.md",
+    "data/4. Anexo 20/A20_COL.md",
+    "data/4. Anexo 20/A20_CLV_UNI.md",
+    "data/4. Anexo 20/A20_ADU.md",
     "data/4. Anexo 20/A20_MUN.md",
+    "web/Usuarios.md",
+    "web/Roles.md",
+    "data/4. Anexo 20/A20_IMP.md",
+    "data/4. Anexo 20/A20_TAS_CUO.md",
+    "data/4. Anexo 20/A20_TIP_FAC.md",
     "data/4. Anexo 20/A20_MON.md",
     "data/4. Anexo 20/A20_MET_PAG.md",
     "data/4. Anexo 20/A20_MESES.md",
     "data/4. Anexo 20/A20_LOC.md",
-    "data/4. Anexo 20/A20_IMP.md",
     "data/4. Anexo 20/A20_FOR_PAG.md",
-    "data/4. Anexo 20/A20_EXP.md",
-    "data/4. Anexo 20/A20_EST.md",
     "data/4. Anexo 20/A20_CP.md",
-    "data/4. Anexo 20/A20_COL.md",
-    "data/4. Anexo 20/A20_CLV_UNI.md",
-    "data/4. Anexo 20/A20_ADU.md",
-    "data/5. Carta Porte/CP_CLV_TRAN.md",
+    "data/5. Carta Porte/CP_CON_ESP.md",
+    "data/5. Carta Porte/CP_CON_AUT.md",
+    "data/5. Carta Porte/CP_COD_TRA_AER.md",
     "data/5. Carta Porte/CP_CLV_UNI_PESO.md",
+    "data/5. Carta Porte/CP_CLV_TRAN.md",
+    "data/4. Anexo 20/A20_NUM_PED_ADU.md",
+    "data/3. CFDI/003__PAR_TRA.md",
+    "data/3. CFDI/003__IMP_TRSL_TRA.md",
+    "data/3. CFDI/003__IMP_TRA.md",
+    "web",
     "data/5. Carta Porte/Sin confirmar 837491.crdownload",
     "data/5. Carta Porte/Sin confirmar 535736.crdownload",
     "data/5. Carta Porte/Sin confirmar 527107.crdownload",
@@ -212,7 +217,6 @@
     "data/5. Carta Porte/Sin confirmar 980624.crdownload",
     "data/5. Carta Porte/Sin confirmar 575769.crdownload",
     "data/5. Carta Porte/Sin confirmar 278070.crdownload",
-    "data/5. Carta Porte/Sin confirmar 653868.crdownload",
-    "data/5. Carta Porte/Sin confirmar 789215.crdownload"
+    "data/5. Carta Porte/Sin confirmar 653868.crdownload"
   ]
 }

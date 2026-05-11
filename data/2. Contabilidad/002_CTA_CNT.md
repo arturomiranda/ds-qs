@@ -1,32 +1,31 @@
-# Tabla: 002: Cuentas Contables
-
-Esta tabla maestra contiene el catálogo de cuentas contables del sistema. Soporta una estructura jerárquica para la consolidación financiera.
+# Tabla: ID: 002_CTA_CNT
 
 ## 📄 Información General
-- **ID de Tabla:** `002_CTA_CNT`
-- **Tipo:** Maestro
-- **Reside en:** Disco
-- **Longitud del registro:** 288
-- **Número de campos:** 8
-- **Número de índices:** 6
-- **Descripción:** Catálogo maestro de cuentas contables y su jerarquía.
+- Tipo de tabla: Maestro
+- Reside en: Disco
+- Longitud del registro: 288
+- Número de campos: 8
+- Número de índices: 6
+
+## 📝 Descripción
+El Catálogo Maestro de Cuentas Contables. Es el eje estructural de toda la información financiera del ERP. Organiza de forma jerárquica los activos, pasivos, capital, ingresos y egresos. Incluye compatibilidad nativa con la Contabilidad Electrónica del SAT mediante el enlace con el código agrupador oficial. Define comportamientos críticos como la obligatoriedad de centros de costo o el nivel de la cuenta.
 
 ## 🛠️ Estructura de Campos
 
-| Identificador | Nombre | Tipo | Longitud | Tipo de enlace |
-| :--- | :--- | :--- | :--- | :--- |
-| `ID` | Código | Numérico | 3 | |
-| `NAME` | Nombre de la cuenta | Alfa 256 | 256 | |
-| `PAD_CTA` | Cuenta Padre | Numérico | 3 | Maestro: 002_CTA_CNT@datta_erp_dat |
-| `CTA_SAT` | Cuenta SAT | Alfa 256 | 20 | |
-| `NAT_CTA` | Naturaleza | Alfa 256 | 1 | |
-| `NIV_CTA` | Nivel | Numérico | 2 | |
-| `REG_CCO` | Registra CCO | Booleano | 1 | |
-| `ES_CCC` | Es CCO? | Booleano | 1 | |
+| Identificador | Nombre | Tipo | Longitud | Tipo de enlace | Comentarios y Relaciones |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `ID` | Código | Numérico | 3 | | Identificador interno correlativo. |
+| `NAME` | Nombre de la cuenta | Alfa 256 | 256 | | Nombre oficial de la cuenta contable. |
+| `PAD_CTA` | Cuenta Padre | Numérico | 3 | Maestro: `002_CTA_CNT@datta_erp_dat` | Define la jerarquía (Cuentas de Mayor y Subcuentas). |
+| `CTA_SAT` | Cuenta SAT | Alfa 256 | 20 | | Código agrupador del SAT para cumplimiento fiscal. |
+| `NAT_CTA` | Naturaleza | Alfa 256 | 1 | | Define comportamiento: D (Deudora) o A (Acreedora). |
+| `NIV_CTA` | Nivel | Numérico | 2 | | Nivel jerárquico dentro del árbol de cuentas (1, 2, 3...). |
+| `REG_CCO` | Registra CCO | Booleano | 1 | | Si es Verdadero, obliga a capturar Centro de Costo en asientos. |
+| `ES_CCC` | Es CCO? | Booleano | 1 | | Indica si la cuenta es de tipo complementario o analítico. |
 
 ## 🔍 Índices
 
-| Identificador | Nombre | Tipo de indice |
+| Identificador | Nombre | Tipo de índice |
 | :--- | :--- | :--- |
 | `ID` | Código | Clave única |
 | `NAME` | Alfabético | Acepta repetidas |
@@ -35,15 +34,16 @@ Esta tabla maestra contiene el catálogo de cuentas contables del sistema. Sopor
 | `CTA_SAT` | Código Cuenta | Clave única |
 | `PAD_CTA` | Cuenta Padre | Acepta repetidas |
 
-## 🔗 Enlaces plurales
+## 🔗 Enlaces Plurales
 
 | Identificador | Nombre | Tabla enlazada | Índice |
 | :--- | :--- | :--- | :--- |
-| `002_ASI_CTA_CON` | 002: Asientos | 002_ASI@datta_erp_dat | CTA_CON |
-| `002_CTA_CNT_PAD_CTA` | 002: Cuentas Contables (Subcuentas) | 002_CTA_CNT@datta_erp_dat | PAD_CTA |
-| `002_SAL_SALDO_UNI` | 002: Saldos | 002_SAL@datta_erp_dat | SALDO_UNI |
+| `002_ASI_CTA_CON` | 002: Asientos | `002_ASI@datta_erp_dat` | `CTA_CON` |
+| `002_CTA_CNT_PAD_CTA` | 002: Cuentas Contables | `002_CTA_CNT@datta_erp_dat` | `PAD_CTA` |
+| `002_SAL_SALDO_UNI` | 002: Saldos | `002_SAL@datta_erp_dat` | `SALDO_UNI` |
 
-## 📝 Notas
-- La naturaleza (`NAT_CTA`) define si la cuenta es Deudora (D) o Acreedora (A).
-- El campo `REG_CCO` indica si la cuenta obliga a capturar un Centro de Costo en los asientos.
-- El campo `CTA_SAT` vincula la cuenta con el agrupador oficial para la contabilidad electrónica.
+## ⚡ Triggers
+*No reporta triggers.*
+
+## 📌 Notas
+La naturaleza de la cuenta (`NAT_CTA`) es vital para los procesos de cierre y generación de estados financieros. Una cuenta solo debe permitir asientos si es de "último nivel". El enlace plural hacia `002_SAL` garantiza la trazabilidad de los acumulados mensuales por cuenta. Se recomienda bloquear la edición de `CTA_SAT` una vez que la cuenta tiene movimientos para evitar inconsistencias en reportes al SAT.

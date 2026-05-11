@@ -1,27 +1,26 @@
-# Tabla: 004: Catalogo de Tablas
-
-Esta tabla maestra centraliza el catálogo de todas las tablas físicas y lógicas del sistema. Es utilizada principalmente para la gestión dinámica de permisos y auditoría.
+# Tabla: ID: 004_CAT_TAB
 
 ## 📄 Información General
-- **ID de Tabla:** `004_CAT_TAB`
-- **Tipo:** Maestro
-- **Reside en:** Disco
-- **Longitud del registro:** 516
-- **Número de campos:** 3
-- **Número de índices:** 5
-- **Descripción:** Catálogo de definición de tablas para el motor de permisos y sistema.
+- Tipo de tabla: Maestro
+- Reside en: Disco
+- Longitud del registro: 516
+- Número de campos: 3
+- Número de índices: 5
+
+## 📝 Descripción
+Esta tabla funciona como el Diccionario de Datos dinámico del ERP. Almacena la lista de todas las tablas que componen la base de datos del proyecto. Su función primordial es servir de catálogo de referencia para el motor de permisos granulares (`001_PRM`), permitiendo que el administrador del sistema pueda asignar privilegios sobre tablas específicas sin necesidad de modificar el código fuente.
 
 ## 🛠️ Estructura de Campos
 
-| Identificador | Nombre | Tipo | Longitud | Tipo de enlace |
-| :--- | :--- | :--- | :--- | :--- |
-| `ID` | Código | Numérico | 3 | |
-| `NAME` | Name | Alfa 256 | 256 | |
-| `IDE` | Identificador | Alfa Latin1 | 256 | |
+| Identificador | Nombre | Tipo | Longitud | Tipo de enlace | Comentarios y Relaciones |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `ID` | Código | Numérico | 3 | | ID único correlativo del catálogo. |
+| `NAME` | Name | Alfa 256 | 256 | | Nombre descriptivo de la tabla (ej. "Entidades"). |
+| `IDE` | Identificador | Alfa Latin1 | 256 | | Identificador técnico de la tabla en Velneo (ej. "001_ENT"). |
 
 ## 🔍 Índices
 
-| Identificador | Nombre | Tipo de indice |
+| Identificador | Nombre | Tipo de índice |
 | :--- | :--- | :--- |
 | `ID` | Código | Clave única |
 | `NAME` | Alfabético | Acepta repetidas |
@@ -29,6 +28,11 @@ Esta tabla maestra centraliza el catálogo de todas las tablas físicas y lógic
 | `PARTS` | Trozos de palabras | Trozos de palabras |
 | `IDE` | Identificador | Acepta repetidas |
 
-## 📝 Notas
-- El campo `IDE` almacena el identificador técnico de la tabla en Velneo (ej. `001_ENT`).
-- Es una tabla crítica para el módulo de Permisos (`001_PRM`), ya que permite asignar privilegios por tabla.
+## 🔗 Enlaces Plurales
+*No reporta enlaces plurales.*
+
+## ⚡ Triggers
+*No definidos.*
+
+## 📌 Notas
+El campo `IDE` debe coincidir exactamente con el nombre del objeto tabla en el editor de Velneo para que los procesos de seguridad funcionen correctamente. Esta tabla debe actualizarse cada vez que se agregue un nuevo módulo o tabla al esquema físico de la base de datos. Se recomienda un proceso de sincronización automática que lea el esquema y actualice este catálogo.

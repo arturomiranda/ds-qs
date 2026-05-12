@@ -8,17 +8,17 @@
 - Número de índices: 6
 
 ## 📝 Descripción
-Esta tabla actúa como el contenedor maestro de los ejercicios contables anuales. Su propósito fundamental es segmentar la información financiera por año y por unidad de negocio (Empresa/Sucursal). Es el nodo raíz de la jerarquía temporal del sistema, del cual dependen los periodos mensuales (`001_PERI`) y, por ende, toda la operatividad contable y fiscal del ERP.
+Esta tabla gestiona los periodos anuales de operación contable y fiscal del ERP. Cada registro representa un año fiscal específico para una Empresa o Sucursal, permitiendo el aislamiento temporal de la información financiera. Es el nivel superior de la jerarquía temporal, del cual dependen los Periodos mensuales (`001_PERI`), y sirve como filtro global para la generación de balances, estados de resultados y cierres de ejercicio.
 
 ## 🛠️ Estructura de Campos
 
 | Identificador | Nombre | Tipo | Longitud | Tipo de enlace | Comentarios y Relaciones |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ID` | Código | Numérico | 3 | | Clave interna correlativa del ejercicio. |
-| `EMP` | Empresa | Numérico | 3 | Maestro: `001_EMP@datta_erp_dat` | Relación con la empresa propietaria del ejercicio fiscal. |
-| `SUC` | Sucursal | Numérico | 3 | Maestro: `001_EMP@datta_erp_dat` | Relación con la sucursal específica, permitiendo balances independientes. |
-| `ANIO` | Año | Numérico | 4 | | Representación numérica del año fiscal (ej. 2024). |
-| `EST_EJE` | Estatus del ejercicio | Alfa 256 | 1 | | Controla el estado operativo (A: Abierto, C: Cerrado, B: Bloqueado). |
+| `ID` | Código | Numérico | 3 | | Identificador único del ejercicio. |
+| `EMP` | Empresa | Numérico | 3 | Maestro: `001_EMP@datta_erp_dat` | Empresa a la que pertenece el ejercicio fiscal. |
+| `SUC` | Sucursal | Numérico | 3 | Maestro: `001_EMP@datta_erp_dat` | Sucursal específica vinculada al ejercicio. |
+| `ANIO` | Año | Numérico | 4 | | El año fiscal representado (ej. 2026). |
+| `EST_EJE` | Estatus del ejercicio | Alfa 256 | 1 | | Estado actual (A: Abierto, C: Cerrado, P: Preparación). |
 
 ## 🔍 Índices
 
@@ -38,7 +38,7 @@ Esta tabla actúa como el contenedor maestro de los ejercicios contables anuales
 | `001_PERI_EJER_MES` | 001: Periodos | `001_PERI@datta_erp_dat` | `EJER_MES` |
 
 ## ⚡ Triggers
-*No definidos en el esquema.*
+*No reporta triggers definidos.*
 
 ## 📌 Notas
-La adición de los campos `EMP` y `SUC` directamente en esta tabla refuerza la arquitectura multi-tenant de alto rendimiento. El índice único `EMP_ANI` es la restricción de integridad más importante, ya que prohíbe la existencia de duplicados para el mismo año dentro de una misma empresa. Al cerrar un ejercicio (`EST_EJE`), el sistema debe propagar este bloqueo a todos sus enlaces plurales en la tabla de Periodos.
+La unicidad del índice `EMP_ANI` garantiza que no existan dos registros para el mismo año en la misma empresa. El control de estatus (`EST_EJE`) debe ser respetado por los procesos de contabilidad para evitar inserciones en años ya cerrados fiscalmente. Se recomienda que la apertura de un nuevo ejercicio dispare automáticamente la creación de sus 12 periodos mensuales correspondientes en la tabla `001_PERI`.

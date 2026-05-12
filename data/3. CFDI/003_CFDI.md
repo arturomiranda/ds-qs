@@ -59,6 +59,8 @@ Esta es la tabla maestra central para la facturación electrónica en México (C
 | `003_CFDI_CON_CFDI_CON` | 003: Conceptos de CFDI | `003_CFDI_CON@datta_erp_dat` | `CFDI_CON` |
 | `003_CPLM_CFDI_CPLM` | 003: Complementos | `003_CPLM@datta_erp_dat` | `CFDI_CPLM` |
 | `003_IMP_CFDI_IMP` | 003: Impuestos | `003_IMP@datta_erp_dat` | `CFDI_IMP` |
+| `003_IMP_RET_CFDI_PAD` | 003: Impuestos Retenidos | `003_IMP_RET@datta_erp_dat` | `CFDI_PAD` |
+| `003_IMP_TRSL_CFDI_PAD` | 003: Impuestos Trasladados | `003_IMP_TRSL@datta_erp_dat` | `CFDI_PAD` |
 | `003_PAR_CFDI` | 003: Participantes | `003_PAR@datta_erp_dat` | `CFDI` |
 
 ## ⚡ Triggers

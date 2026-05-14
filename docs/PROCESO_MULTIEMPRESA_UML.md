@@ -61,7 +61,7 @@ graph LR
 classDiagram
   direction LR
 
-  class "001_ENT" {
+  class `001_ENT` {
     +ID : Numérico PK
     +NAME : Alfa(256) - Razón Social
     +RFC : Alfa(13) - Unique
@@ -73,7 +73,7 @@ classDiagram
     +UUID_EX : Alfa(40) - Unique
   }
 
-  class "001_EMP" {
+  class `001_EMP` {
     +ID : Numérico PK
     +NAME : Alfa(35)
     +ENT : Numérico FK
@@ -83,7 +83,7 @@ classDiagram
     +ACT : Booleano
   }
 
-  class "001_USU" {
+  class `001_USU` {
     +ID : Numérico PK
     +NAME : Alfa(60) - Unique - LoginKey
     +PSW_ACC : Alfa(256)
@@ -92,14 +92,14 @@ classDiagram
     +OFF : Booleano
   }
 
-  class "001_GRP_USU" {
+  class `001_GRP_USU` {
     +ID : Numérico PK
     +NAME : Alfa(35)
     +DESC : Alfa(40)
     +OFF : Booleano
   }
 
-  class "001_USU_EMP" {
+  class `001_USU_EMP` {
     +ID : Numérico PK
     +USU : Numérico FK
     +EMP : Numérico FK
@@ -107,7 +107,7 @@ classDiagram
     +CRD_TIM : Tiempo
   }
 
-  class "001_PRM" {
+  class `001_PRM` {
     +ID : Numérico PK
     +GRP : Numérico FK
     +TIP_OBJ : Alfa(1)
@@ -119,7 +119,7 @@ classDiagram
     +CAN : Booleano
   }
 
-  class "004_APP_CFG_W" {
+  class `004_APP_CFG_W` {
     +ID : Numérico PK
     +APP_NOM : Alfa(40)
     +TEM : Alfa(40) FK
@@ -127,13 +127,13 @@ classDiagram
     +LUC_ON : Booleano
   }
 
-  class "004_TEM" {
+  class `004_TEM` {
     +ID : Alfa(40) PK
     +NAME : Alfa(35)
     +CSS : ObjetoTexto
   }
 
-  class "$SES_DAT" {
+  class `$SES_DAT` {
     <<Variable Global>>
     +globalVar_CUR_USR_ID : Numérico
     +globalVar_CUR_USR_NOM : Alfa
@@ -146,21 +146,17 @@ classDiagram
     +lista_PRM : JSON Array
   }
 
-  "001_ENT" <|-- "001_EMP" : ENT (FK)
-  "001_ENT" <|-- "001_USU" : ENT_USU (FK)
-  "001_ENT" "1" --> "0..*" "001_ENT" : ID_PAD (Jerarquía)
+  `001_ENT` "1" --> "0..*" `001_USU` : ENT_USU (FK)
+  `001_EMP` "1" --> "0..*" `001_USU_EMP` : EMP
 
-  "001_USU" "1" --> "0..*" "001_USU_EMP" : USU
-  "001_EMP" "1" --> "0..*" "001_USU_EMP" : EMP
+  `001_GRP_USU` "1" --> "0..*" `001_PRM` : GRP
 
-  "001_GRP_USU" "1" --> "0..*" "001_PRM" : GRP
+  `004_APP_CFG_W` --> `004_TEM` : TEM (FK)
 
-  "004_APP_CFG_W" --> "004_TEM" : TEM (FK)
-
-  "$SES_DAT" ..> "001_USU" : hidrata desde
-  "$SES_DAT" ..> "001_PRM" : acumula permisos
-  "$SES_DAT" ..> "004_APP_CFG_W" : serializa config
-  "$SES_DAT" ..> "004_TEM" : serializa tema
+  `$SES_DAT` ..> `001_USU` : hidrata desde
+  `$SES_DAT` ..> `001_PRM` : acumula permisos
+  `$SES_DAT` ..> `004_APP_CFG_W` : serializa config
+  `$SES_DAT` ..> `004_TEM` : serializa tema
 ```
 
 ---

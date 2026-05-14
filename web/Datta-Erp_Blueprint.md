@@ -80,29 +80,6 @@ graph TD
     WS <--> UI
 ```
 
-### 2. Flujo de Datos Principal (Autenticación e Ingesta)
-
-```mermaid
-sequenceDiagram
-    participant U as Usuario
-    participant F as Frontend (Next.js)
-    participant B as Backend (Express)
-    participant V as Velneo Cloud
-
-    U->>F: Ingresa credenciales
-    F->>B: POST /api/auth/login
-    B->>B: Validar con MySQL (Hash check con Bcrypt)
-    B-->>F: Retorna JWT en Cookie HttpOnly + UserInfo
-    F->>RQ: Almacena sesión en Cache
-    F->>U: Redirige a Dashboard
-    U->>F: Consulta Reporte de Ventas
-    F->>B: GET /api/ventas (JWT en Cookie)
-    B->>V: Consulta V7 RPC/REST (Axios)
-    V-->>B: Datos de Ventas (JSON)
-    B-->>F: JSON Formateado y Validado
-    F->>U: Renderiza Tabla de Ventas
-```
-
 ---
 
 ## 🔐 Seguridad, Validación y Cumplimiento

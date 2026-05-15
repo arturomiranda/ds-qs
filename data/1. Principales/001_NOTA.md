@@ -1,4 +1,5 @@
 # Tabla: ID: 001_NOTA
+# Nombre: 001: Notas
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

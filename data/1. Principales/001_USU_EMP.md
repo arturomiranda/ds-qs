@@ -1,4 +1,5 @@
 # Tabla: ID: 001_USU_EMP
+# Nombre: 001: Usuarios por Empresa
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

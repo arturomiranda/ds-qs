@@ -1,4 +1,6 @@
 # Tabla: ID: 001_PERI
+# Nombre: 001: Periodos
+
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

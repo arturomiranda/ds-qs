@@ -1,4 +1,5 @@
 # Tabla: ID: 001_GRP_USU
+# Nombre: 001: Grupos de Usuarios
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

@@ -1,4 +1,5 @@
 # Tabla: ID: 003_IMP_RET
+# Nombre: 003: Impuestos Retenidos
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

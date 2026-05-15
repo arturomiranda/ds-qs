@@ -1,4 +1,5 @@
 # Tabla: ID: 002_CTA_CNT
+# Nombre: 002: Cuentas Contables
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

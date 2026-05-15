@@ -1,4 +1,5 @@
 # Tabla: ID: 004_APP_CFG_W
+# Nombre: 004: Configuraciones de la aplicación
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

@@ -22,11 +22,11 @@ flowchart TD
 
     U -->|"① Accede: Registro o Login"| DASH
 
-    subgraph HUB["🖥️  HUB DE APLICACIONES  —  Dashboard de Gestión  (Next.js)"]
+    subgraph HUB["🖥️ HUB DE APLICACIONES"]
         DASH["Dashboard\nInterfaz principal del usuario"]
     end
 
-    subgraph PC["⚙️  PLANO DE CONTROL  —  Admin API  (Node.js + Express)"]
+    subgraph PC["⚙️ Admin API"]
         direction TB
         API["API Node.js\nOrquestador del sistema"]
         BDD[("🗄️ BD Maestra MySQL\nUsuarios · Apps · Sesiones")]
@@ -40,14 +40,14 @@ flowchart TD
 
     DASH -->|"⑤ Solicita lista de\ninstancias contratadas"| API
 
-    subgraph INY["🔀  INYECTOR DINÁMICO  —  Enrutador de Instancias"]
+    subgraph INY["🔀  Enrutador de Instancias"]
         INYECTOR["Conecta al usuario con\nsu vServer correcto según su cuenta"]
     end
 
     API -->|"⑥ Responde con la\ninstancia seleccionada"| INY
     DASH -->|"⑦ Selecciona instancia\ny lanza operación"| INY
 
-    subgraph CAPA["☁️  CAPA DE DATOS ON-DEMAND  —  Velneo vServers por Tenant"]
+    subgraph CAPA["☁️ Velneo vServers por Tenant"]
         direction LR
         subgraph VA["🏢 Tenant A"]
             DBA[("DB App A\nDatos exclusivos\ndel Cliente A")]
@@ -61,11 +61,6 @@ flowchart TD
     end
 
     INY -->|"⑧ Petición REST dirigida\nAL tenant correcto — nunca a otro"| CAPA
-
-    style HUB fill:#0f2d4a,color:#e0f0ff,stroke:#1e5f8c
-    style PC fill:#1a3a1a,color:#e0ffe0,stroke:#2d7a2d
-    style INY fill:#3a2000,color:#fff3e0,stroke:#8c5a00
-    style CAPA fill:#2a1a3a,color:#f0e0ff,stroke:#7a3d9e
 ```
 
 ### Qué pasa en cada paso
@@ -151,57 +146,22 @@ Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen e
 
 ## 📊 FASE 2: Arquitectura Real del Proyecto
 
-### 1. Diagrama de Capas (Estado Actual)
+### 1. Diagrama de Capas Lógicas
+
+> *Este diagrama muestra cómo se divide el trabajo en el código de forma conceptual, sin listar cada archivo.*
 
 ```mermaid
 graph TD
-    subgraph Frontend ["🖥️ Cliente (Next.js 16 + React 19)"]
-        HP["Página Principal (/)"]
-        LP["Página Login (/login)"]
-        RP["Página Registro (/register) — Referenciada"]
-    end
+    UI["🖥️ Presentación (Next.js)\nInterfaz con el usuario"]
+    API["⚙️ API y Ruteo (Express)\nRecibe peticiones y valida"]
+    NEGOCIO["💼 Reglas de Negocio\nMódulos (Auth, ERP, etc.)"]
+    CORE["🔧 Herramientas Base\n(Conexiones HTTP, SQL, Errores)"]
+    DATOS["🗄️ Fuentes de Datos\n(MySQL, Velneo, SAT)"]
 
-    subgraph Backend ["⚙️ Servidor (Express 5)"]
-        APP["app.js — Orquestador principal"]
-        ROUTER["routes.js — Centralizador de rutas"]
-        MW["Middlewares: Helmet + CORS + RateLimit + ErrorHandler"]
-        CONFIG_DB["config/database.js — Pool MySQL"]
-        CONFIG_HTTP["config/httpClients.js — Axios Factory"]
-    end
-
-    subgraph Core ["🔧 Núcleo (Infraestructura Compartida)"]
-        BASE_HTTP["core/database/baseHttp.provider.js"]
-        BASE_SQL["core/database/baseSql.provider.js"]
-        TX_SQL["core/database/transactionSql.js"]
-        ERRORS["core/errors/ — AppError, DatabaseError, NotFoundError, ValidationError"]
-        SOCKET["core/socket/ — Socket.io (pendiente)"]
-    end
-
-    subgraph Services ["🏭 Servicios Globales"]
-        VELNEO["services/Velneo.service.js — Gestión de Cloud"]
-        MAIL["services/Mail.service.js — Envío de correos"]
-    end
-
-    subgraph Data ["🗄️ Infraestructura de Datos"]
-        MYSQL[("MySQL — Auth, OTP, Usuarios")]
-        VELNEO_CLOUD[("Velneo Cloud — ERP Core por tenant")]
-        SAT_API[("API SAT — Catálogos fiscales")]
-    end
-
-    HP -->|"router.push('/login')"| LP
-    HP -->|"router.push('/register')"| RP
-    Frontend -->|"REST /backend/*"| ROUTER
-    APP --> MW
-    APP --> ROUTER
-    APP --> CONFIG_DB
-    ROUTER -.->|"módulos vacíos, próximos pasos"| MW
-    CONFIG_HTTP -->|"velneoCloudClient"| VELNEO
-    CONFIG_HTTP -->|"satClient"| SAT_API
-    VELNEO --> BASE_HTTP
-    VELNEO --> VELNEO_CLOUD
-    BASE_SQL --> MYSQL
-    TX_SQL --> MYSQL
-    MAIL --> MYSQL
+    UI -->|"Pide datos / Acciones"| API
+    API -->|"Delega trabajo"| NEGOCIO
+    NEGOCIO -->|"Usa conectores"| CORE
+    CORE -->|"Lee/Escribe"| DATOS
 ```
 
 ### 2. Estructura de Carpetas Real
@@ -438,65 +398,7 @@ erDiagram
 
 ---
 
-## ☁️ Flujo de Aprovisionamiento — Cómo se Crea el "Apartamento" de un Nuevo Cliente
 
-> *Este es el proceso más crítico del sistema. Cuando un nuevo cliente completa su registro y verifica su correo, el sistema ejecuta automáticamente una secuencia de pasos en Velneo Cloud para "construir su apartamento": crear sus bases de datos, su aplicación ERP y su usuario. Todo sin intervención manual.*
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant B as ⚙️ Backend (Node.js)
-    participant VC as ☁️ Velneo Cloud API
-    participant SQL as 🗄️ MySQL
-
-    Note over B, SQL: El usuario verificó su OTP — comienza el aprovisionamiento
-
-    B->>VC: Iniciar sesión en Velneo Cloud (email del admin)
-    VC-->>B: ✅ Token de sesión
-
-    B->>VC: Autenticar vServer (usuario + contraseña del vServer)
-    VC-->>B: ✅ vServer listo para operar
-
-    rect rgb(15, 45, 74)
-    Note right of B: 📁 Preparar el espacio del tenant
-    B->>VC: Consultar carpetas existentes (máx. 10 instancias por carpeta)
-    VC-->>B: Lista de carpetas y conteo de instancias
-    B->>B: Calcular carpeta destino (ej: "cloud/2")
-    end
-
-    rect rgb(26, 58, 26)
-    Note right of B: 🏗️ Construir las instancias del tenant
-    B->>VC: Crear instancia de DATOS (vcd tipo "data")
-    VC-->>B: ✅ ID de instancia DAT creada
-    B->>VC: Crear instancia de APP (vcd tipo "app", hereda del DAT)
-    VC-->>B: ✅ URL del vServer del nuevo tenant
-    end
-
-    rect rgb(58, 32, 0)
-    Note right of B: 🔑 Configurar seguridad del tenant
-    B->>VC: Crear grupo de seguridad "Administradores"
-    B->>VC: Crear usuario en Velneo con email + contraseña autogenerada
-    B->>VC: Asignar usuario al grupo "Administradores"
-    end
-
-    B->>VC: Cerrar sesión (liberar recursos)
-
-    B->>SQL: Guardar usuario como ACTIVO con su url_api_tenant
-    B-->>B: 📧 Enviar correo de bienvenida con credenciales
-```
-
-### ¿Qué pasa si algo falla durante este proceso?
-
-> *Si el servidor de Velneo no responde en algún paso, el sistema no deja al usuario en un estado inválido. El interceptor de Axios captura el error, el bloque `finally` cierra la sesión de Velneo (para no dejar recursos ocupados) y el usuario recibe un mensaje claro. El registro puede reintentrarse.*
-
-| Escenario de fallo | ¿Qué hace el sistema? |
-| :--- | :--- |
-| Velneo Cloud no responde (timeout 30s) | El interceptor de Axios registra el error. Se devuelve `503 Service Unavailable` al cliente. |
-| La carpeta de tenant está llena (10 instancias) | El sistema automáticamente calcula y usa la siguiente carpeta disponible. |
-| El correo del usuario ya existe en Velneo | Se retorna `409 Conflict` antes de crear nada, protegiendo la integridad. |
-| Fallo en la creación de APP después de crear DAT | La sesión se cierra via `finally`. El equipo recibe el log de error para limpieza manual. |
-
----
 
 ## 🚀 Próximos Pasos (Roadmap por Sprints)
 

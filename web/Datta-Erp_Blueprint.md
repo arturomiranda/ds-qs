@@ -4,176 +4,522 @@ Este documento detalla la arquitectura, el stack tecnológico y la estrategia de
 
 ---
 
-## 🧠 FASE 1: Análisis de Stack y Objetivos
+## 🗺️ Vista General: Cómo Funciona el Sistema de Principio a Fin
 
-### 1. Visión General y Objetivo
-**Datta-Erp** tiene como objetivo proporcionar una solución SaaS integral para la gestión empresarial, permitiendo la automatización de procesos operativos, financieros y administrativos. El sistema está diseñado para ser multi-tenant, escalable y con una experiencia de usuario premium.
+> **¿Cómo leer este diagrama?**
+> Sigue los números del `1` al `8`. Cada número es un "mensaje" que viaja de un bloque a otro.
+> Los bloques con fondo de color son **zonas separadas** del sistema que tienen una responsabilidad distinta.
+>
+> *Piénsalo como un aeropuerto:*
+> - El **Hub (Dashboard)** es la sala de espera donde el pasajero (usuario) interactúa.
+> - El **Plano de Control** es la torre de control que valida tickets y dirige el tráfico.
+> - El **Inyector** es la puerta de embarque que conecta al pasajero con su avión específico.
+> - Los **vServers** son los aviones: cada cliente tiene el suyo, y nunca se mezclan.
 
-### 2. Justificación del Stack Tecnológico
+```mermaid
+flowchart TD
+    U(["👤 Usuario / Cliente"])
 
-| Componente | Tecnología | Justificación |
-| :--- | :--- | :--- |
-| **Backend** | Node.js (Express) | Ideal para manejar múltiples conexiones concurrentes y facilitar la integración con servicios externos (SAT, Velneo, MySQL) mediante APIs REST y WebSockets. |
-| **Frontend** | React (Next.js) | El uso de Next.js permite una carga optimizada, renderizado híbrido (SSR/CSR) y una estructura de enrutamiento basada en archivos eficiente para dashboards complejos. |
-| **Base de Datos 1** | Velneo Cloud | Columna vertebral para la lógica de negocio empresarial pesada y persistencia de datos críticos de ERP, garantizando integridad y velocidad en transacciones complejas. |
-| **Base de Datos 2** | MySQL | Utilizada para persistencia de datos relacionales locales, configuraciones de usuario y caché de datos de acceso rápido. |
-| **Tiempo Real** | Socket.io | Implementación de notificaciones instantáneas y actualizaciones de estado sin recarga de página. |
+    U -->|"① Accede: Registro o Login"| DASH
 
-### 3. Ecosistema de Librerías
+    subgraph HUB["🖥️  HUB DE APLICACIONES  —  Dashboard de Gestión  (Next.js)"]
+        DASH["Dashboard\nInterfaz principal del usuario"]
+    end
 
-#### Backend (Capa de Servicio)
-- **`mysql2`**: Conector optimizado para la base de datos MySQL (uso de Pool).
-- **`jsonwebtoken` & `bcrypt`**: Gestión de seguridad, autenticación basada en tokens (JWT) y encriptación de credenciales.
-- **`nodemailer`**: Motor para el envío de correos electrónicos (notificaciones, facturas).
-- **`express-rate-limit` & `helmet`**: Capas de seguridad para prevenir ataques de fuerza bruta y asegurar headers HTTP.
-- **`morgan`**: Logging de peticiones para auditoría y debugging.
-- **`zod`**: Validación de esquemas de datos estricta.
+    subgraph PC["⚙️  PLANO DE CONTROL  —  Admin API  (Node.js + Express)"]
+        direction TB
+        API["API Node.js\nOrquestador del sistema"]
+        BDD[("🗄️ BD Maestra MySQL\nUsuarios · Apps · Sesiones")]
+        VELNEO_ADMIN["☁️ Velneo Cloud API\nAprovisionamiento de tenants"]
 
-#### Frontend (Capa de Cliente)
-- **`@tanstack/react-query`**: Gestión de estado asíncrono, caching de peticiones API y sincronización automática.
-- **`react-hook-form`**: Manejo eficiente de formularios complejos con validación integrada.
-- **`zod`**: Validación compartida de esquemas.
-- **`jspdf` & `jspdf-autotable`**: Generación dinámica de reportes y documentos PDF en el lado del cliente.
-- **`lucide-react`**: Set de iconos consistentes y ligeros.
-- **`react-hot-toast`**: Sistema de notificaciones visuales (Toasts) no intrusivas.
+        API -->|"③ Consulta metadata\ndel usuario autenticado"| BDD
+        API <-->|"④ Crear / gestionar\ninstancias del tenant"| VELNEO_ADMIN
+    end
+
+    DASH -->|"② Envía JWT para\nvalidar identidad"| API
+
+    DASH -->|"⑤ Solicita lista de\ninstancias contratadas"| API
+
+    subgraph INY["🔀  INYECTOR DINÁMICO  —  Enrutador de Instancias"]
+        INYECTOR["Conecta al usuario con\nsu vServer correcto según su cuenta"]
+    end
+
+    API -->|"⑥ Responde con la\ninstancia seleccionada"| INY
+    DASH -->|"⑦ Selecciona instancia\ny lanza operación"| INY
+
+    subgraph CAPA["☁️  CAPA DE DATOS ON-DEMAND  —  Velneo vServers por Tenant"]
+        direction LR
+        subgraph VA["🏢 Tenant A"]
+            DBA[("DB App A\nDatos exclusivos\ndel Cliente A")]
+        end
+        subgraph VB["🏢 Tenant B"]
+            DBB[("DB App B\nDatos exclusivos\ndel Cliente B")]
+        end
+        subgraph VN["🏢 Tenant N"]
+            DBN[("DB App N\n···")]
+        end
+    end
+
+    INY -->|"⑧ Petición REST dirigida\nAL tenant correcto — nunca a otro"| CAPA
+
+    style HUB fill:#0f2d4a,color:#e0f0ff,stroke:#1e5f8c
+    style PC fill:#1a3a1a,color:#e0ffe0,stroke:#2d7a2d
+    style INY fill:#3a2000,color:#fff3e0,stroke:#8c5a00
+    style CAPA fill:#2a1a3a,color:#f0e0ff,stroke:#7a3d9e
+```
+
+### Qué pasa en cada paso
+
+| Paso | ¿Qué ocurre? | ¿Quién lo hace? |
+| :---: | :--- | :--- |
+| **①** | El usuario entra al Dashboard con su correo y contraseña (o se registra por primera vez) | Frontend (Next.js) |
+| **②** | El Dashboard envía el token JWT al servidor para verificar que la sesión es legítima | Backend (Express) |
+| **③** | El servidor consulta en la BD Maestra los datos del usuario y sus aplicaciones contratadas | MySQL (BD local) |
+| **④** | Si es un registro nuevo, el Plano de Control crea las instancias del cliente en Velneo Cloud | Velneo Cloud API |
+| **⑤** | El Dashboard pide al servidor la lista de instancias ERP disponibles para ese usuario | Backend → MySQL |
+| **⑥** | El servidor responde con la instancia a usar y el Inyector se prepara para la conexión | Inyector Dinámico |
+| **⑦** | El usuario selecciona su empresa/módulo y el Dashboard lanza la operación al Inyector | Frontend → Inyector |
+| **⑧** | El Inyector dirige la petición al vServer **exacto** del cliente — aislado del resto | Velneo vServer |
+
+> 🔒 **Garantía de aislamiento:** Un usuario del Tenant A **nunca puede ver ni modificar** datos del Tenant B. El Inyector valida el JWT en cada petición antes de conectar.
 
 ---
 
-## 📊 FASE 2: Documentación Modular (Arquitectura)
+## 📖 Glosario: Las Palabras Clave Explicadas Sin Tecnicismos
 
-### 1. Diagrama de Arquitectura (Nivel 2 C4)
+> *Si un cliente no entiende cómo se guardan sus datos, la arquitectura no es lo suficientemente transparente.*
+
+Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen en todo este documento, explicados como si se los contaras a alguien que nunca ha programado.
+
+| Término técnico | ¿Qué significa en realidad? |
+| :--- | :--- |
+| **Multi-tenant** | *El edificio de apartamentos:* el sistema es el edificio, cada empresa cliente es un inquilino con su propia puerta y llave. Comparten el edificio pero nadie puede entrar al apartamento del vecino. |
+| **Velneo Cloud** | Una plataforma empresarial española especializada en ERP. Funciona como el "motor de contabilidad y operaciones" del sistema. Cada cliente tiene su propia instancia (su propio motor) completamente aislada. |
+| **vServer / Instancia** | El "apartamento" de cada cliente en Velneo Cloud. Contiene toda su base de datos, configuraciones y lógica de negocio. Crear una instancia es como asignarle un apartamento nuevo a un inquilino. |
+| **Inyector Dinámico** | El "portero inteligente" del edificio. Cuando un usuario autenticado hace una operación, el Inyector lee su credencial (JWT) y lo dirige al apartamento correcto — nunca al del vecino. Es el middleware que enruta cada petición al vServer del tenant que corresponde. |
+| **JWT (Token)** | Una "pulsera de evento": cuando el usuario inicia sesión, el sistema le entrega una pulsera digital firmada. En cada petición, el sistema lee esa pulsera para saber quién es y a qué tiene acceso, sin preguntar la contraseña de nuevo. Expira en 1 hora. |
+| **BD Maestra (MySQL)** | La "recepción del edificio": guarda el directorio de todos los inquilinos (usuarios, sus correos, y la URL de su instancia Velneo). No guarda datos contables ni empresariales, solo metadatos de gestión. |
+| **OTP (Código de verificación)** | Un código de 6 dígitos que el sistema envía al correo del usuario para confirmar que la dirección es real. Funciona como el código SMS de un banco: expira en 15 minutos y solo se puede usar una vez. |
+| **Aprovisionamiento** | El proceso automático de "preparar el apartamento": crear la carpeta del tenant, sus instancias de datos y aplicación en Velneo, el grupo de seguridad y el usuario. Se ejecuta una sola vez cuando un nuevo cliente se registra. |
+| **Pool de Conexiones** | En lugar de abrir y cerrar una puerta a la base de datos en cada petición (lento), se mantienen 10 puertas abiertas y listas. Cuando llega una petición, toma una puerta disponible, la usa y la devuelve al grupo. |
+| **Middleware** | Un "guardia de seguridad" que revisa cada petición antes de que llegue al destino. Por ejemplo: verifica que el token sea válido, que el usuario no esté haciendo demasiadas peticiones, o que los datos tengan el formato correcto. |
+
+---
+
+## 🧠 FASE 1: Stack Tecnológico Verificado
+
+### 1. Visión General
+**Datta-Erp** es un sistema ERP SaaS multi-tenant que combina la velocidad de Node.js/Next.js con la robustez de Velneo Cloud. Cada cliente empresarial opera en su propio entorno aislado de datos. El sistema resuelve un problema clave para empresas mexicanas: **tener un ERP profesional conectado al SAT, con sus datos completamente separados de otros clientes, sin comprar infraestructura propia.**
+
+### 2. Stack Real (auditado del código)
+
+| Componente | Tecnología | Estado |
+| :--- | :--- | :--- |
+| **Backend** | Node.js (Express 5.x) + ES Modules | ✅ Activo |
+| **Frontend** | Next.js 16 + React 19 + TypeScript | ✅ Activo |
+| **Estilos** | Tailwind CSS 4 | ✅ Activo |
+| **BD Principal** | Velneo Cloud (instancias DAT/APP por tenant) | ✅ Activo |
+| **BD Local** | MySQL (`mysql2/promise`, Pool de 10 cx) | ✅ Activo |
+| **Tiempo Real** | Socket.io *(configurado, pendiente de módulo)* | ⏳ Pendiente |
+| **Gestor de paquetes** | pnpm (workspace monorepo) | ✅ Activo |
+
+### 3. Librerías Verificadas en el Código
+
+#### Backend (`/backend`)
+| Librería | ¿Para qué la usamos aquí? |
+| :--- | :--- |
+| `express 5.x` | Servidor HTTP principal |
+| `mysql2/promise` | Pool de conexiones async a MySQL |
+| `axios` | Cliente HTTP para Velneo Cloud y SAT |
+| `https` (Node built-in) | Agente HTTPS con Keep-Alive para Velneo |
+| `dotenv` | Carga de variables de entorno |
+| `cors`, `cookie-parser` | Seguridad de peticiones y cookies |
+| `morgan` | Logging de peticiones (solo en desarrollo) |
+| `helmet` | Seguridad de headers HTTP |
+| `express-rate-limit` | Límite de intentos (100 req/15 min) |
+
+#### Frontend (`/frontend`)
+| Librería | ¿Para qué la usamos aquí? |
+| :--- | :--- |
+| `next 16` + `react 19` | Framework UI con App Router |
+| `typescript 5` + `tailwindcss 4` | Tipado y estilos |
+| `lucide-react` | Iconos (Rocket, Shield, BarChart3, etc.) |
+
+> ⚠️ **Detección de cambio:** Las librerías `jsonwebtoken`, `bcrypt`, `nodemailer`, `zod`, `@tanstack/react-query`, `react-hook-form` y `jspdf` están en el Blueprint de diseño pero **aún no están instaladas en `package.json`**. Se instalarán cuando se construyan los módulos correspondientes.
+
+---
+
+## 📊 FASE 2: Arquitectura Real del Proyecto
+
+### 1. Diagrama de Capas (Estado Actual)
 
 ```mermaid
 graph TD
-    subgraph Client ["Capa de Cliente (Next.js)"]
-        UI["Dashboard React (Components)"]
-        RQ["TanStack Query (Cache/State)"]
-        Actions["Server Actions / Services"]
+    subgraph Frontend ["🖥️ Cliente (Next.js 16 + React 19)"]
+        HP["Página Principal (/)"]
+        LP["Página Login (/login)"]
+        RP["Página Registro (/register) — Referenciada"]
     end
 
-    subgraph API ["Capa de Servidor (Express)"]
-        Router["REST API Router"]
-        WS["Socket.io Server"]
-        Middleware["Auth, Security (Helmet/RateLimit) & Validation (Zod)"]
-        Controllers["Module Controllers"]
+    subgraph Backend ["⚙️ Servidor (Express 5)"]
+        APP["app.js — Orquestador principal"]
+        ROUTER["routes.js — Centralizador de rutas"]
+        MW["Middlewares: Helmet + CORS + RateLimit + ErrorHandler"]
+        CONFIG_DB["config/database.js — Pool MySQL"]
+        CONFIG_HTTP["config/httpClients.js — Axios Factory"]
     end
 
-    subgraph Logic ["Aplicación y Dominio"]
-        Services["Use Case Services (Business Logic)"]
-        Entities["Domain Entities"]
+    subgraph Core ["🔧 Núcleo (Infraestructura Compartida)"]
+        BASE_HTTP["core/database/baseHttp.provider.js"]
+        BASE_SQL["core/database/baseSql.provider.js"]
+        TX_SQL["core/database/transactionSql.js"]
+        ERRORS["core/errors/ — AppError, DatabaseError, NotFoundError, ValidationError"]
+        SOCKET["core/socket/ — Socket.io (pendiente)"]
     end
 
-    subgraph Data ["Capa de Infraestructura (Datos)"]
-        Velneo[("Velneo Cloud (Core ERP)")]
-        MySQL[("MySQL (Local/Auth/Logs)")]
-        Mail["Nodemailer Service"]
+    subgraph Services ["🏭 Servicios Globales"]
+        VELNEO["services/Velneo.service.js — Gestión de Cloud"]
+        MAIL["services/Mail.service.js — Envío de correos"]
     end
 
-    UI <--> Router
-    UI <--> WS
-    Router --> Middleware
-    Middleware --> Controllers
-    Controllers --> Services
-    Services --> Velneo
-    Services --> MySQL
-    Services --> Mail
-    WS <--> UI
+    subgraph Data ["🗄️ Infraestructura de Datos"]
+        MYSQL[("MySQL — Auth, OTP, Usuarios")]
+        VELNEO_CLOUD[("Velneo Cloud — ERP Core por tenant")]
+        SAT_API[("API SAT — Catálogos fiscales")]
+    end
+
+    HP -->|"router.push('/login')"| LP
+    HP -->|"router.push('/register')"| RP
+    Frontend -->|"REST /backend/*"| ROUTER
+    APP --> MW
+    APP --> ROUTER
+    APP --> CONFIG_DB
+    ROUTER -.->|"módulos vacíos, próximos pasos"| MW
+    CONFIG_HTTP -->|"velneoCloudClient"| VELNEO
+    CONFIG_HTTP -->|"satClient"| SAT_API
+    VELNEO --> BASE_HTTP
+    VELNEO --> VELNEO_CLOUD
+    BASE_SQL --> MYSQL
+    TX_SQL --> MYSQL
+    MAIL --> MYSQL
 ```
 
----
+### 2. Estructura de Carpetas Real
 
-## 🔐 Seguridad, Validación y Cumplimiento
-
-### 🛡️ Capas de Seguridad
-
-#### 1. Autenticación (JWT)
-- **Token**: Se utilizará `jsonwebtoken` para emitir Access Tokens.
-- **Expiración**: 1 hora para Access Tokens.
-- **Almacenamiento**: Cookies con flags `Secure`, `SameSite=Strict` y `HttpOnly` (para evitar XSS).
-
-#### 2. Protección de API (Backend)
-- **Helmet**: Para asegurar headers HTTP contra vulnerabilidades comunes.
-- **Express Rate Limit**: Máximo 100 peticiones por cada 15 minutos por IP para prevenir fuerza bruta.
-- **CORS**: Configurado estrictamente para permitir solo el dominio del Frontend.
-
-#### 3. Validación de Datos
-- **Backend**: Uso de middlewares de validación con **Zod** antes de procesar cualquier `req.body`.
-- **Frontend**: `React-Hook-Form` + **Zod** para validación inmediata en el cliente (campos obligatorios, formatos de RFC, correos).
-
-### 🏗️ Multi-tenancy (Aislamiento de Datos)
-
-El sistema garantiza que los datos de un cliente no sean visibles para otros mediante:
-
-1. **Aislamiento en MySQL**: Cada registro en la tabla `velneo` está vinculado estrictamente a un `id_usuario`.
-2. **Aislamiento en Velneo**: Cada cliente tiene sus propias **instancias DAT y APP**, eliminando el riesgo de fugas de datos a nivel de base de datos.
-3. **Middleware de Propiedad**: En el backend, cada petición a `/api/erp/*` verifica que la `url_api` que se intenta consumir pertenece efectivamente al usuario autenticado en el JWT.
-
----
-
-## 📜 Estándares de Código y Calidad
-
-### Backend (Node/Express)
-- Uso de **ES Modules** para una sintaxis moderna y limpia.
-- Uso de `morgan` para registro de auditoría de todas las peticiones de escritura.
-- Manejo centralizado de errores mediante un middleware global.
-- Encriptación de contraseñas con `bcrypt` (salting rounds: 10).
-
-### Frontend (Next.js)
-- Tipado estricto con **TypeScript**.
-- Uso de `TanStack Query` para evitar peticiones redundantes y manejar estados de carga/error globalmente.
-- Separación de componentes presentacionales (Atoms/Molecules) y contenedores lógicos.
-
----
-
-## 📁 Estructura de Carpetas Propuesta
-
-La organización sigue un estándar de **Feature-Based Architecture** bajo principios de Clean Architecture:
-
-### 📂 Backend (`src/`)
+#### 📂 Backend (`/backend`)
 ```text
-├── config/             # Variables de entorno y configuraciones de BD
-├── core/               # Lógica transversal (Errors, Security, Utils)
-│   ├── database/       # Providers base (baseSql.provider.js, etc)
-│   ├── socket/         # Configuración global de Socket.io
-│   └── errors/         # Clases de error personalizadas
-├── middlewares/        # Helmet, Validation, Auth, ErrorHandler
-└── modules/            # Dominios funcionales (Feature-based)
-    └── [Modulo]/
-        ├── controllers/ # Adaptadores de entrada (Express)
-        ├── services/    # Casos de uso de aplicación (Business Logic)
-        ├── providers/   # Implementaciones de infra (MySQL/Velneo/Axios)
-        ├── routes/      # Definición de endpoints
-        └── schemas/     # Validaciones Zod (Shared or local)
+backend/
+├── app.js              ✅ Orquestador (CORS, Helmet, Morgan, Rutas)
+├── routes.js           ✅ Router principal (vacío — esperando módulos)
+├── server.js           ✅ Punto de entrada HTTP
+├── package.json        ✅ Express 5 + pnpm
+├── src/
+│   ├── config/
+│   │   ├── database.js       ✅ Pool MySQL (10 conexiones, async/await)
+│   │   └── httpClients.js    ✅ Axios Factory (Velneo Cloud + SAT)
+│   ├── core/
+│   │   ├── database/
+│   │   │   ├── baseHttp.provider.js   ✅ Clase base para HTTP
+│   │   │   ├── baseSql.provider.js    ✅ Clase base para MySQL
+│   │   │   └── transactionSql.js     ✅ Soporte de transacciones SQL
+│   │   ├── errors/
+│   │   │   ├── AppError.js           ✅ Error base del sistema
+│   │   │   ├── DatabaseError.js      ✅ Errores de BD
+│   │   │   ├── NotFoundError.js      ✅ Recurso no encontrado
+│   │   │   └── ValidationError.js   ✅ Datos inválidos
+│   │   └── socket/                  ⏳ Socket.io (pendiente)
+│   ├── middlewares/
+│   │   ├── index.js                 ✅ Exportador central
+│   │   ├── error.middleware.js      ✅ Manejo global de errores
+│   │   ├── rateLimit.middleware.js  ✅ 100 req / 15 min
+│   │   └── security.middleware.js  ✅ Helmet
+│   ├── modules/                     ⏳ VACÍO — Próximo a desarrollar
+│   └── services/
+│       ├── Velneo.service.js        ✅ Ciclo de vida tenant en Velneo Cloud
+│       └── Mail.service.js         ✅ Motor de correos
 ```
 
-### 📂 Frontend (`app/` & `modules/`)
+#### 📂 Frontend (`/frontend`)
 ```text
-├── app/                # Rutas, layouts y páginas (Next.js App Router)
-├── components/         # Componentes UI reutilizables (forms, layout, ui)
-├── hooks/              # Lógica de estado y hooks globales
-├── modules/            # Lógica específica por dominio
-│   └── [Modulo]/
-│       ├── components/ # Componentes exclusivos del módulo
-│       ├── services/   # Llamadas a la API y lógica de datos (Axios/TanStack)
-│       ├── hooks/      # Hooks específicos del módulo
-│       └── types/      # Interfaces de TypeScript del dominio
-├── providers/          # Context Providers (Auth, QueryClient, Theme)
-└── types/              # Tipos globales de la aplicación
+frontend/
+├── app/
+│   ├── layout.tsx       ✅ Layout raíz con fuentes y metadatos
+│   ├── page.tsx         ✅ Landing Page — Hero + Features + Modal
+│   └── login/
+│       └── page.tsx     ✅ Página de Login
+├── components/          ⏳ VACÍO — Componentes UI por crear
+├── modules/             ⏳ VACÍO — Módulos de dominio por crear
+├── hooks/               ⏳ VACÍO
+├── providers/           ⏳ VACÍO — Auth, Query, Theme providers
+└── types/               ⏳ VACÍO
 ```
 
 ---
 
-## 🚦 Checklist de Lanzamiento
-- [ ] Configurar variables de entorno (`.env`) seguras en producción.
-- [ ] Implementar certificados SSL (HTTPS).
-- [ ] Realizar pruebas de carga en la API de Velneo.
-- [ ] Verificar que el OTP expira correctamente después de 10 minutos.
-- [ ] Auditoría de headers de seguridad con herramientas externas.
+## 🔐 FASE 3: Seguridad y Aislamiento de Datos
+
+### Aislamiento Multi-tenant (Cómo protegemos los datos de cada cliente)
+
+> *Imagina que cada cliente es un inquilino: tiene su propio candado (instancia Velneo), y el portero del edificio (el middleware del backend) solo le abre la puerta de su apartamento, nunca del vecino.*
+
+```mermaid
+graph LR
+    subgraph Tenant A ["🏢 Cliente A"]
+        A_DAT[("DAT Instance A")]
+        A_APP[("APP Instance A")]
+    end
+
+    subgraph Tenant B ["🏢 Cliente B"]
+        B_DAT[("DAT Instance B")]
+        B_APP[("APP Instance B")]
+    end
+
+    subgraph MySQL_Local ["🗄️ MySQL (Compartido — Solo metadatos)"]
+        USERS["Tabla: usuarios (id, email, url_api_tenant)"]
+        OTP["Tabla: otp_codes (email, code, expiry)"]
+    end
+
+    Backend["⚙️ Backend (Middleware de Propiedad)"]
+    Backend -->|"url_api del JWT → solo su tenant"| Tenant_A
+    Backend -->|"url_api del JWT → solo su tenant"| Tenant_B
+    Backend --- MySQL_Local
+
+    style Tenant_A fill:#1e3a5f,color:#fff
+    style Tenant_B fill:#3d1e5f,color:#fff
+```
+
+### Capas de Seguridad Implementadas
+
+| Capa | Implementación | Archivo |
+| :--- | :--- | :--- |
+| **Headers HTTP** | Helmet middleware | `security.middleware.js` |
+| **Rate Limiting** | 100 req / 15 min / IP | `rateLimit.middleware.js` |
+| **CORS Dinámico** | Solo orígenes en `CLIENT_URL` | `app.js` |
+| **Errores Controlados** | Jerarquía `AppError` → 4 tipos | `core/errors/` |
+| **Pool de BD** | `waitForConnections: true`, 10 cx máx | `config/database.js` |
+| **HTTPS Resiliente** | Keep-Alive + timeout 30s + retry | `config/httpClients.js` |
+
+### Resiliencia de Velneo Cloud
+
+> *Si el servidor de Velneo Cloud no responde, el interceptor de Axios registra el error y el sistema devuelve una respuesta controlada. Se implementan 3 reintentos implícitos vía el agente HTTPS Keep-Alive antes de fallar.*
 
 ---
 
-## 🚀 Próximos Pasos
-1. Definir los contratos de API para los módulos iniciales (Auth, Dashboard).
-2. Configurar el middleware de conexión base con Velneo Cloud usando Axios.
-3. Establecer el sistema de permisos multi-tenant y middleware de propiedad.
-4. Implementar el patrón **Repository** para desacoplar la lógica de los proveedores de datos.
+## 🚦 Estado por Módulo (Checklist Real)
+
+| Módulo | Backend | Frontend | Documentación |
+| :--- | :---: | :---: | :---: |
+| **Infraestructura Base** | ✅ Listo | ✅ Listo | ✅ Este Blueprint |
+| **Módulo Auth / Registro** | ⏳ Pendiente | ⏳ Pendiente | ✅ `Registro_Plan.md` |
+| **Dashboard ERP** | ⏳ Pendiente | ⏳ Pendiente | — |
+| **Catálogos SAT** | ⏳ Pendiente | ⏳ Pendiente | — |
+| **Socket.io Tiempo Real** | ⏳ Pendiente | ⏳ Pendiente | — |
+
+---
+
+## ⚙️ Variables de Entorno Requeridas
+
+> *Piensa en las variables de entorno como las "llaves maestras" del sistema: sin ellas, el servidor no sabe a qué base de datos conectarse, ni cómo hablar con Velneo, ni cómo enviar correos. Nunca se guardan en el código — viven en un archivo `.env` privado que cada desarrollador configura en su máquina.*
+
+Para arrancar el proyecto por primera vez, copia el archivo `.env.example` del backend y rellena cada valor:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+### Variables del Backend
+
+| Variable | Grupo | ¿Para qué sirve? | Ejemplo |
+| :--- | :---: | :--- | :--- |
+| `PORT` | Servidor | Puerto donde corre Express | `3000` |
+| `NODE_ENV` | Servidor | Modo de ejecución (activa/desactiva logs) | `development` |
+| `CLIENT_URL` | Seguridad | Dominio del frontend permitido por CORS | `http://localhost:3001` |
+| `JWT_SECRET` | Seguridad | Clave secreta para firmar las "pulseras JWT" — debe ser larga y aleatoria | `mi_clave_super_secreta_2026` |
+| `VELNEO_CLOUD` | Velneo | URL base de la API de administración de Velneo Cloud | `https://cloudapi.velneo.com/v1` |
+| `VELNEO_CLOUD_EMAIL` | Velneo | Correo del administrador de la cuenta Velneo Cloud | `admin@empresa.com` |
+| `VELNEO_CLOUD_APIKEY` | Velneo | API Key de autenticación con Velneo Cloud | `abc123...` |
+| `VELNEO_VSERVER_USER` | Velneo | Usuario del vServer para autenticación avanzada | `vserver_admin` |
+| `VELNEO_VSERVER_PASSWORD` | Velneo | Contraseña del vServer | `password_seguro` |
+| `VELNEO_BASE_FOLDER_NAME` | Velneo | Prefijo de carpetas donde se crean los tenants | `cloud` |
+| `VELNEO_SOLUTION` | Velneo | Nombre de la solución ERP en Velneo | `DATTA ERP` |
+| `VELNEO_DATA_PROJECT` | Velneo | Nombre del proyecto de datos (`.vcd`) | `datta_erp_dat` |
+| `VELNEO_APP_PROJECT` | Velneo | Nombre del proyecto de aplicación (`.vcd`) | `datta_erp_app` |
+| `VELNEO_APP_VCD` | Velneo | Alias del esquema VCD para herencia de la app | `alias_esquema.vcd` |
+| `DB_HOST` | MySQL | Servidor de la base de datos local | `localhost` |
+| `DB_USER` | MySQL | Usuario de MySQL | `root` |
+| `DB_PASSWORD` | MySQL | Contraseña de MySQL | `mi_password` |
+| `DB_NAME` | MySQL | Nombre de la base de datos maestra | `DattaErp` |
+| `DB_PORT` | MySQL | Puerto de MySQL | `3306` |
+| `MAIL_HOST` | Correo | Servidor SMTP para envío de correos | `smtp.gmail.com` |
+| `MAIL_PORT` | Correo | Puerto SMTP (587=TLS, 465=SSL) | `587` |
+| `MAIL_USER` | Correo | Correo remitente del sistema | `noreply@empresa.com` |
+| `MAIL_PASS` | Correo | Contraseña de aplicación del correo | `app_password` |
+| `MAIL_FROM` | Correo | Nombre y dirección que ve el destinatario | `"Datta ERP <noreply@empresa.com>"` |
+| `CATALOGO_SAT_API_URL` | SAT | URL de la API de catálogos fiscales del SAT | `https://c6.velneo.com:16992/catalogos_sat/` |
+
+> ⚠️ **Regla de Oro:** Nunca subas el archivo `.env` real al repositorio. El `.gitignore` ya lo excluye. Si necesitas compartir una configuración de ejemplo, usa `.env.example` (sin valores reales).
+
+---
+
+## 🗄️ Modelo de Datos — La Recepción del Edificio (MySQL)
+
+> *MySQL en este sistema no guarda facturas ni inventarios — eso le toca a Velneo. MySQL es la "recepción del edificio": sabe quién vive ahí (usuarios), qué apartamentos tienen contratados (tenants) y guarda los códigos de acceso temporales (OTP) para verificar identidades.*
+
+### Diagrama de Tablas (ER)
+
+```mermaid
+erDiagram
+    USUARIOS {
+        int id PK "Identificador único del usuario"
+        varchar nombre "Nombre(s)"
+        varchar apellido_paterno
+        varchar apellido_materno
+        varchar email UK "Correo — usado para login"
+        varchar telefono
+        varchar empresa "Razón social del cliente"
+        varchar rfc "RFC para facturación SAT"
+        varchar username "Usuario autogenerado: nombre.apellido123"
+        varchar password_hash "Contraseña encriptada con Bcrypt"
+        varchar url_api_tenant "URL del vServer de Velneo de este cliente"
+        enum estado "'pendiente' | 'verificado' | 'activo'"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    OTP_CODES {
+        int id PK
+        varchar email FK "Correo del usuario en proceso de registro"
+        varchar code "Código de 6 dígitos"
+        timestamp expires_at "Expira 15 minutos después de crearse"
+        boolean usado "Evita que el mismo código se use dos veces"
+        timestamp created_at
+    }
+
+    SESIONES {
+        int id PK
+        int usuario_id FK
+        varchar token_hash "Hash del JWT activo"
+        timestamp expires_at "Expira en 1 hora"
+        varchar ip_address "IP del cliente para auditoría"
+        timestamp created_at
+    }
+
+    USUARIOS ||--o{ OTP_CODES : "genera durante registro"
+    USUARIOS ||--o{ SESIONES : "crea al iniciar sesión"
+```
+
+### ¿Qué guarda cada tabla en palabras simples?
+
+| Tabla | ¿Qué guarda? | Dato clave |
+| :--- | :--- | :--- |
+| `USUARIOS` | El directorio de todos los clientes y sus accesos | `url_api_tenant` → conecta al usuario con su vServer en Velneo |
+| `OTP_CODES` | Los códigos temporales de verificación de correo | `expires_at` → el código muere en 15 minutos |
+| `SESIONES` | Las sesiones activas (auditoría de quién está conectado) | `token_hash` → nunca se guarda el JWT completo, solo su huella |
+
+---
+
+## 🗺️ Mapa de Endpoints de la API
+
+> *Un "endpoint" es como una ventanilla de banco: cada ventanilla tiene un número (la ruta) y atiende solo cierto tipo de trámites (GET para consultar, POST para crear, etc.).*
+
+### Estado actual de las ventanillas
+
+| Método | Ruta | ¿Qué hace? | Estado |
+| :---: | :--- | :--- | :---: |
+| `POST` | `/backend/api/auth/register/init` | Valida el correo, genera el OTP y lo envía al usuario | ⏳ Pendiente |
+| `POST` | `/backend/api/auth/register/verify` | Verifica el OTP, crea el usuario y aprovisiona el tenant en Velneo | ⏳ Pendiente |
+| `POST` | `/backend/api/auth/login` | Autentica al usuario y devuelve el JWT en una cookie segura | ⏳ Pendiente |
+| `POST` | `/backend/api/auth/logout` | Invalida la sesión activa | ⏳ Pendiente |
+| `GET` | `/backend/api/erp/instances` | Lista las instancias Velneo del usuario autenticado | ⏳ Pendiente |
+| `POST` | `/backend/api/erp/proxy` | Reenvía peticiones REST al vServer del tenant correcto (Inyector) | ⏳ Pendiente |
+| `GET` | `/backend/api/sat/catalogos/:tipo` | Consulta catálogos del SAT (unidades, claves de producto, etc.) | ⏳ Pendiente |
+
+> 📌 **Convención de prefijos:** Todas las rutas usan `/backend` como prefijo global (definido en `app.js`). Esto permite distinguir el tráfico de API del tráfico de archivos estáticos en el servidor de producción.
+
+---
+
+## ☁️ Flujo de Aprovisionamiento — Cómo se Crea el "Apartamento" de un Nuevo Cliente
+
+> *Este es el proceso más crítico del sistema. Cuando un nuevo cliente completa su registro y verifica su correo, el sistema ejecuta automáticamente una secuencia de pasos en Velneo Cloud para "construir su apartamento": crear sus bases de datos, su aplicación ERP y su usuario. Todo sin intervención manual.*
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant B as ⚙️ Backend (Node.js)
+    participant VC as ☁️ Velneo Cloud API
+    participant SQL as 🗄️ MySQL
+
+    Note over B, SQL: El usuario verificó su OTP — comienza el aprovisionamiento
+
+    B->>VC: Iniciar sesión en Velneo Cloud (email del admin)
+    VC-->>B: ✅ Token de sesión
+
+    B->>VC: Autenticar vServer (usuario + contraseña del vServer)
+    VC-->>B: ✅ vServer listo para operar
+
+    rect rgb(15, 45, 74)
+    Note right of B: 📁 Preparar el espacio del tenant
+    B->>VC: Consultar carpetas existentes (máx. 10 instancias por carpeta)
+    VC-->>B: Lista de carpetas y conteo de instancias
+    B->>B: Calcular carpeta destino (ej: "cloud/2")
+    end
+
+    rect rgb(26, 58, 26)
+    Note right of B: 🏗️ Construir las instancias del tenant
+    B->>VC: Crear instancia de DATOS (vcd tipo "data")
+    VC-->>B: ✅ ID de instancia DAT creada
+    B->>VC: Crear instancia de APP (vcd tipo "app", hereda del DAT)
+    VC-->>B: ✅ URL del vServer del nuevo tenant
+    end
+
+    rect rgb(58, 32, 0)
+    Note right of B: 🔑 Configurar seguridad del tenant
+    B->>VC: Crear grupo de seguridad "Administradores"
+    B->>VC: Crear usuario en Velneo con email + contraseña autogenerada
+    B->>VC: Asignar usuario al grupo "Administradores"
+    end
+
+    B->>VC: Cerrar sesión (liberar recursos)
+
+    B->>SQL: Guardar usuario como ACTIVO con su url_api_tenant
+    B-->>B: 📧 Enviar correo de bienvenida con credenciales
+```
+
+### ¿Qué pasa si algo falla durante este proceso?
+
+> *Si el servidor de Velneo no responde en algún paso, el sistema no deja al usuario en un estado inválido. El interceptor de Axios captura el error, el bloque `finally` cierra la sesión de Velneo (para no dejar recursos ocupados) y el usuario recibe un mensaje claro. El registro puede reintentrarse.*
+
+| Escenario de fallo | ¿Qué hace el sistema? |
+| :--- | :--- |
+| Velneo Cloud no responde (timeout 30s) | El interceptor de Axios registra el error. Se devuelve `503 Service Unavailable` al cliente. |
+| La carpeta de tenant está llena (10 instancias) | El sistema automáticamente calcula y usa la siguiente carpeta disponible. |
+| El correo del usuario ya existe en Velneo | Se retorna `409 Conflict` antes de crear nada, protegiendo la integridad. |
+| Fallo en la creación de APP después de crear DAT | La sesión se cierra via `finally`. El equipo recibe el log de error para limpieza manual. |
+
+---
+
+## 🚀 Próximos Pasos (Roadmap por Sprints)
+
+### Sprint 1 — Autenticación Completa *(Siguiente)*
+- [ ] Instalar dependencias: `jsonwebtoken`, `bcrypt`, `zod`
+- [ ] Crear `src/modules/auth/` con controllers, services, routes y schemas
+- [ ] Implementar `POST /register/init` y `/register/verify`
+- [ ] Implementar `POST /login` y `/logout` con JWT en cookie `HttpOnly`
+- [ ] Crear `app/register/page.tsx` en el frontend (formulario + modal OTP)
+- [ ] Configurar `providers/AuthContext` para gestión de sesión global
+
+### Sprint 2 — Inyector y Dashboard Base
+- [ ] Implementar el Inyector Dinámico como middleware de proxy a vServers
+- [ ] Crear `GET /erp/instances` para listar aplicaciones del usuario
+- [ ] Construir la página de Dashboard con selector de instancias
+- [ ] Configurar `@tanstack/react-query` para caché de peticiones
+
+### Sprint 3 — Módulos ERP
+- [ ] Módulo de Catálogos SAT (consulta a `satClient`)
+- [ ] Módulo de Facturación (conexión al vServer del tenant)
+- [ ] Socket.io para notificaciones en tiempo real
+- [ ] Generación de PDFs con `jspdf`
+
+---
+
+*Última actualización automática: Mayo 2026 — Auditado por Project Blueprint Skill — Proyecto: Datta ERP*

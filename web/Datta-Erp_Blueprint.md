@@ -407,28 +407,6 @@ classDiagram
 
 ---
 
-## 🗺️ Mapa de Endpoints de la API
-
-> *Un "endpoint" es como una ventanilla de banco: cada ventanilla tiene un número (la ruta) y atiende solo cierto tipo de trámites (GET para consultar, POST para crear, etc.).*
-
-### Estado actual de las ventanillas
-
-| Método | Ruta | ¿Qué hace? | Estado |
-| :---: | :--- | :--- | :---: |
-| `POST` | `/backend/api/auth/register/init` | Valida el correo, genera el OTP y lo envía al usuario | ⏳ Pendiente |
-| `POST` | `/backend/api/auth/register/verify` | Verifica el OTP, crea el usuario y aprovisiona el tenant en Velneo | ⏳ Pendiente |
-| `POST` | `/backend/api/auth/login` | Autentica al usuario y devuelve el JWT en una cookie segura | ⏳ Pendiente |
-| `POST` | `/backend/api/auth/logout` | Invalida la sesión activa | ⏳ Pendiente |
-| `GET` | `/backend/api/erp/instances` | Lista las instancias Velneo del usuario autenticado | ⏳ Pendiente |
-| `POST` | `/backend/api/erp/proxy` | Reenvía peticiones REST al vServer del tenant correcto (Inyector) | ⏳ Pendiente |
-| `GET` | `/backend/api/sat/catalogos/:tipo` | Consulta catálogos del SAT (unidades, claves de producto, etc.) | ⏳ Pendiente |
-
-> 📌 **Convención de prefijos:** Todas las rutas usan `/backend` como prefijo global (definido en `app.js`). Esto permite distinguir el tráfico de API del tráfico de archivos estáticos en el servidor de producción.
-
----
-
-
-
 ## 🚀 Próximos Pasos (Roadmap por Sprints)
 
 ### Sprint 1 — Autenticación Completa *(Siguiente)*

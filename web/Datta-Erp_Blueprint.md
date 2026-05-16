@@ -223,29 +223,39 @@ frontend/
 > *Imagina que cada cliente es un inquilino: tiene su propio candado (instancia Velneo), y el portero del edificio (el middleware del backend) solo le abre la puerta de su apartamento, nunca del vecino.*
 
 ```mermaid
-graph LR
-    subgraph Tenant A ["🏢 Cliente A"]
-        A_DAT[("DAT Instance A")]
-        A_APP[("APP Instance A")]
+flowchart TB
+    subgraph Hub ["🌐 PLANO DE CONTROL (Hub)"]
+        direction TB
+        API["⚙️ Backend API\n(Middleware de Propiedad)"]
+        MySQL[("🗄️ MySQL Maestra\nMetadatos & Sesiones")]
+        API <--> MySQL
     end
 
-    subgraph Tenant B ["🏢 Cliente B"]
-        B_DAT[("DAT Instance B")]
-        B_APP[("APP Instance B")]
+    subgraph Inyector ["🔀 INYECTOR DINÁMICO"]
+        INY["Valida JWT y enruta\nsegún url_api"]
     end
 
-    subgraph MySQL_Local ["🗄️ MySQL (Compartido — Solo metadatos)"]
-        USERS["Tabla: usuarios (id, email, url_api_tenant)"]
-        OTP["Tabla: otp_codes (email, code, expiry)"]
+    API --> INY
+
+    subgraph Tenants ["☁️ CAPA DE AISLAMIENTO (Velneo Cloud)"]
+        direction LR
+        subgraph TA ["🏢 Tenant A"]
+            DA[("DAT A")]
+            AA[("APP A")]
+        end
+        subgraph TB ["🏢 Tenant B"]
+            DB[("DAT B")]
+            AB[("APP B")]
+        end
     end
 
-    Backend["⚙️ Backend (Middleware de Propiedad)"]
-    Backend -->|"url_api del JWT → solo su tenant"| Tenant_A
-    Backend -->|"url_api del JWT → solo su tenant"| Tenant_B
-    Backend --- MySQL_Local
+    INY -->|"Petición aislada A"| TA
+    INY -->|"Petición aislada B"| TB
 
-    style Tenant_A fill:#1e3a5f,color:#fff
-    style Tenant_B fill:#3d1e5f,color:#fff
+    style Hub fill:#f8fafc,stroke:#cbd5e1
+    style Tenants fill:#f1f5f9,stroke:#94a3b8
+    style TA fill:#1e3a5f,color:#fff
+    style TB fill:#3d1e5f,color:#fff
 ```
 
 ### Capas de Seguridad Implementadas
@@ -325,56 +335,75 @@ cp backend/.env.example backend/.env
 
 > *MySQL en este sistema no guarda facturas ni inventarios — eso le toca a Velneo. MySQL es la "recepción del edificio": sabe quién vive ahí (usuarios), qué apartamentos tienen contratados (tenants) y guarda los códigos de acceso temporales (OTP) para verificar identidades.*
 
-### Diagrama de Tablas (ER)
+### Diagrama de Clases (Tablas MySQL)
 
 ```mermaid
-erDiagram
-    USUARIOS {
-        int id PK "Identificador único del usuario"
-        varchar nombre "Nombre(s)"
-        varchar apellido_paterno
-        varchar apellido_materno
-        varchar email UK "Correo — usado para login"
-        varchar telefono
-        varchar empresa "Razón social del cliente"
-        varchar rfc "RFC para facturación SAT"
-        varchar username "Usuario autogenerado: nombre.apellido123"
-        varchar password_hash "Contraseña encriptada con Bcrypt"
-        varchar url_api_tenant "URL del vServer de Velneo de este cliente"
-        enum estado "'pendiente' | 'verificado' | 'activo'"
-        timestamp created_at
-        timestamp updated_at
+classDiagram
+    class roles {
+        +int id PK
+        +string nombre_rol
+        +string descripcion
+        +boolean es_activo
+    }
+    class usuarios {
+        +int id PK
+        +string nombres
+        +string correo UK
+        +string usuario UK
+        +int id_rol FK
+        +boolean verificado
+    }
+    class codigos_otp {
+        +int id PK
+        +string correo
+        +string codigo
+        +datetime fecha_expiracion
+        +boolean usado
+    }
+    class sesiones {
+        +int id PK
+        +int id_usuario FK
+        +string hash_token UK
+        +datetime fecha_expiracion
+    }
+    class velneo_carpetas {
+        +int id PK
+        +string nombre UK
+        +int limite_maximo
+    }
+    class velneo_instancias {
+        +int id PK
+        +string id_instancia
+        +string tipo
+    }
+    class velneo {
+        +int id PK
+        +int id_usuario FK
+        +int id_carpeta FK
+        +int id_instancia_dat FK
+        +int id_instancia_app FK
+        +string url_api UK
     }
 
-    OTP_CODES {
-        int id PK
-        varchar email FK "Correo del usuario en proceso de registro"
-        varchar code "Código de 6 dígitos"
-        timestamp expires_at "Expira 15 minutos después de crearse"
-        boolean usado "Evita que el mismo código se use dos veces"
-        timestamp created_at
-    }
-
-    SESIONES {
-        int id PK
-        int usuario_id FK
-        varchar token_hash "Hash del JWT activo"
-        timestamp expires_at "Expira en 1 hora"
-        varchar ip_address "IP del cliente para auditoría"
-        timestamp created_at
-    }
-
-    USUARIOS ||--o{ OTP_CODES : "genera durante registro"
-    USUARIOS ||--o{ SESIONES : "crea al iniciar sesión"
+    roles "1" -- "0..*" usuarios : define permisos
+    usuarios "1" -- "0..*" sesiones : tiene
+    usuarios "1" -- "0..*" codigos_otp : valida vía email
+    usuarios "1" -- "1" velneo : configurado en
+    velneo_carpetas "1" -- "0..*" velneo : contiene
+    velneo_instancias "1" -- "0..*" velneo : asignada a
 ```
 
 ### ¿Qué guarda cada tabla en palabras simples?
 
 | Tabla | ¿Qué guarda? | Dato clave |
 | :--- | :--- | :--- |
-| `USUARIOS` | El directorio de todos los clientes y sus accesos | `url_api_tenant` → conecta al usuario con su vServer en Velneo |
-| `OTP_CODES` | Los códigos temporales de verificación de correo | `expires_at` → el código muere en 15 minutos |
-| `SESIONES` | Las sesiones activas (auditoría de quién está conectado) | `token_hash` → nunca se guarda el JWT completo, solo su huella |
+| `USUARIOS` | Directorio de clientes y sus credenciales de acceso. | `id` → Ancla del sistema |
+| `ROLES` | Definición de niveles de permisos (Admin, Cliente). | `nombre_rol` |
+| `CODIGOS_OTP` | Tokens temporales para registro y recuperación. | `usado` → Seguridad |
+| `SESIONES` | Auditoría de JWTs activos para permitir logout global. | `hash_token` |
+| `VELNEO` | El "Mapa de Conexión" de cada cliente. | `url_api` → Endpoint único |
+| `V_CARPETAS` | Organización física en Velneo Cloud. | `limite_maximo` |
+| `V_INSTANCIAS` | Inventario de instancias DAT/APP desplegadas. | `id_instancia` |
 
 ---
 

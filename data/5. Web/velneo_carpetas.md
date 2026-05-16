@@ -3,34 +3,35 @@
 ## 📄 Información General
 - Tipo de tabla: Maestro
 - Reside en: Disco
-- Longitud del registro: 210
-- Número de campos: 6
+- Longitud del registro: 300
+- Número de campos: 7
 - Número de índices: 2
 
 ## 📝 Descripción [IA]
-Esta tabla gestiona la topología de almacenamiento físico en el servidor Velneo. Permite implementar una estrategia de escalado horizontal manual al organizar a los usuarios en diferentes carpetas (buckets). Controla las cuotas de ocupación para evitar la saturación de un solo directorio, lo cual es fundamental para el rendimiento del vServer y la gestión de backups segmentados.
+Esta tabla es el orquestador físico de la infraestructura en la nube. Gestiona los contenedores (carpetas) de Velneo Cloud donde se alojan las instancias de los clientes. Su propósito es permitir un escalamiento organizado: cuando una carpeta alcanza su límite máximo de instancias, el sistema de aprovisionamiento utiliza esta tabla para identificar la siguiente carpeta disponible, evitando la saturación de recursos y facilitando las tareas de mantenimiento por bloques de clientes.
 
 ## 🛠️ Estructura de Campos
 
 | Identificador | Nombre | Tipo | Longitud | Tipo de enlace | Comentarios y Relaciones |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `id` | ID Carpeta | Numérico | 10 | | Clave primaria. |
-| `nombre` | Nombre Carpeta | Alfa | 100 | | Nombre físico en el vServer (ej. clientes01). |
-| `contador_instancias` | Ocupación | Numérico | 11 | | Cantidad de tenants alojados actualmente. |
-| `limite_maximo` | Capacidad | Numérico | 11 | | Máximo de usuarios permitidos en esta carpeta. |
-| `estado` | Estado | Enum | - | | disponible, llena, mantenimiento. Controla si se pueden asignar nuevos usuarios. |
-| `fecha_creacion` | Registrada el | Tiempo | 4 | | Fecha de alta de la carpeta en el sistema. |
+| `id` | ID Carpeta | Numérico | 10 | | Clave primaria e identificador interno. |
+| `nombre` | Nombre Físico | Alfa | 100 | | Nombre de la carpeta en el vServer (ej: 'clientes_zona_a'). |
+| `contador_instancias` | Ocupación | Numérico | 11 | | Cantidad actual de tenants alojados en esta carpeta. |
+| `limite_maximo` | Capacidad | Numérico | 11 | | Límite de instancias permitidas antes de marcar como llena. |
+| `estado` | Estatus Ops. | Enum | | | 'disponible', 'llena' o 'mantenimiento'. |
+| `fecha_creacion` | Alta | Tiempo | 4 | | Registro de creación de la carpeta. |
+| `fecha_actualizacion` | Último Cambio | Tiempo | 4 | | Seguimiento de cambios en capacidad o estado. |
 
 ## 🔍 Índices
 
-| Identificador | Nombre | Tipo de índice |
-| :--- | :--- | :--- |
-| `PRIMARY` | Primary Key | Clave única (id) |
-| `idx_nombre_carpeta` | Nombre Único | Clave única (nombre) |
+| Identificador | Nombre | Tipo de índice | Campos |
+| :--- | :--- | :--- | :--- |
+| `PRIMARY` | Primary Key | Clave única | `id` |
+| `idx_nombre_carpeta` | Nombre Único | Clave única | `nombre` |
 
 ## 🔗 Enlaces Plurales
-- **velneo:** Múltiples registros de infraestructura apuntan a una misma carpeta.
+- **velneo:** Una carpeta agrupa múltiples configuraciones de tenants.
 
 ## 📌 Notas [IA]
-- Es imperativo que el `contador_instancias` se actualice dentro de una transacción al momento de asignar una nueva instancia en la tabla `velneo`.
-- Cuando el contador llega al límite, el sistema de aprovisionamiento debe buscar automáticamente la siguiente carpeta con estado `disponible`.
+- El sistema de registro automático consulta esta tabla buscando la primera carpeta con `estado = 'disponible'` y `contador_instancias < limite_maximo`.
+- Es vital mantener el campo `nombre` sincronizado con la estructura real de carpetas en el Administrador de Velneo Cloud.

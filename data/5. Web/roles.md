@@ -4,31 +4,33 @@
 - Tipo de tabla: Maestro
 - Reside en: Disco
 - Longitud del registro: 360
-- Número de campos: 4
+- Número de campos: 6
 - Número de índices: 2
 
 ## 📝 Descripción [IA]
-Esta tabla gestiona los perfiles de acceso y niveles de autorización dentro del portal administrativo del ecosistema DattaErp. Su función principal es segmentar las capacidades operativas de los usuarios internos, permitiendo diferenciar entre administradores totales, supervisores de infraestructura y personal de soporte. Es la base del sistema de seguridad RBAC (Role-Based Access Control) que protege los endpoints sensibles del backend.
+Esta tabla actúa como el catálogo maestro de perfiles de acceso dentro del ecosistema Datta-Erp. Su propósito fundamental es segmentar las capacidades operativas de los usuarios, permitiendo que el sistema asigne permisos específicos según la función de negocio (ej. Administrador Global vs. Usuario de Tenant). Es una pieza clave para la seguridad basada en roles (RBAC) que consume el Backend durante la validación del JWT.
 
 ## 🛠️ Estructura de Campos
 
 | Identificador | Nombre | Tipo | Longitud | Tipo de enlace | Comentarios y Relaciones |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `id` | ID Rol | Numérico | 10 | | Clave primaria interna. |
-| `nombre_rol` | Nombre del Rol | Alfa | 50 | | Identificador único del perfil (ej. ADMIN, USER). Relacionado con el middleware de autorización. |
-| `descripcion` | Descripción | Alfa | 255 | | Explicación detallada de los permisos asociados al rol. |
-| `es_activo` | Activo | Booleano | 1 | | Control de vigencia del rol. Si es 0, los usuarios vinculados pierden privilegios. |
+| `id` | ID Rol | Numérico | 10 | | Clave primaria. Identificador único para la vinculación con usuarios. |
+| `nombre_rol` | Nombre | Alfa | 50 | | Etiqueta única del rol (ej: 'admin', 'cliente'). |
+| `descripcion` | Descripción | Alfa | 255 | | Detalle de las responsabilidades o permisos que otorga el rol. |
+| `es_activo` | Activo | Booleano | 1 | | Control lógico de habilitación. Si es 0, los usuarios con este rol no pueden loguearse. |
+| `fecha_creacion` | Creado el | Tiempo | 4 | | Timestamp de auditoría para el registro inicial. |
+| `fecha_actualizacion` | Actualizado el | Tiempo | 4 | | Registro automático de la última modificación del rol. |
 
 ## 🔍 Índices
 
-| Identificador | Nombre | Tipo de índice |
-| :--- | :--- | :--- |
-| `PRIMARY` | Primary Key | Clave única (id) |
-| `idx_nombre_rol_unico` | Nombre Único | Clave única (nombre_rol) |
+| Identificador | Nombre | Tipo de índice | Campos |
+| :--- | :--- | :--- | :--- |
+| `PRIMARY` | Primary Key | Clave única | `id` |
+| `idx_nombre_rol_unico` | Rol Único | Clave única | `nombre_rol` |
 
 ## 🔗 Enlaces Plurales
-- **usuarios:** Un rol puede estar asignado a múltiples usuarios.
+- **usuarios:** Un rol es compartido por múltiples usuarios de la plataforma.
 
 ## 📌 Notas [IA]
-- El diseño permite una gestión dinámica de permisos sin necesidad de modificar el esquema de base de datos.
-- Se recomienda no eliminar registros de esta tabla para preservar la integridad referencial histórica; en su lugar, utilizar el campo `es_activo`.
+- La integridad de esta tabla es crítica. Se recomienda no eliminar roles que tengan usuarios asociados (`ON DELETE RESTRICT`).
+- Los nombres de roles deben ser normalizados (preferiblemente minúsculas) para evitar colisiones en la lógica del middleware de autorización.

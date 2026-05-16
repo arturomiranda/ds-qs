@@ -203,248 +203,11 @@ pnpm add zod react-hook-form @hookform/resolvers
 
 > La maqueta muestra los **dos estados del módulo** en una sola vista: a la izquierda el formulario de registro (Paso 1) y a la derecha el modal de verificación OTP (Paso 2). Diseño **Light Mode**, estilo dashboard SaaS moderno.
 
-## 🖼️ Maqueta de Interfaz
+### Paso 1 — Formulario de Registro
+![Paso 1: Formulario](./maqueta-registro.svg)
 
-```xml
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720"
-     font-family="system-ui,-apple-system,'Segoe UI',sans-serif">
-  <defs>
-    <linearGradient id="brandG" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1E3A8A"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
-    </linearGradient>
-    <linearGradient id="btnG" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2563EB"/>
-      <stop offset="100%" stop-color="#60A5FA"/>
-    </linearGradient>
-    <linearGradient id="successG" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10B981"/>
-      <stop offset="100%" stop-color="#34D399"/>
-    </linearGradient>
-    <filter id="cardShadow">
-      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#1E293B" flood-opacity="0.10"/>
-    </filter>
-    <filter id="modalShadow">
-      <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#000" flood-opacity="0.25"/>
-    </filter>
-    <clipPath id="leftClip">
-      <rect x="20" y="18" width="215" height="682" rx="18"/>
-    </clipPath>
-  </defs>
-
-  <!-- ── PAGE BACKGROUND ── -->
-  <rect width="1280" height="720" fill="#F1F5F9"/>
-  <!-- Subtle grid pattern -->
-  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#CBD5E1" stroke-width="0.4"/>
-  </pattern>
-  <rect width="1280" height="720" fill="url(#grid)" opacity="0.5"/>
-
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- ESTADO 1 — FORMULARIO DE REGISTRO          -->
-  <!-- ═══════════════════════════════════════════ -->
-
-  <!-- Card shadow + card -->
-  <rect x="20" y="18" width="590" height="682" rx="18" fill="#CBD5E1" opacity="0.4" transform="translate(3,5)"/>
-  <rect x="20" y="18" width="590" height="682" rx="18" fill="white" filter="url(#cardShadow)"/>
-
-  <!-- Blue brand panel -->
-  <rect x="20" y="18" width="215" height="682" rx="18" fill="url(#brandG)"/>
-  <rect x="215" y="18" width="20" height="682" fill="#3B82F6"/>
-
-  <!-- Decorative circles on brand panel -->
-  <circle cx="120" cy="580" r="90" fill="white" opacity="0.04"/>
-  <circle cx="185" cy="640" r="60" fill="white" opacity="0.04"/>
-  <circle cx="50" cy="620" r="40" fill="white" opacity="0.04"/>
-
-  <!-- Logo -->
-  <circle cx="120" cy="80" r="34" fill="rgba(255,255,255,0.12)"/>
-  <circle cx="120" cy="80" r="24" fill="rgba(255,255,255,0.20)"/>
-  <text x="120" y="87" text-anchor="middle" font-size="18" font-weight="800" fill="white">DE</text>
-  <text x="120" y="130" text-anchor="middle" font-size="16" font-weight="700" fill="white">Datta ERP</text>
-  <text x="120" y="150" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.6)">Sistema Empresarial SaaS</text>
-
-  <!-- Divider -->
-  <rect x="55" y="168" width="130" height="1" fill="rgba(255,255,255,0.18)"/>
-
-  <!-- Features -->
-  <text x="46" y="196" font-size="9" font-weight="700" fill="rgba(255,255,255,0.45)" letter-spacing="1">INCLUYE</text>
-
-  <rect x="44" y="208" width="16" height="16" rx="4" fill="rgba(255,255,255,0.15)"/>
-  <text x="52" y="220" text-anchor="middle" font-size="9" fill="white">✓</text>
-  <text x="68" y="219" font-size="10" font-weight="600" fill="white">Verificación en 2 pasos</text>
-  <text x="68" y="233" font-size="9" fill="rgba(255,255,255,0.6)">OTP de 6 dígitos vía correo</text>
-
-  <rect x="44" y="252" width="16" height="16" rx="4" fill="rgba(255,255,255,0.15)"/>
-  <text x="52" y="264" text-anchor="middle" font-size="9" fill="white">✓</text>
-  <text x="68" y="263" font-size="10" font-weight="600" fill="white">Credenciales automáticas</text>
-  <text x="68" y="277" font-size="9" fill="rgba(255,255,255,0.6)">Usuario y contraseña generados</text>
-
-  <rect x="44" y="296" width="16" height="16" rx="4" fill="rgba(255,255,255,0.15)"/>
-  <text x="52" y="308" text-anchor="middle" font-size="9" fill="white">✓</text>
-  <text x="68" y="307" font-size="10" font-weight="600" fill="white">Datos cifrados</text>
-  <text x="68" y="321" font-size="9" fill="rgba(255,255,255,0.6)">Bcrypt + aislamiento multi-tenant</text>
-
-  <rect x="44" y="340" width="16" height="16" rx="4" fill="rgba(255,255,255,0.15)"/>
-  <text x="52" y="352" text-anchor="middle" font-size="9" fill="white">✓</text>
-  <text x="68" y="351" font-size="10" font-weight="600" fill="white">Doble validación</text>
-  <text x="68" y="365" font-size="9" fill="rgba(255,255,255,0.6)">MySQL + Velneo Cloud API</text>
-
-  <!-- Form area -->
-  <!-- Title -->
-  <text x="248" y="62" font-size="21" font-weight="700" fill="#0F172A">Crear tu cuenta</text>
-  <text x="248" y="82" font-size="11" fill="#64748B">Completa el formulario para comenzar</text>
-
-  <!-- Step indicator -->
-  <circle cx="265" cy="116" r="13" fill="#2563EB"/>
-  <text x="265" y="121" text-anchor="middle" font-size="11" font-weight="700" fill="white">1</text>
-  <rect x="278" y="115" width="55" height="2" rx="1" fill="#CBD5E1"/>
-  <circle cx="347" cy="116" r="13" fill="#E2E8F0"/>
-  <text x="347" y="121" text-anchor="middle" font-size="11" fill="#94A3B8">2</text>
-  <text x="265" y="139" text-anchor="middle" font-size="9" font-weight="600" fill="#2563EB">Tus datos</text>
-  <text x="347" y="139" text-anchor="middle" font-size="9" fill="#94A3B8">Verificación</text>
-
-  <!-- ROW 1: Nombre | Apellido Paterno -->
-  <text x="248" y="168" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">NOMBRE(S)</text>
-  <rect x="248" y="174" width="163" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="260" y="196" font-size="11" fill="#94A3B8">William</text>
-
-  <text x="421" y="168" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">APELLIDO PATERNO</text>
-  <rect x="421" y="174" width="163" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="433" y="196" font-size="11" fill="#94A3B8">García</text>
-
-  <!-- ROW 2: Apellido Materno | Correo -->
-  <text x="248" y="228" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">APELLIDO MATERNO</text>
-  <rect x="248" y="234" width="163" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="260" y="256" font-size="11" fill="#94A3B8">López</text>
-
-  <text x="421" y="228" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">CORREO ELECTRÓNICO</text>
-  <!-- Active field -->
-  <rect x="421" y="234" width="163" height="36" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/>
-  <text x="433" y="256" font-size="11" fill="#1E293B">william@empresa.com</text>
-  <text x="575" y="256" text-anchor="middle" font-size="9" fill="#10B981">✓</text>
-
-  <!-- ROW 3: Telefono | RFC -->
-  <text x="248" y="288" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">TELÉFONO</text>
-  <rect x="248" y="294" width="163" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="260" y="316" font-size="11" fill="#94A3B8">55 1234 5678</text>
-
-  <text x="421" y="288" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">RFC</text>
-  <rect x="421" y="294" width="163" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="433" y="316" font-size="11" fill="#94A3B8">GALW850101ABC</text>
-
-  <!-- ROW 4: Empresa (full width) -->
-  <text x="248" y="348" font-size="9" font-weight="700" fill="#475569" letter-spacing="0.5">NOMBRE DE LA EMPRESA</text>
-  <rect x="248" y="354" width="336" height="36" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5"/>
-  <text x="260" y="376" font-size="11" fill="#94A3B8">Empresa Ejemplo SA de CV</text>
-  <text x="544" y="376" font-size="9" fill="#94A3B8">Opcional</text>
-
-  <!-- Security note -->
-  <rect x="248" y="402" width="336" height="28" rx="6" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1"/>
-  <text x="266" y="420" font-size="9" fill="#15803D">🔒  Datos protegidos con cifrado de extremo a extremo</text>
-
-  <!-- Submit Button -->
-  <rect x="248" y="442" width="336" height="44" rx="10" fill="url(#btnG)"/>
-  <text x="416" y="469" text-anchor="middle" font-size="13" font-weight="700" fill="white">Continuar al paso 2  →</text>
-
-  <!-- Rate limit badge -->
-  <rect x="318" y="498" width="196" height="20" rx="10" fill="#FEF3C7"/>
-  <text x="416" y="512" text-anchor="middle" font-size="9" fill="#92400E">⚡ Máx. 3 intentos/hora por IP</text>
-
-  <!-- Login link -->
-  <text x="416" y="542" text-anchor="middle" font-size="11" fill="#64748B">¿Ya tienes cuenta?
-    <tspan fill="#2563EB" font-weight="600"> Iniciar sesión</tspan>
-  </text>
-
-  <!-- STATE 1 Label -->
-  <rect x="20" y="692" width="590" height="22" rx="6" fill="#1E3A8A"/>
-  <text x="315" y="707" text-anchor="middle" font-size="10" font-weight="600" fill="white">
-    ESTADO 1 — POST /api/auth/register/init
-  </text>
-
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- ESTADO 2 — MODAL OTP                       -->
-  <!-- ═══════════════════════════════════════════ -->
-
-  <!-- Card base (blurred page behind modal) -->
-  <rect x="670" y="18" width="590" height="682" rx="18" fill="#E2E8F0" filter="url(#cardShadow)"/>
-
-  <!-- Simulated blurred form behind -->
-  <rect x="680" y="28" width="195" height="662" rx="14" fill="#3B82F6" opacity="0.18"/>
-  <rect x="885" y="60" width="355" height="90" rx="8" fill="#CBD5E1" opacity="0.35"/>
-  <rect x="885" y="162" width="355" height="40" rx="8" fill="#CBD5E1" opacity="0.25"/>
-  <rect x="885" y="214" width="355" height="40" rx="8" fill="#CBD5E1" opacity="0.25"/>
-  <rect x="885" y="266" width="355" height="40" rx="8" fill="#CBD5E1" opacity="0.25"/>
-  <rect x="885" y="318" width="355" height="40" rx="8" fill="#CBD5E1" opacity="0.25"/>
-  <rect x="885" y="380" width="355" height="44" rx="10" fill="#93C5FD" opacity="0.30"/>
-
-  <!-- Dark overlay -->
-  <rect x="670" y="18" width="590" height="682" rx="18" fill="rgba(15,23,42,0.52)"/>
-
-  <!-- Modal Card -->
-  <rect x="748" y="148" width="434" height="396" rx="16" fill="white" filter="url(#modalShadow)"/>
-
-  <!-- Modal top accent bar -->
-  <rect x="748" y="148" width="434" height="5" rx="3" fill="url(#btnG)"/>
-
-  <!-- Email icon -->
-  <circle cx="965" cy="192" r="26" fill="#EFF6FF"/>
-  <rect x="949" y="183" width="32" height="22" rx="4" fill="none" stroke="#3B82F6" stroke-width="2"/>
-  <polyline points="949,183 965,197 981,183" fill="none" stroke="#3B82F6" stroke-width="2"/>
-
-  <!-- Modal title -->
-  <text x="965" y="240" text-anchor="middle" font-size="18" font-weight="700" fill="#0F172A">Verifica tu correo</text>
-  <text x="965" y="260" text-anchor="middle" font-size="11" fill="#64748B">Ingresa el código de 6 dígitos enviado a</text>
-  <text x="965" y="278" text-anchor="middle" font-size="11" font-weight="600" fill="#2563EB">william@empresa.com</text>
-
-  <!-- Timer pill -->
-  <rect x="905" y="288" width="120" height="22" rx="11" fill="#FEF3C7"/>
-  <text x="965" y="303" text-anchor="middle" font-size="10" font-weight="600" fill="#D97706">⏱  Expira en 14:23</text>
-
-  <!-- OTP Input Boxes (6 boxes, 52px wide, 8px gap) -->
-  <!-- Box 1 - filled -->
-  <rect x="770" y="326" width="52" height="60" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5"/>
-  <text x="796" y="366" text-anchor="middle" font-size="26" font-weight="700" fill="#1E293B">4</text>
-  <!-- Box 2 - filled -->
-  <rect x="830" y="326" width="52" height="60" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5"/>
-  <text x="856" y="366" text-anchor="middle" font-size="26" font-weight="700" fill="#1E293B">8</text>
-  <!-- Box 3 - filled -->
-  <rect x="890" y="326" width="52" height="60" rx="10" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2.5"/>
-  <text x="916" y="366" text-anchor="middle" font-size="26" font-weight="700" fill="#1E293B">2</text>
-  <!-- Box 4 - active (cursor) -->
-  <rect x="950" y="326" width="52" height="60" rx="10" fill="#F8FAFC" stroke="#2563EB" stroke-width="3"/>
-  <rect x="975" y="348" width="2" height="20" rx="1" fill="#2563EB"/>
-  <!-- Box 5 - empty -->
-  <rect x="1010" y="326" width="52" height="60" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
-  <!-- Box 6 - empty -->
-  <rect x="1070" y="326" width="52" height="60" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
-
-  <!-- Resend link -->
-  <text x="965" y="412" text-anchor="middle" font-size="11" fill="#64748B">¿No recibiste el código?
-    <tspan fill="#2563EB" font-weight="600"> Reenviar</tspan>
-  </text>
-
-  <!-- Verify button (disabled state - waiting for all digits) -->
-  <rect x="770" y="428" width="352" height="44" rx="10" fill="#E2E8F0"/>
-  <text x="946" y="455" text-anchor="middle" font-size="13" font-weight="600" fill="#94A3B8">Verificar código</text>
-
-  <!-- Success preview badge at bottom -->
-  <rect x="770" y="484" width="352" height="46" rx="10" fill="#F0FDF4" stroke="#6EE7B7" stroke-width="1.5"/>
-  <text x="946" y="504" text-anchor="middle" font-size="11" font-weight="600" fill="#059669">✅  ¡Registro completado!</text>
-  <text x="946" y="520" text-anchor="middle" font-size="9" fill="#047857">Credenciales enviadas → redirigiendo al Login...</text>
-
-  <!-- Dismiss X button -->
-  <circle cx="1162" cy="164" r="12" fill="#F1F5F9"/>
-  <text x="1162" y="169" text-anchor="middle" font-size="12" fill="#94A3B8">✕</text>
-
-  <!-- STATE 2 Label -->
-  <rect x="670" y="692" width="590" height="22" rx="6" fill="#1E3A8A"/>
-  <text x="965" y="707" text-anchor="middle" font-size="10" font-weight="600" fill="white">
-    ESTADO 2 — POST /api/auth/register/verify (Modal OTP)
-  </text>
-
-</svg>
-```
+### Paso 2 — Verificación OTP
+![Paso 2: OTP](./maqueta-otp.svg)
 
 ---
 
@@ -606,76 +369,70 @@ classDiagram
     direction TB
 
     class roles {
-        <<🟩 Tabla MySQL>>
         +INT id PK
-        +VARCHAR(50) nombre_rol UK
-        +VARCHAR(255) descripcion
-        +TINYINT(1) es_activo
+        +VARCHAR_50 nombre_rol UK
+        +VARCHAR_255 descripcion
+        +TINYINT_1 es_activo
         +TIMESTAMP fecha_creacion
         +TIMESTAMP fecha_actualizacion
-        ──────────────────────────
-        Catálogo de niveles de acceso.
-        En el registro se asigna
-        el rol 'cliente' por defecto.
+        -- NOTAS DE NEGOCIO --
+        +catalogo_niveles_acceso()
+        +asigna_cliente_por_defecto()
     }
 
     class usuarios {
-        <<🟩 Tabla MySQL>>
-        +INT id PK AUTO_INCREMENT
-        +VARCHAR(100) nombres
-        +VARCHAR(100) apellido_paterno
-        +VARCHAR(100) apellido_materno
-        +VARCHAR(100) empresa
-        +VARCHAR(13) rfc
-        +VARCHAR(100) correo UK
-        +VARCHAR(20) telefono
-        +VARCHAR(50) usuario UK
-        +VARCHAR(255) contraseña
+        +INT id PK_AUTO_INCREMENT
+        +VARCHAR_100 nombres
+        +VARCHAR_100 apellido_paterno
+        +VARCHAR_100 apellido_materno
+        +VARCHAR_100 empresa
+        +VARCHAR_13 rfc
+        +VARCHAR_100 correo UK
+        +VARCHAR_20 telefono
+        +VARCHAR_50 usuario UK
+        +VARCHAR_255 contrasena
         +INT id_rol FK
-        +TINYINT(1) verificado
-        +TINYINT(1) actualizar_contraseña
+        +TINYINT_1 verificado
+        +TINYINT_1 actualizar_contrasena
         +TIMESTAMP fecha_creacion
         +TIMESTAMP fecha_actualizacion
-        ──────────────────────────
-        Se crea SOLO al verificar OTP.
-        verificado=1 desde el inicio.
-        actualizar_contraseña=1 siempre.
+        -- NOTAS DE NEGOCIO --
+        +creado_solo_al_verificar_OTP()
+        +por_defecto_verificado_1()
+        +por_defecto_actualizar_pass_1()
     }
 
     class codigos_otp {
-        <<🟩 Tabla MySQL>>
-        +INT id PK AUTO_INCREMENT
-        +VARCHAR(100) correo
-        +VARCHAR(6) codigo
-        +ENUM tipo
+        +INT id PK_AUTO_INCREMENT
+        +VARCHAR_100 correo
+        +VARCHAR_6 codigo
+        +ENUM_tipo tipo
         +DATETIME fecha_expiracion
-        +TINYINT(1) usado
+        +TINYINT_1 usado
         +TIMESTAMP fecha_creacion
-        ──────────────────────────
-        tipo: 'registro' en este módulo.
-        Sin FK a usuarios — soporta OTPs
-        antes de que el usuario exista.
-        Expira en 15 min desde creación.
+        -- NOTAS DE NEGOCIO --
+        +tipo_registro_en_este_modulo()
+        +sin_FK_soporta_usuarios_nuevos()
+        +expira_en_15_minutos()
     }
 
     class sesiones {
-        <<🟩 Tabla MySQL>>
-        +INT id PK AUTO_INCREMENT
+        +INT id PK_AUTO_INCREMENT
         +INT id_usuario FK
-        +VARCHAR(255) hash_token UK
+        +VARCHAR_255 hash_token UK
         +DATETIME fecha_expiracion
-        +VARCHAR(45) direccion_ip
-        +VARCHAR(512) agente_usuario
+        +VARCHAR_45 direccion_ip
+        +VARCHAR_512 agente_usuario
         +TIMESTAMP fecha_creacion
-        ──────────────────────────
-        No se usa en el registro.
-        Se activa en el módulo de Login
-        al generar el JWT de sesión.
+        -- NOTAS DE NEGOCIO --
+        +no_se_usa_en_registro()
+        +activo_en_modulo_login()
     }
 
-    roles "1" --> "0..*" usuarios : id_rol\nasigna permisos
-    usuarios "1" --> "0..*" sesiones : id_usuario\ntiene sesiones JWT
-    usuarios "1" ..> "0..*" codigos_otp : correo\nvalida vía email
+    %% Relaciones Lógicas de Base de Datos
+    roles "1" --o "0..*" usuarios : id_rol (asigna permisos)
+    usuarios "1" --o "0..*" sesiones : id_usuario (tiene sesiones)
+    usuarios "1" ..> "0..*" codigos_otp : correo (coincide via email)
 ```
 
 ### ¿Cómo se leen las relaciones?
@@ -693,30 +450,32 @@ classDiagram
 ```mermaid
 flowchart LR
     subgraph STEP1["🟦 Paso 1 — Formulario"]
-        F1["nombres\napellido_paterno\napellido_materno\ncorreo\ntelefono\nempresa\nrfc"]
+        F1["nombres<br/>apellido_paterno<br/>apellido_materno<br/>correo<br/>telefono<br/>empresa<br/>rfc"]
     end
 
-    subgraph OTP["🟩 codigos_otp"]
-        O1["correo ← del form\ncodigo ← generado\ntipo = 'registro'\nfecha_expiracion = +15min\nusado = 0"]
+    subgraph OTP["🟩 Tabla: codigos_otp"]
+        O1["correo: del form<br/>codigo: generado<br/>tipo: 'registro'<br/>fecha_expiracion: +15min<br/>usado: 0"]
     end
 
     subgraph STEP2["🟦 Paso 2 — Verificación"]
-        F2["correo\ncodigo (6 dígitos)"]
+        F2["correo<br/>codigo (6 dígitos)"]
     end
 
     subgraph AUTO["🟨 Backend auto-genera"]
-        A1["usuario = nombre.apellido + 3 nums\ncontraseña = 12 chars random\nhash = Bcrypt(contraseña, 12)"]
+        A1["usuario: nombre.apellido + 3nums<br/>contraseña: 12 chars random<br/>hash: Bcrypt(pass, 12)"]
     end
 
-    subgraph USERS["🟩 usuarios"]
-        U1["nombres ✅\ncorreo ✅\nusuario ✅ auto\ncontraseña ✅ hash\nid_rol = cliente\nverificado = 1\nactualizar_contraseña = 1"]
+    subgraph USERS["🟩 Tabla: usuarios"]
+        U1["nombres ✅<br/>correo ✅<br/>usuario ✅ (auto)<br/>contraseña ✅ (hash)<br/>id_rol: cliente<br/>verificado: 1<br/>actualizar_contraseña: 1"]
     end
 
-    STEP1 -->|"POST /init"| OTP
-    OTP -->|"Envía código\npor correo"| STEP2
-    STEP2 -->|"POST /verify\nvalida OTP"| AUTO
-    AUTO -->|"INSERT"| USERS
+    %% Flujo de Conexiones Nodo a Nodo
+    F1 -->|"POST /init"| O1
+    O1 -->|"Envía código<br/>por correo"| F2
+    F2 -->|"POST /verify<br/>valida OTP"| A1
+    A1 -->|"INSERT"| U1
 
+    %% Estilos Visuales
     style STEP1 fill:#EFF6FF,stroke:#93C5FD
     style STEP2 fill:#EFF6FF,stroke:#93C5FD
     style OTP fill:#F0FDF4,stroke:#6EE7B7
@@ -767,18 +526,20 @@ flowchart LR
 
 > *Rollback = "cancelación segura". Si algo sale mal a mitad del proceso, el sistema deshace los cambios para que no queden datos a medias.*
 
+### Paso 1: `/register/init` (Envío de OTP)
+
 ```mermaid
 flowchart TD
-    A["POST /register/init\nRecibe datos del formulario"] --> B{"¿Validación\nZod OK?"}
-    B -->|"❌ No"| B1["422 — Responde error\nSin tocar la BD"]
-    B -->|"✅ Sí"| C{"¿Correo libre\nen MySQL?"}
-    C -->|"❌ Existe"| C1["409 — Responde error\nSin tocar la BD"]
-    C -->|"✅ Libre"| D{"¿Correo libre\nen Velneo?"}
-    D -->|"❌ Existe"| D1["409 — Responde error\nSin tocar la BD"]
-    D -->|"✅ Libre"| E["INSERT en codigos_otp\n(OTP generado)"]
-    E --> F{"¿Nodemailer\nenvió el correo?"}
-    F -->|"❌ Falló"| F1["🔴 ROLLBACK:\nDELETE codigos_otp WHERE id=?\n500 — 'No pudimos enviar el código'"]
-    F -->|"✅ Enviado"| G["200 — 'Código enviado'\nFlujo continúa al modal OTP"]
+    A["POST /register/init<br/>Recibe datos del formulario"] --> B{"¿Validación<br/>Zod OK?"}
+    B -->|"❌ No"| B1["422 — Responde error<br/>Sin tocar la BD"]
+    B -->|"✅ Sí"| C{"¿Correo libre<br/>en MySQL?"}
+    C -->|"❌ Existe"| C1["409 — Responde error<br/>Sin tocar la BD"]
+    C -->|"✅ Libre"| D{"¿Correo libre<br/>en Velneo?"}
+    D -->|"❌ Existe"| D1["409 — Responde error<br/>Sin tocar la BD"]
+    D -->|"✅ Libre"| E["INSERT en codigos_otp<br/>(OTP generado)"]
+    E --> F{"¿Nodemailer<br/>envió el correo?"}
+    F -->|"❌ Falló"| F1["🔴 ROLLBACK:<br/>DELETE codigos_otp WHERE id=?<br/>500 — 'No pudimos enviar el código'"]
+    F -->|"✅ Enviado"| G["200 — 'Código enviado'<br/>Flujo continúa al modal OTP"]
 
     style B1 fill:#FEE2E2,stroke:#FCA5A5
     style C1 fill:#FEE2E2,stroke:#FCA5A5
@@ -787,18 +548,20 @@ flowchart TD
     style G fill:#F0FDF4,stroke:#6EE7B7
 ```
 
+### Paso 2: `/register/verify` (Creación de Usuario)
+
 ```mermaid
 flowchart TD
-    A["POST /register/verify\nRecibe correo + código"] --> B{"¿OTP válido,\nno usado,\nno expirado?"}
-    B -->|"❌ No"| B1["400 — Responde error específico\nSin tocar la BD de usuarios"]
-    B -->|"✅ Sí"| C["UPDATE codigos_otp\nSET usado=1"]
-    C --> D["INSERT usuarios\n(con hash Bcrypt)"]
-    D --> E{"¿INSERT\nexitoso?"}
-    E -->|"❌ Error MySQL"| E1["🔴 ROLLBACK:\nUPDATE codigos_otp SET usado=0\n409 — 'Conflicto al crear cuenta'"]
-    E -->|"✅ OK"| F["Enviar correo\nde bienvenida"]
-    F --> G{"¿Correo\nde bienvenida OK?"}
-    G -->|"❌ Falló"| G1["🟡 Log silencioso\nUsuario YA existe — NO se revierte\n201 — Registro exitoso igual"]
-    G -->|"✅ OK"| H["201 — '¡Registro exitoso!'\nRedirige a /login"]
+    A["POST /register/verify<br/>Recibe correo + código"] --> B{"¿OTP válido,<br/>no usado,<br/>no expirado?"}
+    B -->|"❌ No"| B1["400 — Responde error específico<br/>Sin tocar la BD de usuarios"]
+    B -->|"✅ Sí"| C["UPDATE codigos_otp<br/>SET usado=1"]
+    C --> D["INSERT usuarios<br/>(con hash Bcrypt)"]
+    D --> E{"¿INSERT<br/>exitoso?"}
+    E -->|"❌ Error MySQL"| E1["🔴 ROLLBACK:<br/>UPDATE codigos_otp SET usado=0<br/>409 — 'Conflicto al crear cuenta'"]
+    E -->|"✅ OK"| F["Enviar correo<br/>de bienvenida"]
+    F --> G{"¿Correo<br/>de bienvenida OK?"}
+    G -->|"❌ Falló"| G1["🟡 Log silencioso<br/>Usuario YA existe — NO se revierte<br/>201 — Registro exitoso igual"]
+    G -->|"✅ OK"| H["201 — '¡Registro exitoso!'<br/>Redirige a /login"]
 
     style B1 fill:#FEE2E2,stroke:#FCA5A5
     style E1 fill:#FEF3C7,stroke:#FCD34D
@@ -838,38 +601,6 @@ flowchart TD
 
 ---
 
-## 🏢 Protección Multi-tenant — "El Edificio de Apartamentos"
-
-> *Imagina Datta ERP como un edificio de apartamentos. El módulo de registro es el proceso de asignarle un apartamento nuevo a un inquilino. Desde el momento del registro, ese inquilino tiene **su propio espacio privado** que nadie más puede ver ni tocar.*
-
-### ¿Cómo garantizamos el aislamiento desde el registro?
-
-```mermaid
-flowchart TD
-    subgraph REGISTRO["🚪 Módulo de Registro (este módulo)"]
-        R1["Usuario se registra\n→ Solo se crea en MySQL Maestra\n→ verificado = 1"]
-        R2["❌ AÚN NO tiene instancia Velneo\nEl aprovisionamiento ocurre\nen un paso posterior (Sprint 1)"]
-    end
-
-    subgraph MYSQL["🟩 BD Maestra MySQL\n(La Recepción del Edificio)"]
-        M1["usuarios: correo, usuario, hash\nRol asignado: 'cliente'\nSIN acceso a datos de otro tenant"]
-    end
-
-    subgraph VELNEO["☁️ Velneo Cloud\n(Los Apartamentos)"]
-        V1["Tenant A\nDB privada"]
-        V2["Tenant B\nDB privada"]
-        V3["Tenant N...\nDB privada"]
-    end
-
-    REGISTRO --> MYSQL
-    MYSQL -.->|"Aprovisionamiento futuro\n(POST-registro, Sprint 2)"| VELNEO
-
-    style REGISTRO fill:#EFF6FF,stroke:#93C5FD
-    style MYSQL fill:#F0FDF4,stroke:#6EE7B7
-    style VELNEO fill:#FFFBEB,stroke:#FCD34D
-    style R2 fill:#FEE2E2,stroke:#FCA5A5
-```
-
 ### Reglas de aislamiento aplicadas en el registro
 
 | Regla | ¿Cómo se implementa? | ¿Dónde vive en el código? |
@@ -888,30 +619,36 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    REQ["📡 Petición\ndel usuario"] --> L1
+    REQ["📡 Petición<br/>del usuario"] --> H
 
-    subgraph L1["Capa 1 🟨\nHelmet + CORS"]
-        H["Headers HTTP seguros\nSolo origen CLIENT_URL\npermitido"]
+    subgraph L1["Capa 1 🟨 — Helmet + CORS"]
+        H["Headers HTTP seguros<br/>Solo origen CLIENT_URL<br/>permitido"]
     end
 
-    subgraph L2["Capa 2 🟨\nRate Limit"]
-        RL["3 intentos/hora\npor IP\nen /register/*"]
+    subgraph L2["Capa 2 🟨 — Rate Limit"]
+        RL["3 intentos/hora<br/>por IP<br/>en /register/*"]
     end
 
-    subgraph L3["Capa 3 🟦\nZod (Frontend)"]
-        Z["Validación local\nantes de enviar\nla petición"]
+    subgraph L3["Capa 3 🟦 — Zod (Frontend)"]
+        Z["Validación local<br/>antes de enviar<br/>la petición"]
     end
 
-    subgraph L4["Capa 4 🟨\nZod (Backend)"]
-        ZB["Re-validación\nen el servidor\n(nunca confiar solo en el cliente)"]
+    subgraph L4["Capa 4 🟨 — Zod (Backend)"]
+        ZB["Re-validación<br/>en el servidor<br/>(no confiar en cliente)"]
     end
 
-    subgraph L5["Capa 5 🟩\nBcrypt + MySQL"]
-        B["Contraseña hasheada\n12 rondas\nAntes del INSERT"]
+    subgraph L5["Capa 5 🟩 — Bcrypt + MySQL"]
+        B["Contraseña hasheada<br/>12 rondas<br/>Antes del INSERT"]
     end
 
-    L1 --> L2 --> L3 --> L4 --> L5 --> DB[("🟩 MySQL\nDato seguro")]
+    %% Conexiones directas entre los nodos internos para mantener el flujo lineal
+    H --> RL
+    RL --> Z
+    Z --> ZB
+    ZB --> B
+    B --> DB[("🟩 MySQL<br/>Dato seguro")]
 
+    %% Estilos de los contenedores
     style L1 fill:#FFFBEB,stroke:#FCD34D
     style L2 fill:#FFFBEB,stroke:#FCD34D
     style L3 fill:#EFF6FF,stroke:#93C5FD

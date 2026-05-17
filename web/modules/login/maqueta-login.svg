@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <!-- Fondo degradado moderno -->
+  <defs>
+    <linearGradient id="degradadoFondo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8FAFC" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <linearGradient id="degradadoBoton" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="degradadoAlerta" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FEF2F2" />
+      <stop offset="100%" stop-color="#FEE2E2" />
+    </linearGradient>
+    <filter id="sombraSuave" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <!-- Lienzo principal -->
+  <rect width="1280" height="720" fill="url(#degradadoFondo)" />
+
+  <!-- Cabecera de la maqueta -->
+  <text x="640" y="60" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" fill="#0F172A">FLUJO DE ACCESO Y RECUPERACIÓN — DATTA ERP</text>
+  <text x="640" y="85" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="500" fill="#64748B">Especificación de Interfaz de Usuario y Estados de Control (SaaS)</text>
+
+  <!-- ================= VISTA 1: LOGIN ESTÁNDAR ================= -->
+  <g transform="translate(60, 130)" filter="url(#sombraSuave)">
+    <!-- Contenedor Tarjeta -->
+    <rect width="360" height="500" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+    
+    <!-- Logo e Identidad -->
+    <circle cx="180" cy="55" r="22" fill="#E0F2FE" />
+    <polygon points="174,45 188,55 174,65" fill="#0284C7" />
+    <circle cx="184" cy="55" r="4" fill="#38BDF8" />
+    
+    <text x="180" y="105" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#0F172A">Iniciar Sesión</text>
+    <text x="180" y="125" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="400" fill="#64748B">Ingresa a tu consola administrativa</text>
+
+    <!-- Campos de Entrada (Inputs) -->
+    <!-- Correo -->
+    <text x="35" y="165" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#475569">Correo Electrónico</text>
+    <rect x="30" y="175" width="300" height="42" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+    <text x="45" y="200" font-family="system-ui, sans-serif" font-size="13" fill="#0F172A">william@empresa.com</text>
+
+    <!-- Contraseña -->
+    <text x="35" y="240" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#475569">Contraseña</text>
+    <rect x="30" y="250" width="300" height="42" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+    <text x="45" y="277" font-family="system-ui, sans-serif" font-size="16" fill="#64748B">••••••••••••</text>
+
+    <!-- Enlace ¿Olvidaste tu contraseña? -->
+    <text x="325" y="312" text-anchor="end" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#2563EB">¿Olvidaste tu contraseña?</text>
+
+    <!-- Botón de Ingreso -->
+    <rect x="30" y="340" width="300" height="45" rx="10" fill="url(#degradadoBoton)" />
+    <text x="180" y="367" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Ingresar al Sistema</text>
+
+    <!-- Separador -->
+    <line x1="30" y1="410" x2="330" y2="410" stroke="#E2E8F0" stroke-width="1.5" />
+
+    <!-- Alerta de Contraseña Fallida -->
+    <rect x="30" y="430" width="300" height="48" rx="8" fill="url(#degradadoAlerta)" stroke="#FECACA" stroke-width="1" />
+    <circle cx="48" cy="454" r="8" fill="#EF4444" />
+    <text x="48" y="459" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="900" fill="#FFFFFF">!</text>
+    <text x="66" y="449" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#991B1B">Clave incorrecta</text>
+    <text x="66" y="464" font-family="system-ui, sans-serif" font-size="10" fill="#B91C1C">Haz clic en el enlace azul para recuperar</text>
+  </g>
+
+  <!-- ================= VISTA 2: RECUPERACIÓN (TELÉFONO ENMASCARADO) ================= -->
+  <g transform="translate(460, 130)" filter="url(#sombraSuave)">
+    <!-- Contenedor Tarjeta -->
+    <rect width="360" height="500" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+    
+    <!-- Icono de Seguridad -->
+    <circle cx="180" cy="55" r="22" fill="#FEF3C7" />
+    <path d="M174,58 L180,64 L188,48" fill="none" stroke="#D97706" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <text x="180" y="105" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#0F172A">Verifica tu Identidad</text>
+    <text x="180" y="125" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="400" fill="#64748B">Por seguridad, confirma tu número</text>
+
+    <!-- Indicador de Teléfono Enmascarado -->
+    <rect x="30" y="150" width="300" height="70" rx="10" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1.2" />
+    <text x="180" y="175" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#B45309">TELÉFONO ASOCIADO DETECTADO</text>
+    <text x="180" y="202" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="800" fill="#78350F" letter-spacing="4">******53</text>
+
+    <!-- Campo de Entrada (Input Teléfono Completo) -->
+    <text x="35" y="250" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="#475569">Ingresa tu número completo</text>
+    <rect x="30" y="260" width="300" height="42" rx="10" fill="#F8FAFC" stroke="#2563EB" stroke-width="1.5" />
+    <text x="45" y="286" font-family="system-ui, sans-serif" font-size="14" font-weight="500" fill="#0F172A">5512345653</text>
+    <!-- Cursor parpadeante -->
+    <line x1="130" y1="272" x2="130" y2="290" stroke="#2563EB" stroke-width="2" />
+
+    <!-- Botón Enviar OTP -->
+    <rect x="30" y="325" width="300" height="45" rx="10" fill="url(#degradadoBoton)" />
+    <text x="180" y="352" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Enviar Código OTP</text>
+
+    <!-- Instrucciones de Ayuda -->
+    <rect x="30" y="390" width="300" height="85" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1" />
+    <text x="45" y="412" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#475569">¿Qué pasará a continuación?</text>
+    <text x="45" y="432" font-family="system-ui, sans-serif" font-size="10.5" fill="#64748B">• Validaremos el número contra el registro.</text>
+    <text x="45" y="448" font-family="system-ui, sans-serif" font-size="10.5" fill="#64748B">• Recibirás un OTP de 6 dígitos en tu email.</text>
+    <text x="45" y="464" font-family="system-ui, sans-serif" font-size="10.5" fill="#64748B">• Podrás restablecer tu llave de acceso.</text>
+  </g>
+
+  <!-- ================= VISTA 3: CAMBIO OBLIGATORIO (PRIMER INGRESO) ================= -->
+  <g transform="translate(860, 130)" filter="url(#sombraSuave)">
+    <!-- Contenedor Tarjeta -->
+    <rect width="360" height="500" rx="20" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" />
+    
+    <!-- Icono Llave / Seguridad -->
+    <circle cx="180" cy="55" r="22" fill="#ECFDF5" />
+    <path d="M172,62 A7,7 0 1,1 182,52 L188,58 L184,62 L180,58 L176,62 Z" fill="#059669" />
+    
+    <text x="180" y="105" text-anchor="middle" font-family="system-ui, sans-serif" font-size="19" font-weight="700" fill="#0F172A">Actualiza tu Contraseña</text>
+    <text x="180" y="125" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" font-weight="400" fill="#64748B">Tu clave actual es genérica. Crea una nueva.</text>
+
+    <!-- Indicador Informativo -->
+    <rect x="30" y="148" width="300" height="42" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+    <text x="180" y="173" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#065F46">🔒 PRIMER INICIO DETECTADO</text>
+
+    <!-- Inputs -->
+    <!-- Nueva Contraseña -->
+    <text x="35" y="215" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">Nueva Contraseña</text>
+    <rect x="30" y="223" width="300" height="38" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+    <text x="45" y="247" font-family="system-ui, sans-serif" font-size="14" fill="#0F172A">••••••••••••</text>
+
+    <!-- Confirmar Contraseña -->
+    <text x="35" y="283" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#475569">Confirmar Nueva Contraseña</text>
+    <rect x="30" y="291" width="300" height="38" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" />
+    <text x="45" y="315" font-family="system-ui, sans-serif" font-size="14" fill="#0F172A">••••••••••••</text>
+
+    <!-- Barra de Fuerza de Contraseña (Feedback UX) -->
+    <rect x="30" y="340" width="300" height="6" rx="3" fill="#E2E8F0" />
+    <rect x="30" y="340" width="220" height="6" rx="3" fill="#10B981" />
+    <text x="30" y="360" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#059669">Fuerza: Segura</text>
+
+    <!-- Botón Guardar y Acceder -->
+    <rect x="30" y="380" width="300" height="45" rx="10" fill="url(#degradadoBoton)" />
+    <text x="180" y="407" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF">Guardar y Acceder al Home</text>
+
+    <!-- Requisitos -->
+    <text x="35" y="448" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#64748B">La contraseña debe tener mínimo:</text>
+    <text x="35" y="465" font-family="system-ui, sans-serif" font-size="9.5" fill="#475569">✔️ 8 caracteres, 1 número y 1 símbolo especial</text>
+  </g>
+
+  <!-- Indicadores de Conexión de Flujo (Flechas de Guía) -->
+  <!-- Flecha 1 a 2 -->
+  <path d="M 430 330 L 450 330" fill="none" stroke="#64748B" stroke-width="2" marker-end="url(#puntaFlecha)" stroke-dasharray="4" />
+  <!-- Flecha 1 a 3 (Si actualizar_contraseña = 1) -->
+  <path d="M 390 190 L 420 190 L 420 110 L 880 110 L 880 120" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="4" />
+</svg>

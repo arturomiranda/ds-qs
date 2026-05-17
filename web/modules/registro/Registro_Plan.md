@@ -22,13 +22,14 @@
 
 > *Imagina que Datta ERP es un edificio de oficinas exclusivo. El módulo de registro es la **recepcionista y el proceso de acreditación de visitantes**: valida que la persona no esté ya registrada, verifica que su correo es real enviándole un código secreto, y una vez confirmado, le crea automáticamente una tarjeta de acceso con usuario y contraseña — todo sin que el nuevo inquilino tenga que inventarse nada.*
 
-El flujo se divide en **dos fases secuenciales**:
+El flujo se divide en **tres fases visuales (2 secuenciales de acción)**:
 
 | Paso | Qué pasa en el mundo real | Endpoint |
 | :--: | :--- | :--- |
 | **1** | El usuario llena un formulario con sus datos y el sistema verifica que no existe en ningún lado | `POST /api/auth/register/init` |
-| **2** | El usuario recibe un código de 6 dígitos en su correo y lo confirma en un modal | `POST /api/auth/register/verify` |
-| **Auto** | El sistema crea el usuario, genera sus credenciales y envía la bienvenida | *(interno, disparado al verificar)* |
+| **2** | El usuario recibe un código de 6 dígitos en su correo y lo confirma en línea dentro de la misma tarjeta | `POST /api/auth/register/verify` |
+| **3** | Aprovisionamiento: Pantalla de carga mientras se prepara la infraestructura y se configuran recursos. | *(interno, disparado al verificar)* |
+| **Auto** | El sistema crea el usuario, genera sus credenciales y envía la bienvenida | *(backend)* |
 
 ---
 
@@ -201,13 +202,16 @@ pnpm add zod react-hook-form @hookform/resolvers
 
 # FASE 2 — El "Figma" Visual (Maqueta SVG)
 
-> La maqueta muestra los **dos estados del módulo** en una sola vista: a la izquierda el formulario de registro (Paso 1) y a la derecha el modal de verificación OTP (Paso 2). Diseño **Light Mode**, estilo dashboard SaaS moderno.
+> La maqueta muestra los **tres estados del módulo** integrados directamente en el panel principal (sin modales externos). Diseño **Light Mode**, estilo dashboard SaaS moderno con gradientes.
 
 ### Paso 1 — Formulario de Registro
 ![Paso 1: Formulario](./maqueta-registro.svg)
 
 ### Paso 2 — Verificación OTP
 ![Paso 2: OTP](./maqueta-otp.svg)
+
+### Paso 3 — Aprovisionamiento
+![Paso 3: Processing](./maqueta-processing.svg)
 
 ---
 
@@ -218,18 +222,18 @@ pnpm add zod react-hook-form @hookform/resolvers
 | Acción del usuario | ¿Qué ocurre en pantalla? | ¿Qué ocurre en el servidor? |
 | :--- | :--- | :--- |
 | Escribe en el campo **Correo** | El borde se vuelve azul (campo activo). Al salir, Zod valida el formato y aparece `✓` verde si es válido. | Nada aún — la validación de formato es local (frontend). |
-| Hace clic en **Continuar al paso 2** | Zod valida todos los campos. Si hay errores, los campos inválidos se marcan en rojo con un mensaje. Si todo está bien, aparece un spinner sobre el botón. | `POST /api/auth/register/init` → verifica que el correo no exista en MySQL ni en Velneo Cloud → genera OTP → envía correo. |
-| El servidor responde OK | El formulario se oculta y aparece el **Modal OTP** con el correo oscurecido. El temporizador de 15 min empieza a correr. | OTP guardado en `codigos_otp` con `fecha_expiracion`. |
+| Hace clic en **Registrar** | Zod valida todos los campos. Si hay errores, los campos inválidos se marcan en rojo con un mensaje. Si todo está bien, aparece un spinner sobre el botón. | `POST /api/auth/register/init` → verifica que el correo no exista en MySQL ni en Velneo Cloud → genera OTP → envía correo. |
+| El servidor responde OK | El formulario se oculta y aparece la vista **Verifica tu correo** en el mismo panel. El temporizador de 15 min empieza a correr. | OTP guardado en `codigos_otp` con `fecha_expiracion`. |
 | El servidor responde error `409` | Aparece un banner rojo debajo del campo Correo: *"Este correo ya está registrado."* El botón vuelve a estar activo. | Ningún OTP fue generado. |
 | El servidor responde error `429` | El botón se deshabilita y muestra: *"Límite alcanzado. Intenta en 1 hora."* | Rate limit de `express-rate-limit` activo. |
 
-### Estado 2: Modal OTP
+### Estado 2: Verificación OTP (En línea)
 
 | Acción del usuario | ¿Qué ocurre en pantalla? | ¿Qué ocurre en el servidor? |
 | :--- | :--- | :--- |
 | Escribe en los **6 cuadros** | El cursor avanza automáticamente al siguiente cuadro. Al llenar los 6, el botón "Verificar" se activa (azul). | Nada aún — solo entrada local. |
-| Hace clic en **Verificar código** | Aparece spinner. Los cuadros se bloquean. | `POST /api/auth/register/verify` → valida OTP en `codigos_otp` → si correcto: crea usuario, genera credenciales, envía bienvenida. |
-| Verificación exitosa | Los 6 cuadros se vuelven verdes, aparece el banner verde *"¡Registro completado!"* durante 2 seg y luego redirige a `/login`. | `codigos_otp.usado = 1`. Nuevo registro en `usuarios` con `verificado = 1`. Correo de bienvenida disparado. |
+| Hace clic en **Confirmar Registro** | La tarjeta cambia a Estado 3 (Aprovisionamiento) con un cohete y un spinner indicando que se está configurando el entorno. | `POST /api/auth/register/verify` → valida OTP en `codigos_otp` → si correcto: crea usuario, genera credenciales, envía bienvenida. |
+| Verificación exitosa | Se muestra el banner *"¡Registro completado!"* y redirige a `/login`. | `codigos_otp.usado = 1`. Nuevo registro en `usuarios` con `verificado = 1`. Correo de bienvenida disparado. |
 | Código incorrecto | Los cuadros se sacuden (animación shake) y se vuelven rojos. Contador de intentos visible (ej: *"Intento 2 de 3"*). | OTP no marcado. Rate limit cuenta el intento. |
 | Código expirado | Banner amarillo: *"Tu código expiró. Solicita uno nuevo."* Botón "Reenviar" se activa en verde. | Backend rechaza el OTP por `fecha_expiracion`. |
 | Clic en **Reenviar** | El temporizador se reinicia a 15:00. | Nuevo OTP generado y guardado. El anterior queda inválido (nuevo registro en `codigos_otp`). |
@@ -895,19 +899,6 @@ frontend/app/register/
 - [ ] Crear `RegisterForm.tsx` con validación Zod en tiempo real
 - [ ] Crear `OtpModal.tsx` con 6 inputs, temporizador y botón Reenviar
 - [ ] Manejar estados: loading, error, éxito con redirect a `/login`
-
----
-
-## 🔗 Referencias del Proyecto
-
-| Documento | Ubicación |
-| :--- | :--- |
-| Blueprint general del proyecto | `ds-qs/web/Datta-Erp_Blueprint.md` |
-| Schema de la BD MySQL | `Proyectos/bd.sql` |
-| Servicio de correos existente | `backend/src/services/Mail.service.js` |
-| Servicio Velneo existente | `backend/src/services/Velneo.service.js` |
-| Clase base SQL reutilizable | `backend/src/core/database/baseSql.provider.js` |
-| Jerarquía de errores | `backend/src/core/errors/` |
 
 ---
 

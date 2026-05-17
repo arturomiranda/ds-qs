@@ -280,7 +280,7 @@ flowchart TB
 | Módulo | Backend | Frontend | Documentación |
 | :--- | :---: | :---: | :---: |
 | **Infraestructura Base** | ✅ Listo | ✅ Listo | ✅ Este Blueprint |
-| **Módulo Auth / Registro** | ⏳ Pendiente | ⏳ Pendiente | ✅ `Registro_Plan.md` |
+| **Módulo Auth / Registro** | ✅ Listo | ✅ Listo | ✅ `Registro_Plan.md` |
 | **Dashboard ERP** | ⏳ Pendiente | ⏳ Pendiente | — |
 | **Catálogos SAT** | ⏳ Pendiente | ⏳ Pendiente | — |
 | **Socket.io Tiempo Real** | ⏳ Pendiente | ⏳ Pendiente | — |

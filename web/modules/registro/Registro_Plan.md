@@ -166,9 +166,9 @@ Cuando el código es válido, el backend ejecuta automáticamente y en orden:
 1. ✅ Marca el OTP como `usado = 1` en `codigos_otp`
 2. 🧠 Genera el `usuario`: `william.garcia` + 3 dígitos aleatorios → `william.garcia847`
 3. 🔑 Genera contraseña de 12 caracteres aleatorios (letras + números + símbolos)
-4. 🔒 Encripta la contraseña con **Bcrypt** (factor de costo: 12 rondas)
-5. 💾 Inserta el nuevo registro en `usuarios` con `verificado = 1`
-6. 📧 Envía correo de bienvenida con usuario y contraseña en texto legible
+4. 🔒 Encripta la contraseña con **Bcryptjs** (factor de costo: 12 rondas)
+5. 💾 Inserta el nuevo registro en `usuarios` usando la columna literal `contraseña` y control transaccional estricto (COMMIT/ROLLBACK)
+6. 📧 Envía correo de bienvenida con usuario y contraseña usando `correo.service.js` (Plantillas HTML)
 7. 🔀 Devuelve al frontend la señal para redirigir al `/login`
 
 ---
@@ -186,13 +186,13 @@ Cuando el código es válido, el backend ejecuta automáticamente y en orden:
 
 ---
 
-## 📦 Dependencias a Instalar
+## 📦 Dependencias Instaladas
 
-> Estas librerías están planificadas en el Blueprint pero **aún no instaladas**. Se instalan al iniciar el Sprint 1.
+> Estas librerías ya fueron instaladas, compiladas y configuradas en el entorno local (Node v24).
 
 ```bash
 # Backend
-pnpm add zod bcrypt nodemailer express-rate-limit
+pnpm add zod bcryptjs nodemailer express-rate-limit
 
 # Frontend
 pnpm add zod react-hook-form @hookform/resolvers
@@ -317,8 +317,8 @@ sequenceDiagram
         OTP-->>C: "482917"
         C->>DB: INSERT codigos_otp (correo, codigo, tipo='registro', fecha_expiracion=+15min)
         DB-->>C: OTP guardado ✅
-        C->>M: Envía email OTP vía Nodemailer
-        M-->>U: 📧 Correo con código "482917" (expira en 15 min)
+        C->>M: Envía email OTP vía correo.service.js
+        M-->>U: 📧 Correo HTML con código "482917" (expira en 15 min)
         C-->>F: 200 "Código enviado a william@empresa.com"
         F-->>U: Muestra Modal OTP con temporizador
     end
@@ -353,10 +353,10 @@ sequenceDiagram
         C->>C: Genera usuario: "william.garcia847"
         C->>C: Genera contraseña: 12 chars aleatorios
         C->>C: Bcrypt hash(contraseña, 12 rondas)
-        C->>DU: INSERT usuarios (nombres, correo, usuario, contraseña_hash, id_rol=cliente, verificado=1)
+        C->>DU: INSERT usuarios (nombres, correo, usuario, contraseña, id_rol=cliente)
         DU-->>C: Usuario creado ✅ (id asignado)
-        C->>M: Envía correo de bienvenida con usuario + contraseña temporal
-        M-->>U: 📧 Correo de bienvenida con credenciales
+        C->>M: Envía correo de bienvenida vía correo.service.js
+        M-->>U: 📧 Correo HTML de bienvenida con credenciales
         C-->>F: 201 "Registro exitoso" + redirect:/login
         F-->>U: Banner verde → redirige a /login en 2 seg
     end
@@ -394,10 +394,10 @@ classDiagram
         +VARCHAR_100 correo UK
         +VARCHAR_20 telefono
         +VARCHAR_50 usuario UK
-        +VARCHAR_255 contrasena
+        +VARCHAR_255 contraseña
         +INT id_rol FK
         +TINYINT_1 verificado
-        +TINYINT_1 actualizar_contrasena
+        +TINYINT_1 actualizar_contraseña
         +TIMESTAMP fecha_creacion
         +TIMESTAMP fecha_actualizacion
         -- NOTAS DE NEGOCIO --
@@ -501,7 +501,7 @@ flowchart LR
 
 | # | Escenario de error | HTTP | Mensaje al usuario | ¿Qué hace el sistema internamente? | Clase de error |
 | :--: | :--- | :---: | :--- | :--- | :--- |
-| 1 | Campo inválido (ej: RFC con más de 13 chars, correo sin `@`) | `422` | *"El RFC debe tener entre 12 y 13 caracteres."* | Zod corta el flujo antes de tocar la BD. No hay operación en MySQL. | `ValidationError` |
+| 1 | Campo inválido (ej: RFC con más de 13 chars, correo sin `@`) | `422` | *"El RFC debe tener entre 12 y 13 caracteres."* | Zod corta el flujo antes de tocar la BD. Manejo robusto (optional chaining) evita caídas del servidor. | `ValidationError` |
 | 2 | Correo ya registrado en MySQL | `409` | *"Este correo ya tiene una cuenta. ¿Olvidaste tu contraseña?"* | SELECT devuelve resultado → respuesta inmediata. Sin escrituras. | `AppError` |
 | 3 | Correo ya en Velneo Cloud | `409` | *"Este correo ya existe en el sistema central."* | La llamada axios al API de Velneo devuelve el usuario → respuesta inmediata. | `AppError` |
 | 4 | Velneo Cloud no responde (timeout) | `503` | *"El sistema está tardando más de lo esperado. Intenta en unos minutos."* | axios lanza timeout tras 30 s. El interceptor captura y devuelve `503`. Sin escrituras. | `AppError` |
@@ -729,12 +729,12 @@ sequenceDiagram
 | Rate Limiting específico | `express-rate-limit`: 3 req/hora en `/register/*` | 🔧 Nuevo config |
 | CORS de origen único | Solo `CLIENT_URL` permitido (`app.js`) | ✅ Ya existe |
 | Validación doble (cliente + servidor) | Zod en frontend + Zod en backend controller | 🔧 Nuevo |
-| Hash de contraseña | Bcrypt factor 12 antes del INSERT | 🔧 Nuevo |
-| Rol no editable desde cliente | `id_rol` siempre desde servidor | 🔧 Nuevo |
-| OTP de un solo uso | Campo `usado` en `codigos_otp` | 🔧 Nuevo |
-| OTP con expiración | `fecha_expiracion` validado en SELECT | 🔧 Nuevo |
-| Doble verificación de correo | MySQL + Velneo Cloud API | 🔧 Nuevo |
-| Credenciales por correo cifrado | Nodemailer con TLS (puerto 587) | ✅ `Mail.service.js` existe |
+| Hash de contraseña | Bcryptjs factor 12 antes del INSERT | ✅ Activo |
+| Rol no editable desde cliente | `id_rol` siempre desde servidor | ✅ Activo |
+| OTP de un solo uso | Campo `usado` en `codigos_otp` | ✅ Activo |
+| OTP con expiración | `fecha_expiracion` validado en SELECT | ✅ Activo |
+| Doble verificación de correo | MySQL + Velneo Cloud API | ✅ Activo |
+| Credenciales por correo cifrado | Nodemailer con plantillas HTML estéticas | ✅ `correo.service.js` |
 
 ---
 

@@ -53,18 +53,18 @@ Audita las sesiones JWT abiertas.
 
 ---
 
-## 🔄 Contrato de Comunicación (API de Control)
+## 🔄 Contrato de Comunicación (API de Control - Producción)
 
 ---
 
-### Endpoint A: Inicio de Sesión (`POST /autenticacion/login`)
-Valida credenciales básicas.
+### Endpoint A: Inicio de Sesión (`POST /autenticacion/iniciar-sesion`)
+Valida las credenciales de acceso y retorna metadatos con el estado de cambio obligatorio.
 
 #### 📥 Request
 ```json
 {
-  "correo": "william@empresa.com",
-  "contraseña": "MiContraseñaGen123!"
+  "identifier": "william@empresa.com",
+  "password": "MiContraseñaGen123!"
 }
 ```
 
@@ -72,34 +72,45 @@ Valida credenciales básicas.
 * **Acceso Estándar:**
   ```json
   {
-    "status": 200,
-    "token": "JWT_TOKEN...",
-    "actualizar_contraseña": 0,
-    "redirect": "/home"
+    "data": {
+      "user": {
+        "id": 4,
+        "nombres": "William",
+        "apellido_paterno": "Perez",
+        "correo": "william@empresa.com",
+        "mustChangePassword": false
+      }
+    },
+    "message": "Inicio de sesión exitoso"
   }
   ```
 * **Acceso Primer Ingreso:**
   ```json
   {
-    "status": 200,
-    "token": "JWT_TEMPORAL...",
-    "actualizar_contraseña": 1
+    "data": {
+      "user": {
+        "id": 4,
+        "nombres": "William",
+        "apellido_paterno": "Perez",
+        "correo": "william@empresa.com",
+        "mustChangePassword": true
+      }
+    },
+    "message": "Inicio de sesión exitoso"
   }
   ```
-  *(El frontend intercepta el flag `actualizar_contraseña` y activa el modo local de cambio obligatorio en el mismo panel)*
-* **Credenciales Incorrectas:**
+  *(El frontend Next.js detecta `mustChangePassword: true` y alterna el modo de vista local a `cambiarContrasena` sin redireccionar)*
+* **Credenciales Incorrectas (401):**
   ```json
   {
-    "status": 401,
-    "error": "Las credenciales ingresadas son incorrectas.",
-    "showForgotLink": true
+    "mensaje": "Credenciales incorrectas"
   }
   ```
 
 ---
 
-### Endpoint B: Comprobar Correo (`POST /autenticacion/recuperacion/verificar-correo`)
-Busca el correo para recuperar la contraseña y retorna el teléfono ocultando la mayor parte de sus dígitos.
+### Endpoint B: Iniciar Recuperación (`POST /autenticacion/recuperar/iniciar`)
+Valida la existencia del correo electrónico. Si la cuenta es nueva (primer ingreso), bifurca el flujo bloqueando la recuperación tradicional por teléfono y OTP.
 
 #### 📥 Request
 ```json
@@ -108,18 +119,45 @@ Busca el correo para recuperar la contraseña y retorna el teléfono ocultando l
 }
 ```
 
-#### 📤 Respuesta
+#### 📤 Respuestas posibles
+* **Usuario con Cuenta Activada:**
+  ```json
+  {
+    "mensaje": "Correo electrónico validado con éxito.",
+    "telefonoEnmascarado": "******53"
+  }
+  ```
+* **Usuario con Primer Ingreso Pendiente:**
+  ```json
+  {
+    "primerIngreso": true,
+    "mensaje": "Se envió un correo con tus credenciales cuando te registraste por primera vez. Si no las tienes, podemos reenviártelas."
+  }
+  ```
+
+---
+
+### Endpoint C: Reenviar Credenciales Iniciales (`POST /autenticacion/recuperar/reenviar-credenciales`)
+Genera una nueva contraseña temporal cifrada, mantiene el estatus de cambio obligatorio (`actualizar_contraseña = 1`) y reenvía el correo con credenciales iniciales.
+
+#### 📥 Request
 ```json
 {
-  "status": 200,
-  "telefonoEnmascarado": "******53"
+  "correo": "william@empresa.com"
+}
+```
+
+#### 📤 Respuesta OK
+```json
+{
+  "mensaje": "Credenciales reenviadas con éxito. Por favor revisa tu correo electrónico."
 }
 ```
 
 ---
 
-### Endpoint C: Solicitud de OTP (`POST /autenticacion/recuperacion/solicitar-otp`)
-Compara el teléfono completo con el de la BD. Si coincide, envía un OTP de tipo `'reset_contrasena'`.
+### Endpoint D: Confirmar Teléfono y Enviar OTP (`POST /autenticacion/recuperar/verificar-telefono`)
+Compara el teléfono ingresado con el registrado. Si coincide, genera y envía un OTP de 6 dígitos al correo electrónico del usuario.
 
 #### 📥 Request
 ```json
@@ -132,15 +170,14 @@ Compara el teléfono completo con el de la BD. Si coincide, envía un OTP de tip
 #### 📤 Respuesta OK
 ```json
 {
-  "status": 200,
-  "message": "Código OTP enviado a tu correo registrado."
+  "mensaje": "El código OTP ha sido enviado a tu correo electrónico."
 }
 ```
 
 ---
 
-### Endpoint D: Validación de OTP (`POST /autenticacion/recuperacion/verificar-otp`)
-Valida el código de 6 dígitos ingresado por el usuario.
+### Endpoint E: Validar OTP de Recuperación (`POST /autenticacion/recuperar/verificar-otp`)
+Comprueba la validez y expiración del código OTP y retorna el ID de usuario temporal para autorizar el cambio definitivo.
 
 #### 📥 Request
 ```json
@@ -153,55 +190,28 @@ Valida el código de 6 dígitos ingresado por el usuario.
 #### 📤 Respuesta OK
 ```json
 {
-  "status": 200,
-  "message": "Código verificado con éxito.",
-  "resetToken": "TEMP_RESET_SIGNATURE_TOKEN..."
+  "mensaje": "Código OTP verificado con éxito.",
+  "userId": 4
 }
 ```
 
 ---
 
-### Endpoint E: Cambio de Contraseña de Recuperación (`POST /autenticacion/recuperacion/confirmar-password`)
-Establece la contraseña nueva definitiva en MySQL.
+### Endpoint F: Confirmar Nueva Contraseña (`POST /autenticacion/cambiar-contrasena`)
+Registra la contraseña definitiva cifrada en la base de datos y desactiva la bandera de actualización forzada (`actualizar_contraseña = 0`).
 
 #### 📥 Request
 ```json
 {
-  "correo": "william@empresa.com",
-  "resetToken": "TEMP_RESET_SIGNATURE_TOKEN...",
-  "nuevaContraseña": "ClaveSeguraFinal1!",
-  "confirmarContraseña": "ClaveSeguraFinal1!"
+  "userId": 4,
+  "newPassword": "MiPasswordSeguro123!"
 }
 ```
 
 #### 📤 Respuesta OK
 ```json
 {
-  "status": 200,
-  "message": "Contraseña restablecida con éxito.",
-  "redirect": "/login"
-}
-```
-
----
-
-### Endpoint F: Cambio Obligatorio de Primer Ingreso (`POST /autenticacion/recuperacion/cambio-forzado`)
-*Ruta protegida bajo JWT.* Permite actualizar la clave inicial.
-
-#### 📥 Request
-```json
-{
-  "nuevaContraseña": "MiPasswordSeguro123!",
-  "confirmarContraseña": "MiPasswordSeguro123!"
-}
-```
-
-#### 📤 Respuesta OK
-```json
-{
-  "status": 200,
-  "message": "Contraseña definitiva guardada. ¡Bienvenido!",
-  "redirect": "/home"
+  "message": "Contraseña actualizada con éxito"
 }
 ```
 
@@ -231,9 +241,10 @@ Establece la contraseña nueva definitiva en MySQL.
 
 ## ➿ Guía de Experiencia del Usuario (Flujos UX)
 
-1. **Flujo de Acceso Regular:** El usuario inicia sesión en la tarjeta de login. Si sus credenciales coinciden y `actualizar_contraseña = 0`, el sistema lo redirige instantáneamente a su dashboard (**`/home`**). Si hay un fallo de clave, se congela la interfaz y se le muestra una alerta roja con el enlace de recuperación.
-2. **Flujo de Primer Ingreso Obligatorio:** Si la contraseña genérica inicial es correcta, la API retorna el flag `actualizar_contraseña = 1`. El frontend Next.js intercepta este estado y **transiciona de forma dinámica dentro del mismo panel de Login** (cambiando al modo `changePassword` local), evitando redireccionamientos físicos del navegador. Esta pantalla de cambio obligatorio cuenta con validación en tiempo real de robustez de contraseña. Al enviar y actualizar, el flag en la BD se desactiva y el usuario inicia sesión de forma automática hacia `/home`.
-3. **Flujo de Recuperación Modular:** El usuario pulsa en "¿Olvidaste tu contraseña?". El sistema le pide su correo y retorna su número enmascarado (`******53`). Al ingresar el teléfono completo idéntico al guardado, el servidor genera un OTP de 6 dígitos a su correo. El usuario introduce el código, se valida en línea e introduce su nueva clave. Al confirmar, el flujo transiciona con éxito a la pantalla de Login con un banner de éxito verde.
+1. **Flujo de Acceso Regular:** El usuario inicia sesión en la tarjeta de login. Si sus credenciales coinciden y `mustChangePassword` (de la base de datos `actualizar_contraseña`) es `false`, el sistema lo redirige instantáneamente a su dashboard (**`/index`**). Si hay un fallo de clave, se congela la interfaz y se le muestra una alerta roja con el enlace de recuperación.
+2. **Flujo de Primer Ingreso Obligatorio:** Si la contraseña genérica inicial es correcta, la API retorna el flag `mustChangePassword: true`. El frontend Next.js intercepta este estado y **transiciona de forma dinámica dentro del mismo panel de Login** (cambiando al modo `cambiarContrasena` local), evitando redireccionamientos físicos del navegador. Esta pantalla de cambio obligatorio cuenta con validación en tiempo real de robustez de contraseña. Al enviar y actualizar, el flag en la BD se desactiva y el usuario inicia sesión de forma automática hacia `/index`.
+3. **Flujo de Recuperación Modular:** El usuario pulsa en "¿Olvidaste tu contraseña?". El sistema le pide su correo. Si el usuario ya ha ingresado previamente (`actualizar_contraseña = 0`), la API valida el correo y retorna su número enmascarado (`******53`). Al ingresar el teléfono completo idéntico al guardado, el servidor genera un OTP de 6 dígitos a su correo. El usuario introduce el código, se valida en línea e introduce su nueva clave. Al confirmar, el flujo transiciona con éxito a la pantalla de Login con un banner de éxito verde.
+4. **Flujo de Primer Ingreso en Recuperación:** Si el usuario solicita recuperar su contraseña pero aún no ha realizado su primer ingreso (`actualizar_contraseña = 1`), el sistema bloquea el flujo tradicional de restablecimiento. Transiciona de forma modular al panel de **"Primer ingreso"**, informando al usuario que se enviaron sus credenciales iniciales al registrarse. Si no cuenta con ellas, se habilita el botón de **"Reenviar credenciales por correo"**, el cual genera una nueva clave temporal encriptada en la base de datos y le envía un nuevo correo electrónico de bienvenida automatizado.
 
 ---
 
@@ -251,81 +262,83 @@ sequenceDiagram
     participant C as 🟨 Servidor (Express)
     participant DU as 🟩 MySQL (usuarios)
     participant DO as 🟩 MySQL (codigos_otp)
-    participant DS as 🟩 MySQL (sesiones)
-    participant M as 🟨 Mailer (SMTP)
+    participant M as 📧 Mailer (SMTP)
 
     rect rgb(239, 246, 255)
         Note over U,DU: ── FLUJO A: INICIO DE SESIÓN (LOGIN) ──
-        U->>F: Ingresa correo y contraseña
-        F->>C: POST /autenticacion/login
-        C->>DU: SELECT * FROM usuarios WHERE correo = ?
+        U->>F: Ingresa correo (identifier) y contraseña (password)
+        F->>C: POST /autenticacion/iniciar-sesion
+        C->>DU: SELECT * FROM usuarios WHERE correo = ? OR usuario = ?
         DU-->>C: Datos del usuario (con hash Bcrypt)
         
         alt Credenciales incorrectas
-            C-->>F: 401 "Credenciales inválidas" (showForgotLink = true)
+            C-->>F: 401 {"mensaje": "Credenciales incorrectas"}
             F-->>U: Banner rojo + enlace "¿Olvidaste tu contraseña?"
         else Credenciales correctas
             C->>C: Compara Bcrypt hash de contraseña
             
             alt Primer ingreso (actualizar_contraseña = 1)
-                C->>C: Genera JWT temporal de actualización
-                C-->>F: 200 "Primer ingreso" + actualizar_contraseña: 1
-                F-->>U: Alterna el estado local a modo 'changePassword' (mismo panel)
+                C-->>F: 200 {"user": { ..., "mustChangePassword": true }}
+                F-->>U: Alterna el estado local a modo 'cambiarContrasena' (mismo panel)
             else Ingreso normal (actualizar_contraseña = 0)
-                C->>C: Genera JWT definitivo de sesión
-                C->>DS: INSERT INTO sesiones (id_usuario, hash_token, IP)
-                DS-->>C: Sesión registrada
-                C-->>F: 200 "Acceso exitoso" + redirect: "/home"
-                F-->>U: Almacena JWT y redirige a la consola principal
+                C-->>F: 200 {"user": { ..., "mustChangePassword": false }} (Establece cookie)
+                F-->>U: Redirige a consola principal (/index)
             end
         end
     end
 
     rect rgb(255, 251, 235)
-        Note over U,M: ── FLUJO B: RECUPERACIÓN POR TELÉFONO Y OTP ──
+        Note over U,M: ── FLUJO B: RECUPERACIÓN / PRIMER INGRESO ──
         U->>F: Hace clic en "¿Olvidaste tu contraseña?" e ingresa su correo
-        F->>C: POST /autenticacion/recuperacion/verificar-correo
-        C->>DU: SELECT telefono FROM usuarios WHERE correo = ?
-        DU-->>C: Teléfono completo (ej: 5512345653)
-        C->>C: Enmascara número (deja solo últimos dos dígitos: ******53)
-        C-->>F: 200 Teléfono enmascarado
-        F-->>U: Muestra "Confirma tu teléfono: ******53" y solicita número completo
+        F->>C: POST /autenticacion/recuperar/iniciar
+        C->>DU: SELECT * FROM usuarios WHERE correo = ?
+        DU-->>C: Registro de usuario completo
         
-        U->>F: Digita el número de teléfono completo
-        F->>C: POST /autenticacion/recuperacion/solicitar-otp
-        
-        alt Teléfono no coincide con la BD
-            C-->>F: 400 "El número de teléfono no coincide"
-            F-->>U: Muestra alerta roja de teléfono incorrecto
-        else Teléfono coincide perfectamente
-            C->>C: Genera OTP aleatorio de 6 dígitos
-            C->>DO: INSERT INTO codigos_otp (correo, codigo, tipo='reset_contrasena')
-            DO-->>C: Registro OTP exitoso
-            C->>M: Envía correo con OTP (SMTP)
-            M-->>U: Recibe email con los 6 dígitos
-            C-->>F: 200 "Código enviado"
-            F-->>U: Solicita ingresar el código de 6 dígitos en pantalla
+        alt Usuario con Primer Ingreso Pendiente (actualizar_contraseña = 1)
+            C-->>F: 200 {"primerIngreso": true, "mensaje": "..."}
+            F-->>U: Alterna a vista 'primerIngreso' con opción de reenviar credenciales
+            U->>F: Hace clic en "Reenviar credenciales por correo"
+            F->>C: POST /autenticacion/recuperar/reenviar-credenciales
+            C->>C: Genera nueva contraseña temporal aleatoria y la cifra
+            C->>DU: UPDATE usuarios SET contraseña = ? (actualizar_contraseña = 1)
+            C->>M: Envía correo con usuario y contraseña temporal (SMTP)
+            C-->>F: 200 {"mensaje": "Credenciales reenviadas con éxito"}
+            F-->>U: Muestra toast de éxito y regresa a vista de Login
+        else Usuario con Cuenta Activada (actualizar_contraseña = 0)
+            C->>C: Enmascara número (deja solo últimos dos dígitos: ******53)
+            C-->>F: 200 {"telefonoEnmascarado": "******53"}
+            F-->>U: Muestra "Confirma tu teléfono: ******53" y solicita número completo
+            
+            U->>F: Digita el número de teléfono completo
+            F->>C: POST /autenticacion/recuperar/verificar-telefono
+            
+            alt Teléfono no coincide con la BD
+                C-->>F: 400 {"mensaje": "El número de teléfono no coincide"}
+                F-->>U: Muestra alerta de teléfono incorrecto
+            else Teléfono coincide perfectamente
+                C->>C: Genera OTP aleatorio de 6 dígitos
+                C->>DO: INSERT INTO codigos_otp (correo, codigo, tipo='reset_contrasena')
+                C->>M: Envía correo con código OTP (SMTP)
+                C-->>F: 200 {"mensaje": "El código OTP ha sido enviado"}
+                F-->>U: Solicita ingresar el código de 6 dígitos
+            end
+            
+            U->>F: Ingresa el código OTP (ej: 748392)
+            F->>C: POST /autenticacion/recuperar/verificar-otp
+            C->>DO: SELECT * FROM codigos_otp WHERE correo=? AND codigo=? AND tipo='reset_contrasena'
+            DO-->>C: Registro de OTP (válido, usado = 0)
+            C->>DO: UPDATE codigos_otp SET usado = 1
+            C-->>F: 200 {"userId": 4}
+            F-->>U: Muestra formulario "Nueva Contraseña" y "Confirmar Contraseña"
+            
+            U->>F: Ingresa y confirma su nueva contraseña definitiva
+            F->>C: POST /autenticacion/cambiar-contrasena
+            C->>C: Valida e incrementa seguridad, cifra con Bcrypt
+            C->>DU: UPDATE usuarios SET contraseña = ?, actualizar_contraseña = 0 WHERE id = ?
+            C-->>F: 200 {"message": "Contraseña actualizada con éxito"}
+            F-->>U: Redirige a Login con toast de éxito
         end
-        
-        U->>F: Ingresa el código recibido (ej: 748392)
-        F->>C: POST /autenticacion/recuperacion/verificar-otp
-        C->>DO: SELECT * FROM codigos_otp WHERE correo=? AND codigo=? AND tipo='reset_contrasena'
-        DO-->>C: Registro de OTP (válido, no usado, no expirado)
-        C->>C: Genera token temporal de restablecimiento (resetToken)
-        C-->>F: 200 Código verificado + resetToken
-        F-->>U: Muestra formulario "Nueva Contraseña" y "Confirmar Contraseña"
-        
-        U->>F: Ingresa y confirma su nueva contraseña
-        F->>C: POST /autenticacion/recuperacion/confirmar-password
-        C->>C: Valida igualdad de contraseñas y encripta con Bcrypt
-        C->>DU: UPDATE usuarios SET contraseña = ? WHERE correo = ?
-        DU-->>C: Contraseña actualizada con éxito
-        C->>DO: UPDATE codigos_otp SET usado = 1 WHERE id = ?
-        DO-->>C: OTP invalidado para un solo uso
-        C-->>F: 200 "Contraseña restablecida" + redirect: "/login"
-        F-->>U: Redirige a Login con banner de éxito verde
     end
-```
 
 ---
 
@@ -423,17 +436,16 @@ Para asegurar la integridad, la confirmación de la contraseña recuperada ejecu
 
 ## 🔐 Matriz de Permisos del Módulo
 
-El backend restringe el consumo de endpoints conforme al alcance (*scope*) y estatus del token de sesión:
+El backend restringe el consumo de endpoints conforme al alcance (*scope*) y estatus de las rutas públicas y protegidas de autenticación:
 
-| Endpoint | Método | Autenticación Requerida | Rol Permitido | Alcance del Token |
+| Endpoint | Método | Autenticación Requerida | Rol Permitido | Alcance / Nota |
 | :--- | :---: | :---: | :--- | :--- |
-| `/autenticacion/login` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/autenticacion/recuperacion/verificar-correo` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/autenticacion/recuperacion/solicitar-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/autenticacion/recuperacion/verificar-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/autenticacion/recuperacion/confirmar-password` | `POST` | ❌ No (Público) | Cualquiera | `reset_token` firmado por backend |
-| `/autenticacion/recuperacion/cambio-forzado` | `POST` | 🟩 Sí (Transitorio) | Rol Genérico | `scope: "password_update_only"` |
-| `/autenticacion/logout` | `POST` | 🟩 Sí (Normal) | `admin`, `cliente`, `soporte` | `scope: "full_access"` |
+| `/autenticacion/iniciar-sesion` | `POST` | ❌ No (Público) | Cualquiera | Validación de credenciales |
+| `/autenticacion/recuperar/iniciar` | `POST` | ❌ No (Público) | Cualquiera | Valida correo y bifurca primer ingreso |
+| `/autenticacion/recuperar/reenviar-credenciales` | `POST` | ❌ No (Público) | Cualquiera | Reenvía credenciales para primer ingreso |
+| `/autenticacion/recuperar/verificar-telefono` | `POST` | ❌ No (Público) | Cualquiera | Verifica teléfono y envía OTP |
+| `/autenticacion/recuperar/verificar-otp` | `POST` | ❌ No (Público) | Cualquiera | Valida OTP de 6 dígitos |
+| `/autenticacion/cambiar-contrasena` | `POST` | ❌ No (Público) | Cualquiera / Autenticado | Asienta contraseña definitiva |
 
 ---
 
@@ -442,14 +454,11 @@ El backend restringe el consumo de endpoints conforme al alcance (*scope*) y est
 A continuación se presenta la lista detallada de tareas ordenadas por capa para dar inicio al desarrollo:
 
 ### 🟨 Capa Backend (Node.js/Express)
-- [ ] Configurar las rutas en `/src/modules/auth/auth.routes.js`.
-- [ ] Definir schemas de validación Zod (`auth.schema.js`) para Login, Teléfono y Nuevas Claves.
-- [ ] Implementar consultas y métodos transaccionales en `auth.repository.js`:
-  - `obtenerUltimoOtp` (comprobaciones de cooldown).
-  - `actualizarContraseñaTransaccional` (con control de `COMMIT`/`ROLLBACK`).
-- [ ] Diseñar middleware de validación de alcance de JWT (`scope: "password_update_only"`).
-- [ ] Programar lógica del controlador `auth.controller.js` mapeando respuestas y HTTP Status.
-- [ ] Registrar la sesión en la tabla `sesiones` e implementar el endpoint de `logout` con invalidación física.
+- [x] Configurar las rutas de autenticación en `/src/modules/auth/auth.routes.js`.
+- [x] Definir schemas de validación Zod (`auth.schema.js`) para Registro, Login, Teléfono y Nuevas Claves.
+- [x] Implementar consultas y métodos transaccionales en `auth.repository.js` y `auth.service.js` (incluyendo control de OTP, expiraciones y cooldown).
+- [x] Programar lógica del controlador `auth.controller.js` mapeando respuestas limpias con estatus HTTP adecuados.
+- [x] Implementar regla de negocio de primer ingreso y endpoint de reenvío automático de credenciales.
 
 ### 🟦 Capa Frontend (Next.js/React)
 - [x] Crear la página de Login en `app/login/page.tsx` conectando el formulario con `react-hook-form`.
@@ -462,6 +471,7 @@ A continuación se presenta la lista detallada de tareas ordenadas por capa para
   - [x] Paso 2: Validación de número telefónico mostrando enmascarado dinámico `******53`.
   - [x] Paso 3: Entrada y verificación de código OTP de 6 dígitos.
   - [x] Paso 4: Formulario de contraseña nueva con confirmación.
+  - [x] Paso 5: Vista de Primer Ingreso con botón para solicitar reenvío de credenciales iniciales.
 - [x] Integrar alertas interactivas utilizando `react-hot-toast` para notificaciones rápidas de éxito/error.
 - [x] Crear archivos de soporte estructural: `modules/login/login.schema.ts` y `modules/login/login.hooks.ts`.
 

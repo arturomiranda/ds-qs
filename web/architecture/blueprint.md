@@ -140,7 +140,7 @@ Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen e
 | `typescript 5` + `tailwindcss 4` | Tipado y estilos |
 | `lucide-react` | Iconos (Rocket, Shield, BarChart3, etc.) |
 
-> ⚠️ **Detección de cambio:** Las librerías `jsonwebtoken`, `bcrypt`, `nodemailer`, `zod`, `@tanstack/react-query`, `react-hook-form` y `jspdf` están en el Blueprint de diseño pero **aún no están instaladas en `package.json`**. Se instalarán cuando se construyan los módulos correspondientes.
+> ⚠️ **Detección de cambio:** Las librerías `bcryptjs`, `nodemailer`, `zod` (en backend/package.json), `@tanstack/react-query`, `react-hook-form`, `react-hot-toast`, `js-cookie` y `zod` (en frontend/package.json) **ya se encuentran 100% instaladas y configuradas**. La única librería del Blueprint de diseño pendiente de instalación es `jspdf` (para generación de reportes).
 
 ---
 
@@ -170,9 +170,9 @@ graph TD
 ```text
 backend/
 ├── app.js              ✅ Orquestador (CORS, Helmet, Morgan, Rutas)
-├── routes.js           ✅ Router principal (vacío — esperando módulos)
+├── routes.js           ✅ Router principal (Enruta /autenticacion)
 ├── server.js           ✅ Punto de entrada HTTP
-├── package.json        ✅ Express 5 + pnpm
+├── package.json        ✅ Express 5 + pnpm (bcryptjs, nodemailer, zod instalados)
 ├── src/
 │   ├── config/
 │   │   ├── database.js       ✅ Pool MySQL (10 conexiones, async/await)
@@ -193,24 +193,34 @@ backend/
 │   │   ├── error.middleware.js      ✅ Manejo global de errores
 │   │   ├── rateLimit.middleware.js  ✅ 100 req / 15 min
 │   │   └── security.middleware.js  ✅ Helmet
-│   ├── modules/                     ⏳ VACÍO — Próximo a desarrollar
+│   ├── modules/
+│   │   └── auth/                    ✅ Módulo de Autenticación (Registro, Login, Recuperación)
+│   │       ├── auth.controller.js
+│   │       ├── auth.repository.js
+│   │       ├── auth.routes.js
+│   │       ├── auth.schema.js
+│   │       └── auth.service.js
 │   └── services/
 │       ├── Velneo.service.js        ✅ Ciclo de vida tenant en Velneo Cloud
-│       └── Mail.service.js         ✅ Motor de correos
+│       └── correo.service.js       ✅ Motor de correos (Nodemailer SMTP)
 ```
 
 #### 📂 Frontend (`/frontend`)
 ```text
 frontend/
 ├── app/
-│   ├── layout.tsx       ✅ Layout raíz con fuentes y metadatos
+│   ├── globals.css      ✅ Estilos y tokens de diseño
+│   ├── layout.tsx       ✅ Layout raíz con fuentes, QueryProvider y Toaster
 │   ├── page.tsx         ✅ Landing Page — Hero + Features + Modal
-│   └── login/
-│       └── page.tsx     ✅ Página de Login
+│   ├── login/
+│   │   └── page.tsx     ✅ Página de Login
+│   └── registro/
+│       └── page.tsx     ✅ Página de Registro (Formulario, OTP y Loader integrado)
 ├── components/          ⏳ VACÍO — Componentes UI por crear
 ├── modules/             ⏳ VACÍO — Módulos de dominio por crear
 ├── hooks/               ⏳ VACÍO
-├── providers/           ⏳ VACÍO — Auth, Query, Theme providers
+├── providers/
+│   └── QueryProvider.tsx ✅ Proveedor de TanStack React Query Client
 └── types/               ⏳ VACÍO
 ```
 
@@ -409,13 +419,19 @@ classDiagram
 
 ## 🚀 Próximos Pasos (Roadmap por Sprints)
 
-### Sprint 1 — Autenticación Completa *(Siguiente)*
-- [ ] Instalar dependencias: `jsonwebtoken`, `bcrypt`, `zod`
-- [ ] Crear `src/modules/auth/` con controllers, services, routes y schemas
-- [ ] Implementar `POST /register/init` y `/register/verify`
-- [ ] Implementar `POST /login` y `/logout` con JWT en cookie `HttpOnly`
-- [ ] Crear `app/register/page.tsx` en el frontend (formulario + modal OTP)
+### Sprint 1 — Autenticación: Registro de Usuarios *(Listo)*
+- [x] Instalar dependencias base (`bcryptjs`, `nodemailer`, `zod`, `@tanstack/react-query`, `react-hook-form`, `react-hot-toast`, `js-cookie`)
+- [x] Crear `src/modules/auth/` con controllers, services, routes y schemas en backend
+- [x] Implementar endpoints `POST /autenticacion/registro/inicial` y `POST /autenticacion/registro/verificar`
+- [x] Crear `app/registro/page.tsx` en el frontend con formulario premium, OTP y loading
+- [x] Configurar `providers/QueryProvider.tsx` para TanStack React Query
+
+### Sprint 1.5 — Autenticación: Acceso y Recuperación *(Siguiente)*
+- [ ] Implementar endpoints `POST /autenticacion/login` y `POST /autenticacion/logout` con JWT en cookie `HttpOnly`
+- [ ] Crear página de Login en `app/login/page.tsx` conectada a react-hook-form
+- [ ] Implementar flujo de Recuperación de contraseña por Teléfono enmascarado y OTP
 - [ ] Configurar `providers/AuthContext` para gestión de sesión global
+- [ ] Crear formulario de cambio obligatorio de contraseña en `app/reset-password-force/page.tsx`
 
 ### Sprint 2 — Inyector y Dashboard Base
 - [ ] Implementar el Inyector Dinámico como middleware de proxy a vServers

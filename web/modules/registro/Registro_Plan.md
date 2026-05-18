@@ -27,8 +27,8 @@ El flujo se divide en **tres fases visuales (2 secuenciales de acción)**:
 
 | Paso | Qué pasa en el mundo real | Endpoint |
 | :--: | :--- | :--- |
-| **1** | El usuario llena un formulario con sus datos y el sistema verifica de forma local en la base de datos MySQL que no exista el correo | `POST /api/auth/register/init` |
-| **2** | El usuario recibe un código de 6 dígitos en su correo y lo confirma en línea dentro de la misma tarjeta con temporizador de cooldown visible | `POST /api/auth/register/verify` |
+| **1** | El usuario llena un formulario con sus datos y el sistema verifica de forma local en la base de datos MySQL que no exista el correo | `POST /autenticacion/registro/inicial` |
+| **2** | El usuario recibe un código de 6 dígitos en su correo y lo confirma en línea dentro de la misma tarjeta con temporizador de cooldown visible | `POST /autenticacion/registro/verificar` |
 | **3** | Aprovisionamiento: Pantalla de carga mientras se prepara la infraestructura y se configuran recursos. | *(interno, disparado al verificar)* |
 | **Auto** | El sistema crea el usuario, genera sus credenciales y envía la bienvenida | *(backend)* |
 
@@ -103,7 +103,7 @@ El flujo se divide en **tres fases visuales (2 secuenciales de acción)**:
 
 ---
 
-### Endpoint 1: `POST /api/auth/register/init`
+### Endpoint 1: `POST /autenticacion/registro/inicial`
 **¿Qué hace?** → Valida el formulario, verifica que el correo no exista en MySQL, comprueba si no está bajo el límite de cooldown de 3 minutos, y envía el código OTP mediante Nodemailer SMTP real.
 
 #### 📥 Request (lo que envía el formulario)
@@ -132,7 +132,7 @@ El flujo se divide en **tres fases visuales (2 secuenciales de acción)**:
 
 ---
 
-### Endpoint 2: `POST /api/auth/register/verify`
+### Endpoint 2: `POST /autenticacion/registro/verificar`
 **¿Qué hace?** → Valida el OTP, crea el usuario de manera transaccional, genera sus credenciales y envía el correo de bienvenida.
 
 #### 📥 Request (lo que envía el modal OTP)
@@ -176,8 +176,8 @@ Cuando el código es válido, el backend ejecuta automáticamente y en orden:
 
 | Política | ¿Cómo funciona? | Librería |
 | :--- | :--- | :--- |
-| **Rate Limiting (IP)** | Máximo 3 intentos por hora por IP en `/register/init` y `/register/verify` | `express-rate-limit` |
-| **3-Minute OTP Cooldown** | Evita la generación masiva de OTP para una cuenta. MySQL audita la última fecha de creación (`creado_en`). Si transcurren menos de 180 segundos, rechaza con HTTP 429 indicando el tiempo exacto restante. | MySQL + Backend logic |
+| **Rate Limiting (IP)** | Máximo 5 intentos por hora por IP en `/registro/inicial` y `/registro/verificar` | `express-rate-limit` |
+| **3-Minute OTP Cooldown** | Evita la generación masiva de OTP para una cuenta. MySQL audita la última fecha de creación (`fecha_creacion`). Si transcurren menos de 180 segundos, rechaza con HTTP 429 indicando el tiempo exacto restante. | MySQL + Backend logic |
 | **Validación de datos** | Zod valida cada campo en frontend y re-valida en backend | `zod` |
 | **Contraseña encriptada** | Bcrypt con 12 rondas transforma la contraseña en un hash irrecuperable | `bcryptjs` |
 | **OTP de un solo uso** | El campo `usado` en `codigos_otp` impide reutilización | MySQL |
@@ -222,8 +222,8 @@ pnpm add @tanstack/react-query react-hook-form lucide-react js-cookie react-hot-
 | Acción del usuario | ¿Qué ocurre en pantalla? | ¿Qué ocurre en el servidor? |
 | :--- | :--- | :--- |
 | Escribe en el campo **Correo** | El borde se vuelve azul (campo activo). Al salir, Zod valida el formato y se muestra el error si es inválido. | Nada aún — la validación de formato es local (frontend). |
-| Hace clic en **Registrar** | Zod valida todos los campos. Si hay errores, los campos inválidos se marcan en rojo con un mensaje. Si todo está bien, aparece un spinner sobre el botón. | `POST /api/auth/register/init` → verifica que el correo no exista en MySQL, comprueba que no tenga un cooldown activo → genera OTP → envía correo. |
-| El servidor responde OK | El formulario se oculta y aparece la vista **Verifica tu correo** en el mismo panel. El temporizador del cooldown de 3 minutos empieza a correr. | OTP guardado en `codigos_otp` con `fecha_expiracion` and `fecha_creacion`. |
+| Hace clic en **Registrar** | Zod valida todos los campos. Si hay errores, los campos inválidos se marcan en rojo con un mensaje. Si todo está bien, aparece un spinner sobre el botón. | `POST /autenticacion/registro/inicial` → verifica que el correo no exista en MySQL, comprueba que no tenga un cooldown activo → genera OTP → envía correo. |
+| El servidor responde OK | El formulario se oculta y aparece la vista **Verifica tu correo** en el mismo panel. El temporizador del cooldown de 3 minutos empieza a correr. | OTP guardado en `codigos_otp` con `fecha_expiracion` y `fecha_creacion`. |
 | El servidor responde error `409` | Aparece un banner rojo debajo del campo Correo: *"Este correo ya está registrado en el sistema. ¿Olvidaste tu contraseña?"* | Ningún OTP fue generado. |
 | El servidor responde error `429` (IP) | El botón se deshabilita y muestra: *"Demasiados intentos. Espera 1 hora e intenta de nuevo."* | Rate limit de `express-rate-limit` activo. |
 
@@ -232,10 +232,10 @@ pnpm add @tanstack/react-query react-hook-form lucide-react js-cookie react-hot-
 | Acción del usuario | ¿Qué ocurre en pantalla? | ¿Qué ocurre en el servidor? |
 | :--- | :--- | :--- |
 | Escribe en los inputs | Ingresa el código OTP. El botón de Confirmación de Registro se habilita. | Nada aún. |
-| Cooldown en marcha | El botón **Reenviar código** se muestra deshabilitado con un indicador pulsante azul (`animate-pulse`) y una cuenta regresiva dinámica (ej: `Reenviar código en 2:45`). | Si el usuario intenta burlar el frontend e invoca el endpoint `/register/init` antes de tiempo, el backend responde HTTP 429 con el mensaje de espera detallado. |
+| Cooldown en marcha | El botón **Reenviar código** se muestra deshabilitado con un indicador pulsante azul (`animate-pulse`) y una cuenta regresiva dinámica (ej: `Reenviar código en 2:45`). | Si el usuario intenta burlar el frontend e invoca el endpoint `/registro/inicial` antes de tiempo, el backend responde HTTP 429 con el mensaje de espera detallado. |
 | Fin del cooldown | Al llegar a `0:00`, el temporizador desaparece y el botón se habilita mostrando: `¿No recibiste el código? Reenviar`. | Listo para aceptar una nueva solicitud legítima de generación de OTP. |
 | Sincronización automática | Si el usuario recarga la página a mitad del flujo o falla la petición del OTP, al reenviar antes de tiempo la respuesta `429` del backend es parseada mediante expresiones regulares para restaurar el temporizador del frontend. | Verifica el timestamp real de creación en la base de datos. |
-| Hace clic en **Confirmar Registro** | La tarjeta cambia a Estado 3 (Aprovisionamiento) con un cohete y un spinner indicando que se está configurando el entorno. | `POST /api/auth/register/verify` → valida OTP en `codigos_otp` → si correcto: crea usuario, genera credenciales, envía bienvenida. |
+| Hace clic en **Confirmar Registro** | La tarjeta cambia a Estado 3 (Aprovisionamiento) con un cohete y un spinner indicando que se está configurando el entorno. | `POST /autenticacion/registro/verificar` → valida OTP en `codigos_otp` → si correcto: crea usuario, genera credenciales, envía bienvenida. |
 | Verificación exitosa | Se muestra el banner *"¡Registro exitoso! Revisa tu correo con tus credenciales."* y redirige a `/login`. | `codigos_otp.usado = 1`. Nuevo registro en `usuarios` con `verificado = 1`. Correo de bienvenida disparado. |
 | Código incorrecto/expirado | Mensajes de validación de error en color rojo en la parte inferior del input. | Backend rechaza el código por fecha o coincidencia. |
 
@@ -259,7 +259,7 @@ sequenceDiagram
     participant F as 🟦 Frontend<br/>(Next.js)
     participant V as 🟦 Zod<br/>(Validador)
     participant RL as 🟨 RateLimit<br/>(express-rate-limit)
-    participant C as 🟨 Controller<br/>/register/init
+    participant C as 🟨 Controller<br/>/registro/inicial
     participant MS as 🟨 MySQL<br/>Service
     participant OTP as 🟨 OTP<br/>Generator
     participant M as 🟨 Mail<br/>Service
@@ -280,8 +280,8 @@ sequenceDiagram
 
     rect rgb(255, 251, 235)
         Note over F,RL: ── SEGURIDAD: Rate Limit ──
-        F->>RL: POST /api/auth/register/init
-        alt Más de 3 intentos/hora
+        F->>RL: POST /autenticacion/registro/inicial
+        alt Más de 5 intentos/hora
             RL-->>F: 429 Too Many Requests
             F-->>U: "Límite alcanzado. Espera 1 hora."
         else Dentro del límite
@@ -306,7 +306,7 @@ sequenceDiagram
     rect rgb(255, 251, 235)
         Note over C,DB: ── COOLDOWN DE 3 MINUTOS ──
         C->>MS: Obtener último OTP (obtenerUltimoOtp)
-        MS->>DB: SELECT * FROM codigos_otp WHERE correo = ? ORDER BY creado_en DESC
+        MS->>DB: SELECT * FROM codigos_otp WHERE correo = ? ORDER BY fecha_creacion DESC
         DB-->>MS: Registro del último OTP
         alt OTP solicitado hace menos de 3 minutos
             MS-->>C: Cooldown activo
@@ -332,8 +332,8 @@ sequenceDiagram
     rect rgb(239, 246, 255)
         Note over U,F: ── PASO 2: Verificación OTP ──
         U->>F: Ingresa los 6 dígitos en el modal
-        F->>RL: POST /api/auth/register/verify
-        RL->>C: Controller /register/verify
+        F->>RL: POST /autenticacion/registro/verificar
+        RL->>C: Controller /registro/verificar
         C->>DB: SELECT * FROM codigos_otp WHERE correo=? AND codigo=? AND tipo='registro'
         DB-->>C: Registro encontrado
     end
@@ -503,7 +503,7 @@ flowchart LR
 
 ## 🔴 Catálogo de Errores — ¿Qué puede salir mal?
 
-### Endpoint 1: `POST /api/auth/register/init`
+### Endpoint 1: `POST /autenticacion/registro/inicial`
 
 | # | Escenario de error | HTTP | Mensaje al usuario | ¿Qué hace el sistema internamente? | Clase de error |
 | :--: | :--- | :---: | :--- | :--- | :--- |
@@ -512,11 +512,11 @@ flowchart LR
 | 3 | Cooldown activo de 3 minutos | `429` | *"Por favor, espera X minutos y Y segundos antes de solicitar otro código."* | El backend obtiene el último OTP creado para ese email. Si la diferencia es menor a 180s, aborta la operación arrojando HTTP 429 con el temporizador restante dinámico. | `AppError` (Cooldown) |
 | 4 | Fallo al enviar el correo OTP (Nodemailer SMTP) | `500` | *"No pudimos enviar el código de verificación. Intenta de nuevo."* | 🔴 **Rollback:** El OTP insertado se **elimina físicamente** de `codigos_otp` para evitar desincronizaciones en la BD. | `AppError` + DELETE OTP |
 | 5 | Error de conexión a MySQL | `503` | *"Servicio no disponible temporalmente."* | El pool de conexiones lanza excepción. `DatabaseError` capturado por el middleware global. | `DatabaseError` |
-| 6 | Más de 3 intentos en 1 hora por IP | `429` | *"Demasiados intentos. Espera 1 hora e intenta de nuevo."* | `express-rate-limit` bloquea por IP antes de llegar al controller. | Middleware |
+| 6 | Más de 5 intentos en 1 hora por IP | `429` | *"Demasiados intentos. Espera 1 hora e intenta de nuevo."* | `express-rate-limit` bloquea por IP antes de llegar al controller. | Middleware |
 
 ---
 
-### Endpoint 2: `POST /api/auth/register/verify`
+### Endpoint 2: `POST /autenticacion/registro/verificar`
 
 | # | Escenario de error | HTTP | Mensaje al usuario | ¿Qué hace el sistema internamente? | Clase de error |
 | :--: | :--- | :---: | :--- | :--- | :--- |
@@ -530,11 +530,11 @@ flowchart LR
 
 ## 🔄 Estrategia de Rollback — ¿Cómo protegemos la BD?
 
-### Paso 1: `/register/init` (Envío de OTP)
+### Paso 1: `/registro/inicial` (Envío de OTP)
 
 ```mermaid
 flowchart TD
-    A["POST /register/init<br/>Recibe datos del formulario"] --> B{"¿Validación<br/>Zod OK?"}
+    A["POST /registro/inicial<br/>Recibe datos del formulario"] --> B{"¿Validación<br/>Zod OK?"}
     B -->|"❌ No"| B1["422 — Responde error<br/>Sin tocar la BD"]
     B -->|"✅ Sí"| C{"¿Correo libre<br/>en MySQL?"}
     C -->|"❌ Existe"| C1["409 — Responde error<br/>Sin tocar la BD"]
@@ -552,11 +552,11 @@ flowchart TD
     style G fill:#F0FDF4,stroke:#6EE7B7
 ```
 
-### Paso 2: `/register/verify` (Creación de Usuario)
+### Paso 2: `/registro/verificar` (Creación de Usuario)
 
 ```mermaid
 flowchart TD
-    A["POST /register/verify<br/>Recibe correo + código"] --> B{"¿OTP válido,<br/>no usado,<br/>no expirado?"}
+    A["POST /registro/verificar<br/>Recibe correo + código"] --> B{"¿OTP válido,<br/>no usado,<br/>no expirado?"}
     B -->|"❌ No"| B1["400 — Responde error específico<br/>Sin tocar la BD de usuarios"]
     B -->|"✅ Sí"| C["UPDATE codigos_otp<br/>SET usado=1"]
     C --> D["INSERT usuarios<br/>(con hash Bcrypt)"]
@@ -642,9 +642,9 @@ flowchart LR
 | :--- | :--- |
 | **Nombre** | Módulo de Registro de Usuarios |
 | **Proyecto** | Datta ERP — SaaS Multi-tenant |
-| **Sprint** | Sprint 1 — Autenticación |
+| **Sprint** | Sprint 1 — Autenticación (Registro) |
 | **Estado** | 🚀 100% Implementado y Validado |
-| **Endpoints** | `POST /auth/register/init` · `POST /auth/register/verify` |
+| **Endpoints** | `POST /autenticacion/registro/inicial` · `POST /autenticacion/registro/verificar` |
 | **Tablas afectadas** | `usuarios` · `codigos_otp` · `roles` |
 | **Dependencias Clave** | `zod` · `bcryptjs` · `nodemailer` · `express-rate-limit` (backend) · `react-hook-form` · `@tanstack/react-query` (frontend) |
 | **Documentado por** | Antigravity — SaaS Module Planner Skill |
@@ -656,8 +656,8 @@ flowchart LR
 
 | Endpoint | Método | Auth | Rate Limit & Cooldown | Éxito | Error principal |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| `/auth/register/init` | `POST` | ❌ Público | 3/hora por IP + Cooldown 3 min | `200` | `409` correo dup · `429` Cooldown activo · `422` Zod |
-| `/auth/register/verify` | `POST` | ❌ Público | 3/hora por IP | `201` | `400` OTP inv/exp/usado · `409` INSERT dup |
+| `/autenticacion/registro/inicial` | `POST` | ❌ Público | 5/hora por IP + Cooldown 3 min | `200` | `409` correo dup · `429` Cooldown activo · `422` Zod |
+| `/autenticacion/registro/verificar` | `POST` | ❌ Público | 5/hora por IP | `201` | `400` OTP inv/exp/usado · `409` INSERT dup |
 
 ---
 
@@ -704,11 +704,11 @@ backend/src/
 ├── services/
 │   └── correo.service.js   → Envío de correos reales (OTP y bienvenida)
 └── modules/auth/
-    ├── auth.routes.js      → Rutas POST /register/init y /register/verify
+    ├── auth.routes.js      → Rutas POST /registro/inicial y /registro/verificar (bajo prefijo /autenticacion)
     ├── auth.controller.js  → Controlador que mapea payloads y maneja errores
     ├── auth.service.js     → Lógica de negocio (cooldown 3min, Bcrypt, hash, nodemailer)
     ├── auth.schema.js      → Esquemas de validación Zod
-    └── auth.repository.js  → DAL para consultas SQL en MySQL (obtenerUltimoOtp, etc.)
+    └── auth.repository.js  → DAL para consultas SQL en MySQL (obtenerUltimoOtp, etc. con fecha_creacion)
 
 frontend/
 ├── app/

@@ -57,7 +57,7 @@ Audita las sesiones JWT abiertas.
 
 ---
 
-### Endpoint A: Inicio de Sesión (`POST /api/auth/login`)
+### Endpoint A: Inicio de Sesión (`POST /autenticacion/login`)
 Valida credenciales básicas.
 
 #### 📥 Request
@@ -98,7 +98,7 @@ Valida credenciales básicas.
 
 ---
 
-### Endpoint B: Comprobar Correo (`POST /api/auth/reset-password/check-email`)
+### Endpoint B: Comprobar Correo (`POST /autenticacion/recuperacion/verificar-correo`)
 Busca el correo para recuperar la contraseña y retorna el teléfono ocultando la mayor parte de sus dígitos.
 
 #### 📥 Request
@@ -118,7 +118,7 @@ Busca el correo para recuperar la contraseña y retorna el teléfono ocultando l
 
 ---
 
-### Endpoint C: Solicitud de OTP (`POST /api/auth/reset-password/request-otp`)
+### Endpoint C: Solicitud de OTP (`POST /autenticacion/recuperacion/solicitar-otp`)
 Compara el teléfono completo con el de la BD. Si coincide, envía un OTP de tipo `'reset_contrasena'`.
 
 #### 📥 Request
@@ -139,7 +139,7 @@ Compara el teléfono completo con el de la BD. Si coincide, envía un OTP de tip
 
 ---
 
-### Endpoint D: Validación de OTP (`POST /api/auth/reset-password/verify-otp`)
+### Endpoint D: Validación de OTP (`POST /autenticacion/recuperacion/verificar-otp`)
 Valida el código de 6 dígitos ingresado por el usuario.
 
 #### 📥 Request
@@ -161,7 +161,7 @@ Valida el código de 6 dígitos ingresado por el usuario.
 
 ---
 
-### Endpoint E: Cambio de Contraseña de Recuperación (`POST /api/auth/reset-password/confirm`)
+### Endpoint E: Cambio de Contraseña de Recuperación (`POST /autenticacion/recuperacion/confirmar-password`)
 Establece la contraseña nueva definitiva en MySQL.
 
 #### 📥 Request
@@ -185,7 +185,7 @@ Establece la contraseña nueva definitiva en MySQL.
 
 ---
 
-### Endpoint F: Cambio Obligatorio de Primer Ingreso (`POST /api/auth/reset-password/force`)
+### Endpoint F: Cambio Obligatorio de Primer Ingreso (`POST /autenticacion/recuperacion/cambio-forzado`)
 *Ruta protegida bajo JWT.* Permite actualizar la clave inicial.
 
 #### 📥 Request
@@ -243,7 +243,7 @@ sequenceDiagram
     rect rgb(239, 246, 255)
         Note over U,DU: ── FLUJO A: INICIO DE SESIÓN (LOGIN) ──
         U->>F: Ingresa correo y contraseña
-        F->>C: POST /api/auth/login
+        F->>C: POST /autenticacion/login
         C->>DU: SELECT * FROM usuarios WHERE correo = ?
         DU-->>C: Datos del usuario (con hash Bcrypt)
         
@@ -270,7 +270,7 @@ sequenceDiagram
     rect rgb(255, 251, 235)
         Note over U,M: ── FLUJO B: RECUPERACIÓN POR TELÉFONO Y OTP ──
         U->>F: Hace clic en "¿Olvidaste tu contraseña?" e ingresa su correo
-        F->>C: POST /api/auth/reset-password/check-email
+        F->>C: POST /autenticacion/recuperacion/verificar-correo
         C->>DU: SELECT telefono FROM usuarios WHERE correo = ?
         DU-->>C: Teléfono completo (ej: 5512345653)
         C->>C: Enmascara número (deja solo últimos dos dígitos: ******53)
@@ -278,7 +278,7 @@ sequenceDiagram
         F-->>U: Muestra "Confirma tu teléfono: ******53" y solicita número completo
         
         U->>F: Digita el número de teléfono completo
-        F->>C: POST /api/auth/reset-password/request-otp
+        F->>C: POST /autenticacion/recuperacion/solicitar-otp
         
         alt Teléfono no coincide con la BD
             C-->>F: 400 "El número de teléfono no coincide"
@@ -294,7 +294,7 @@ sequenceDiagram
         end
         
         U->>F: Ingresa el código recibido (ej: 748392)
-        F->>C: POST /api/auth/reset-password/verify-otp
+        F->>C: POST /autenticacion/recuperacion/verificar-otp
         C->>DO: SELECT * FROM codigos_otp WHERE correo=? AND codigo=? AND tipo='reset_contrasena'
         DO-->>C: Registro de OTP (válido, no usado, no expirado)
         C->>C: Genera token temporal de restablecimiento (resetToken)
@@ -302,7 +302,7 @@ sequenceDiagram
         F-->>U: Muestra formulario "Nueva Contraseña" y "Confirmar Contraseña"
         
         U->>F: Ingresa y confirma su nueva contraseña
-        F->>C: POST /api/auth/reset-password/confirm
+        F->>C: POST /autenticacion/recuperacion/confirmar-password
         C->>C: Valida igualdad de contraseñas y encripta con Bcrypt
         C->>DU: UPDATE usuarios SET contraseña = ? WHERE correo = ?
         DU-->>C: Contraseña actualizada con éxito
@@ -413,13 +413,13 @@ El backend restringe el consumo de endpoints conforme al alcance (*scope*) y est
 
 | Endpoint | Método | Autenticación Requerida | Rol Permitido | Alcance del Token |
 | :--- | :---: | :---: | :--- | :--- |
-| `/api/auth/login` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/api/auth/reset-password/check-email` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/api/auth/reset-password/request-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/api/auth/reset-password/verify-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
-| `/api/auth/reset-password/confirm` | `POST` | ❌ No (Público) | Cualquiera | `reset_token` firmado por backend |
-| `/api/auth/reset-password/force` | `POST` | 🟩 Sí (Transitorio) | Rol Genérico | `scope: "password_update_only"` |
-| `/api/auth/logout` | `POST` | 🟩 Sí (Normal) | `admin`, `cliente`, `soporte` | `scope: "full_access"` |
+| `/autenticacion/login` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
+| `/autenticacion/recuperacion/verificar-correo` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
+| `/autenticacion/recuperacion/solicitar-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
+| `/autenticacion/recuperacion/verificar-otp` | `POST` | ❌ No (Público) | Cualquiera | Sin restricción |
+| `/autenticacion/recuperacion/confirmar-password` | `POST` | ❌ No (Público) | Cualquiera | `reset_token` firmado por backend |
+| `/autenticacion/recuperacion/cambio-forzado` | `POST` | 🟩 Sí (Transitorio) | Rol Genérico | `scope: "password_update_only"` |
+| `/autenticacion/logout` | `POST` | 🟩 Sí (Normal) | `admin`, `cliente`, `soporte` | `scope: "full_access"` |
 
 ---
 

@@ -102,7 +102,7 @@ Recupera el registro de código más reciente ordenado en orden descendente. Uti
 ```javascript
 async obtenerUltimoOtp(correo) {
   const [filas] = await pool.query(
-    "SELECT * FROM codigos_otp WHERE correo = ? AND tipo = 'registro' ORDER BY creado_en DESC LIMIT 1",
+    "SELECT * FROM codigos_otp WHERE correo = ? AND tipo = 'registro' ORDER BY fecha_creacion DESC LIMIT 1",
     [correo]
   );
   return filas[0] || null;
@@ -124,7 +124,7 @@ async buscarOtpValido(correo, codigo) {
 ### D. Cambios de Estado y Rollback Transaccional
 * **`marcarOtpComoUsado(id, conexion)`**: Setea `usado = 1` una vez validado. Permite pasar una conexión de base de datos activa para actuar dentro de una transacción ácida (`COMMIT`/`ROLLBACK`).
 * **`revertirOtpUsado(id, conexion)`**: Setea `usado = 0` si la inserción del usuario o aprovisionamiento falla tras haber validado el código.
-* **`eliminarOtp(id)`**: Remueve físicamente el registro OTP. Utilizado de manera preventiva en `/register/init` si el servidor SMTP (Nodemailer) falla al enviar el correo, evitando guardar registros huérfanos imposibles de verificar.
+* **`eliminarOtp(id)`**: Remueve físicamente el registro OTP. Utilizado de manera preventiva en `/registro/inicial` si el servidor SMTP (Nodemailer) falla al enviar el correo, evitando guardar registros huérfanos imposibles de verificar.
 
 ---
 
@@ -137,7 +137,7 @@ Las directrices lógicas residen en `auth.service.js` y regulan las fases del ci
 2. **Validación del Cooldown (3 minutos):**
    * Consulta el último OTP con `obtenerUltimoOtp(correo)`.
    * Si existe, calcula el tiempo transcurrido:
-     $$\text{Tiempo Transcurrido} = \text{Date.now()} - \text{creado\_en}$$
+     $$\text{Tiempo Transcurrido} = \text{Date.now()} - \text{fecha\_creacion}$$
    * Si es menor a **180,000 ms (3 minutos)**, arroja un error con código de estado `429 (Too Many Requests)` indicando los minutos y segundos que debe esperar el usuario.
 3. **Criptografía:** Genera un token aleatorio numérico de 6 dígitos:
    ```javascript
@@ -147,7 +147,7 @@ Las directrices lógicas residen en `auth.service.js` y regulan las fases del ci
 5. **Transmisión y Salvaguarda:** Guarda el OTP en MySQL. Intenta enviar el correo mediante Nodemailer. Si este último falla, se ejecuta el **rollback físico** eliminando el registro de la tabla para mantener la base de datos libre de basura técnica.
 
 ### B. Validación e Impacto (Verificación)
-Al recibir `/register/verify`:
+Al recibir `/registro/verificar`:
 1. Consulta el OTP en la base de datos.
 2. **Filtro de Seguridad Rígido:**
    * Si no se encuentra: Rechaza (Código incorrecto).
@@ -193,17 +193,17 @@ El siguiente diagrama detalla cómo cambia el estado de un registro de verificac
 ```mermaid
 stateDiagram-v2
     [*] --> Inexistente : Escribe datos en formulario
-    Inexistente --> Creado : POST /register/init (INSERT usado=0)
+    Inexistente --> Creado : POST /registro/inicial (INSERT usado=0)
     
     state Creado {
-        [*] --> Vigente : creado_en < 15 minutos
-        Vigente --> Expirado : creado_en >= 15 minutos (Rechazo automático)
+        [*] --> Vigente : fecha_creacion < 15 minutos
+        Vigente --> Expirado : fecha_creacion >= 15 minutos (Rechazo automático)
     }
     
     Creado --> Eliminado : Fallo de servidor SMTP (ROLLBACK DELETE)
     Eliminado --> [*]
     
-    Vigente --> Validado : POST /register/verify (UPDATE usado=1)
+    Vigente --> Validado : POST /registro/verificar (UPDATE usado=1)
     
     state Validado {
         [*] --> Comprometido : Transacción en progreso

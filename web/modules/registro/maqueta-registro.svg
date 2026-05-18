@@ -1,82 +1,138 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fafafa" />
-      <stop offset="100%" stop-color="#f4f4f5" />
+    <!-- Premium background gradient imitating the Dattasoft branding colors -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="40%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
     </linearGradient>
-    <linearGradient id="leftPanel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#18181b" />
-      <stop offset="100%" stop-color="#09090b" />
-    </linearGradient>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-opacity="0.1" />
+    
+    <!-- Secondary glowing blobs for high premium aesthetics -->
+    <radialGradient id="glowTeal" cx="20%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#0d9488" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowBlue" cx="80%" cy="80%" r="60%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Professional card shadow filter -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="25" stdDeviation="30" flood-color="#000000" flood-opacity="0.35" />
     </filter>
   </defs>
 
-  <rect width="1280" height="720" fill="url(#bg)" />
+  <!-- Modern Background -->
+  <rect width="1280" height="720" fill="url(#bgGrad)" />
+  <rect width="1280" height="720" fill="url(#glowTeal)" />
+  <rect width="1280" height="720" fill="url(#glowBlue)" />
 
-  <!-- Panel Izquierdo (Branding) -->
-  <rect width="540" height="720" fill="url(#leftPanel)" />
-  <text x="50" y="80" font-family="sans-serif" font-weight="bold" font-size="28" fill="#fff">🚀 Datta ERP</text>
-  <text x="50" y="250" font-family="sans-serif" font-weight="bold" font-size="48" fill="#fff">Gestión empresarial</text>
-  <text x="50" y="310" font-family="sans-serif" font-weight="bold" font-size="48" fill="#fff">inteligente</text>
-  <text x="50" y="360" font-family="sans-serif" font-size="18" fill="#d4d4d8">Potencia tu empresa con infraestructura</text>
-  <text x="50" y="390" font-family="sans-serif" font-size="18" fill="#d4d4d8">cloud dedicada y análisis en tiempo real.</text>
-  
-  <rect x="50" y="450" width="40" height="40" rx="8" fill="#ffffff" fill-opacity="0.1" />
-  <text x="110" y="475" font-family="sans-serif" font-size="16" fill="#fff">Infraestructura dedicada y segura</text>
+  <!-- Clean Grid Lines representing abstract technology branding -->
+  <path d="M0,80 L1280,80 M0,160 L1280,160 M0,240 L1280,240 M0,320 L1280,320 M0,400 L1280,400 M0,480 L1280,480 M0,560 L1280,560 M0,640 L1280,640" stroke="#ffffff" stroke-opacity="0.015" stroke-width="1" />
+  <path d="M160,0 L160,720 M320,0 L320,720 M480,0 L480,720 M640,0 L640,720 M800,0 L800,720 M960,0 L960,720 M1120,0 L1120,720" stroke="#ffffff" stroke-opacity="0.015" stroke-width="1" />
 
-  <rect x="50" y="510" width="40" height="40" rx="8" fill="#ffffff" fill-opacity="0.1" />
-  <text x="110" y="535" font-family="sans-serif" font-size="16" fill="#fff">Despliegue automático en minutos</text>
+  <!-- Dynamic ambient light arcs -->
+  <path d="M-100,360 Q320,180 640,360 T1380,360" fill="none" stroke="#0d9488" stroke-opacity="0.08" stroke-width="3" />
+  <path d="M-100,420 Q320,240 640,420 T1380,420" fill="none" stroke="#3b82f6" stroke-opacity="0.06" stroke-width="2" />
 
-  <rect x="50" y="570" width="40" height="40" rx="8" fill="#ffffff" fill-opacity="0.1" />
-  <text x="110" y="595" font-family="sans-serif" font-size="16" fill="#fff">Acceso desde cualquier lugar</text>
+  <!-- CENTERED REGISTRATION CARD -->
+  <!-- Card Base -->
+  <rect x="370" y="45" width="540" height="630" rx="36" fill="#ffffff" filter="url(#cardShadow)" stroke="#38bdf8" stroke-opacity="0.1" stroke-width="1" />
 
-  <!-- Panel Derecho (Formulario) -->
-  <g transform="translate(680, 80)">
-    <text x="0" y="0" font-family="sans-serif" font-weight="bold" font-size="32" fill="#18181b">Crea tu cuenta</text>
-    <text x="0" y="30" font-family="sans-serif" font-size="16" fill="#71717a">Comienza tu viaje hacia una gestión inteligente hoy mismo.</text>
-
-    <rect y="70" width="480" height="450" rx="24" fill="#ffffff" filter="url(#shadow)" stroke="#e4e4e7" />
-    
-    <g transform="translate(40, 110)">
-      <!-- Inputs Row 1 -->
-      <text x="0" y="0" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">NOMBRE(S)</text>
-      <rect x="0" y="10" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="15" y="37" font-family="sans-serif" font-size="14" fill="#a1a1aa">Nombres</text>
-
-      <text x="210" y="0" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">A. PATERNO</text>
-      <rect x="210" y="10" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="225" y="37" font-family="sans-serif" font-size="14" fill="#a1a1aa">Pérez</text>
-
-      <!-- Inputs Row 2 -->
-      <text x="0" y="80" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">A. MATERNO</text>
-      <rect x="0" y="90" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="15" y="117" font-family="sans-serif" font-size="14" fill="#a1a1aa">García</text>
-
-      <text x="210" y="80" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">CELULAR</text>
-      <rect x="210" y="90" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="225" y="117" font-family="sans-serif" font-size="14" fill="#a1a1aa">55 1234 5678</text>
-
-      <!-- Input Correo -->
-      <text x="0" y="160" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">CORREO ELECTRÓNICO</text>
-      <rect x="0" y="170" width="400" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="15" y="197" font-family="sans-serif" font-size="14" fill="#a1a1aa">william@empresa.com</text>
-
-      <!-- Inputs Row 3 -->
-      <text x="0" y="240" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">EMPRESA</text>
-      <rect x="0" y="250" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="15" y="277" font-family="sans-serif" font-size="14" fill="#a1a1aa">Datta Tech</text>
-
-      <text x="210" y="240" font-family="sans-serif" font-weight="bold" font-size="10" fill="#a1a1aa" letter-spacing="1">RFC</text>
-      <rect x="210" y="250" width="190" height="45" rx="12" fill="#f4f4f5" stroke="#e4e4e7" />
-      <text x="225" y="277" font-family="sans-serif" font-size="14" fill="#a1a1aa">ABC123456XYZ</text>
-
-      <!-- Submit Button -->
-      <rect x="0" y="320" width="400" height="50" rx="12" fill="#2563eb" />
-      <text x="200" y="350" font-family="sans-serif" font-weight="bold" font-size="16" fill="#fff" text-anchor="middle">Registrar</text>
-    </g>
-    
-    <text x="240" y="550" font-family="sans-serif" font-size="14" fill="#71717a" text-anchor="middle">¿Ya tienes una cuenta? <tspan fill="#2563eb" font-weight="bold">Inicia Sesión</tspan></text>
+  <!-- Logo Section (Centered) -->
+  <g transform="translate(640, 75)">
+    <!-- Stylized brand logo mark (Dattasoft D icon) -->
+    <rect x="-100" y="5" width="40" height="40" rx="10" fill="#2563eb" />
+    <path d="M-85,15 L-85,35 L-78,35 C-72,35 -68,31 -68,25 C-68,19 -72,15 -78,15 Z" fill="#ffffff" />
+    <path d="M-81,20 L-81,30 L-77,30 C-74,30 -72,28 -72,25 C-72,22 -74,20 -77,20 Z" fill="#2563eb" />
+    <!-- Brand Typography -->
+    <text x="-50" y="28" font-family="sans-serif" font-weight="900" font-size="22" fill="#0f172a" letter-spacing="1">DATTA <tspan fill="#2563eb" font-weight="500">ERP</tspan></text>
+    <text x="-50" y="42" font-family="sans-serif" font-weight="700" font-size="8" fill="#94a3b8" letter-spacing="2">SOCIOS DE TU CRECIMIENTO</text>
   </g>
+
+  <!-- Titles -->
+  <g transform="translate(640, 160)">
+    <text x="0" y="0" font-family="sans-serif" font-weight="bold" font-size="26" fill="#0f172a" text-anchor="middle">Crea tu cuenta</text>
+    <text x="0" y="22" font-family="sans-serif" font-size="13" fill="#64748b" text-anchor="middle">Comienza tu viaje hacia una gestión inteligente hoy mismo.</text>
+  </g>
+
+  <!-- Form Fields Group -->
+  <g transform="translate(410, 210)">
+    <!-- Grid Row 1: Nombres & A. Paterno -->
+    <!-- Nombres -->
+    <g transform="translate(0, 0)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">NOMBRE(S)</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="40" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">Juan</text>
+      <!-- User Icon -->
+      <path d="M20,38 A4,4 0 0,1 24,42" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+      <circle cx="20" cy="32" r="3.5" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <path d="M14,43 A6,6 0 0,1 26,43" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+    <!-- A. Paterno -->
+    <g transform="translate(240, 0)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">A. PATERNO</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="18" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">Pérez</text>
+    </g>
+
+    <!-- Grid Row 2: A. Materno & Celular -->
+    <!-- A. Materno -->
+    <g transform="translate(0, 85)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">A. MATERNO</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="18" y="48" font-family="sans-serif" font-size="14" fill="#cbd5e1">García (opcional)</text>
+    </g>
+    <!-- Celular -->
+    <g transform="translate(240, 85)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">CELULAR</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="40" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">5512345678</text>
+      <!-- Phone Icon -->
+      <rect x="16" y="30" width="10" height="16" rx="2" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <line x1="19" y1="42" x2="23" y2="42" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+
+    <!-- Grid Row 3: Correo Electrónico (Full Width) -->
+    <g transform="translate(0, 170)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">CORREO ELECTRÓNICO</text>
+      <rect x="0" y="20" width="460" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="40" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">juan@empresa.com</text>
+      <!-- Mail Icon -->
+      <rect x="15" y="32" width="14" height="10" rx="1.5" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <path d="M15,33.5 L22,37.5 L29,33.5" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round" />
+    </g>
+
+    <!-- Grid Row 4: Empresa & RFC -->
+    <!-- Empresa -->
+    <g transform="translate(0, 255)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">EMPRESA</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="40" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">Datta Tech</text>
+      <!-- Building Icon -->
+      <rect x="15" y="30" width="12" height="15" rx="1.5" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <line x1="19" y1="34" x2="19" y2="41" stroke="#94a3b8" stroke-width="1" />
+      <line x1="23" y1="34" x2="23" y2="41" stroke="#94a3b8" stroke-width="1" />
+    </g>
+    <!-- RFC -->
+    <g transform="translate(240, 255)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="10" fill="#94a3b8" letter-spacing="0.5">RFC</text>
+      <rect x="0" y="20" width="220" height="46" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="40" y="48" font-family="sans-serif" font-size="14" fill="#0f172a">ABC123456XYZ</text>
+      <!-- Fingerprint Icon -->
+      <path d="M15,41 C15,34 27,34 27,41" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <path d="M18,41 C18,36 24,36 24,41" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+      <circle cx="21" cy="41" r="1" fill="#94a3b8" />
+    </g>
+
+    <!-- Submit Button -->
+    <g transform="translate(0, 335)">
+      <rect x="0" y="0" width="460" height="50" rx="16" fill="#2563eb" />
+      <text x="230" y="30" font-family="sans-serif" font-weight="bold" font-size="16" fill="#ffffff" text-anchor="middle">Registrar</text>
+    </g>
+  </g>
+
+  <!-- Foot Link -->
+  <text x="640" y="640" font-family="sans-serif" font-size="14" fill="#64748b" text-anchor="middle">¿Ya tienes una cuenta? <tspan fill="#2563eb" font-weight="bold">Inicia Sesión</tspan></text>
 </svg>

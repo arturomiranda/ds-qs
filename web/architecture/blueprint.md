@@ -140,7 +140,7 @@ Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen e
 | `typescript 5` + `tailwindcss 4` | Tipado y estilos |
 | `lucide-react` | Iconos (Rocket, Shield, BarChart3, etc.) |
 
-> ⚠️ **Detección de cambio:** Las librerías `bcryptjs`, `nodemailer`, `zod` (en backend/package.json), `@tanstack/react-query`, `react-hook-form`, `react-hot-toast`, `js-cookie` y `zod` (en frontend/package.json) **ya se encuentran 100% instaladas y configuradas**. La única librería del Blueprint de diseño pendiente de instalación es `jspdf` (para generación de reportes).
+> ⚠️ **Detección de cambio:** Las librerías `bcryptjs`, `nodemailer`, `zod` (en backend/package.json), `@tanstack/react-query`, `react-hook-form`, `react-hot-toast`, `js-cookie` y `zod` (en frontend/package.json) **ya se encuentran 100% instaladas y configuradas**. Se creó una declaración de tipos local en `frontend/types/js-cookie.d.ts` para resolver las firmas ambientales de `js-cookie` bajo el compilador estricto de TypeScript. La única librería del Blueprint de diseño pendiente de instalación es `jspdf` (para generación de reportes).
 
 ---
 
@@ -169,6 +169,7 @@ graph TD
 #### 📂 Backend (`/backend`)
 ```text
 backend/
+├── .gitignore          ✅ Ignora variables de entorno (.env) y dependencias locales
 ├── app.js              ✅ Orquestador (CORS, Helmet, Morgan, Rutas)
 ├── routes.js           ✅ Router principal (Enruta /autenticacion)
 ├── server.js           ✅ Punto de entrada HTTP
@@ -211,17 +212,22 @@ frontend/
 ├── app/
 │   ├── globals.css      ✅ Estilos y tokens de diseño
 │   ├── layout.tsx       ✅ Layout raíz con fuentes, QueryProvider y Toaster
-│   ├── page.tsx         ✅ Landing Page — Hero + Features + Modal
+│   ├── page.tsx         ✅ Landing Page (Logotipo corporativo corregido y comentada)
 │   ├── login/
-│   │   └── page.tsx     ✅ Página de Login
+│   │   └── page.tsx     ✅ Página de Login modular (Inicio, OTP, recuperación y cambio forzado)
 │   └── registro/
-│       └── page.tsx     ✅ Página de Registro (Formulario, OTP y Loader integrado)
+│       └── page.tsx     ✅ Página de Registro (código OTP y loader integrado, TS-safe)
 ├── components/          ⏳ VACÍO — Componentes UI por crear
-├── modules/             ⏳ VACÍO — Módulos de dominio por crear
+├── modules/             
+│   ├── login/           ✅ Lógica de login y hooks reactivos tipados
+│   │   └── login.hooks.ts
+│   └── registro/        ✅ Validación de registro (Zod)
+│       └── registro.schema.ts
 ├── hooks/               ⏳ VACÍO
 ├── providers/
 │   └── QueryProvider.tsx ✅ Proveedor de TanStack React Query Client
-└── types/               ⏳ VACÍO
+└── types/               
+    └── js-cookie.d.ts   ✅ Declaración ambiental local para js-cookie
 ```
 
 ---
@@ -291,6 +297,7 @@ flowchart TB
 | :--- | :---: | :---: | :---: |
 | **Infraestructura Base** | ✅ Listo | ✅ Listo | ✅ Este Blueprint |
 | **Módulo Auth / Registro** | ✅ Listo | ✅ Listo | ✅ `Registro_Plan.md` |
+| **Módulo Auth / Acceso y Recuperación** | ⏳ En Ejecución | ✅ Listo | ✅ `Login_Plan.md` |
 | **Dashboard ERP** | ⏳ Pendiente | ⏳ Pendiente | — |
 | **Catálogos SAT** | ⏳ Pendiente | ⏳ Pendiente | — |
 | **Socket.io Tiempo Real** | ⏳ Pendiente | ⏳ Pendiente | — |
@@ -426,12 +433,13 @@ classDiagram
 - [x] Crear `app/registro/page.tsx` en el frontend con formulario premium, OTP y loading
 - [x] Configurar `providers/QueryProvider.tsx` para TanStack React Query
 
-### Sprint 1.5 — Autenticación: Acceso y Recuperación *(Siguiente)*
-- [ ] Implementar endpoints `POST /autenticacion/login` y `POST /autenticacion/logout` con JWT en cookie `HttpOnly`
-- [ ] Crear página de Login en `app/login/page.tsx` conectada a react-hook-form
-- [ ] Implementar flujo de Recuperación de contraseña por Teléfono enmascarado y OTP
+### Sprint 1.5 — Autenticación: Acceso y Recuperación *(En Ejecución / 90% Completado)*
+- [x] Crear página de Login en `app/login/page.tsx` conectada a react-hook-form
+- [x] Crear formulario de cambio obligatorio de contraseña (integrado modularmente en el mismo panel de Login)
+- [x] Implementar endpoints de inicio y actualización en backend (`/iniciar-sesion` y `/cambiar-contrasena`)
+- [ ] Implementar endpoint `POST /autenticacion/logout` con JWT en cookie `HttpOnly`
+- [ ] Implementar flujo de Recuperación de contraseña por Teléfono enmascarado y OTP en backend
 - [ ] Configurar `providers/AuthContext` para gestión de sesión global
-- [ ] Crear formulario de cambio obligatorio de contraseña en `app/reset-password-force/page.tsx`
 
 ### Sprint 2 — Inyector y Dashboard Base
 - [ ] Implementar el Inyector Dinámico como middleware de proxy a vServers

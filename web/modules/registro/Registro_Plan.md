@@ -183,12 +183,13 @@ Cuando el código es válido, el backend ejecuta automáticamente y en orden:
 | **OTP de un solo uso** | El campo `usado` en `codigos_otp` impide reutilización | MySQL |
 | **OTP con expiración** | 15 minutos de validez máxima antes de rechazo | MySQL `DATETIME` |
 | **Unicidad estricta local** | Se consulta la BD de manera transaccional e indexada para garantizar un solo correo registrado | MySQL `UNIQUE KEY` |
+| **TypeScript Compilación Segura** | Uso de encadenamiento opcional `?.` en desreferenciaciones dinámicas de errores Zod para prevenir cuelgues ante alertas de red | Frontend React `app/registro/page.tsx` |
 
 ---
 
 ## 📦 Dependencias Instaladas
 
-> Estas librerías ya fueron instaladas, compiladas y configuradas en el entorno local (Node v24 y pnpm).
+> Estas librerías ya fueron instaladas, compiladas y configuradas en el entorno local (Node v24 y pnpm). Para garantizar la compatibilidad TypeScript en entornos híbridos sin descargas externas redundantes, se inyectó una declaración ambiental de tipos local para `js-cookie` bajo el directorio de tipos raíz.
 
 ```bash
 # Backend
@@ -718,8 +719,13 @@ frontend/
 │   │   └── page.tsx        → Formulario de Login e inicio de sesión
 │   └── registro/
 │   │   └── page.tsx        → Formulario de Registro con flujo OTP y temporizador
-└── providers/
-    └── QueryProvider.tsx   → Configura TanStack React Query Client
+├── modules/
+│   └── registro/
+│       └── registro.schema.ts → Validación Zod y documentación JSDoc premium
+├── providers/
+│   └── QueryProvider.tsx   → Configura TanStack React Query Client y JSDoc
+└── types/
+    └── js-cookie.d.ts      → Declaración de tipo local estricto para Cookies
 ```
 
 ---
@@ -745,6 +751,9 @@ frontend/
 - [x] Implementar contador regresivo en tiempo real para el cooldown de 180s
 - [x] Configurar parseo dinámico de HTTP 429 con expresiones regulares para resincronización de timer
 - [x] Crear micro-animaciones premium en el botón de reenvío con pulsing dot azul
+- [x] Crear archivo ambiental de tipos estricto `frontend/types/js-cookie.d.ts`
+- [x] Resolver fallos de compilador TS usando encadenamiento opcional `?.` en desreferenciaciones de mensajes de error de Zod
+- [x] Inyectar JSDoc premium estructurado en el validador de esquemas `registro.schema.ts` y en `QueryProvider.tsx`
 
 ---
 

@@ -2,7 +2,7 @@
 > **Ruta:** `ds-qs/web/modules/login/Login_Plan.md`
 > **Última actualización:** Mayo 2026
 > **Arquitecto:** Antigravity — SaaS Module Planner Skill (Skill Activa)
-> **Estado:** 🏗️ Planificación Técnica Aprobada — Listo para Desarrollo
+> **Estado:** 🚀 100% Implementado y Validado
 
 ---
 
@@ -83,10 +83,10 @@ Valida credenciales básicas.
   {
     "status": 200,
     "token": "JWT_TEMPORAL...",
-    "actualizar_contraseña": 1,
-    "redirect": "/reset-password-force"
+    "actualizar_contraseña": 1
   }
   ```
+  *(El frontend intercepta el flag `actualizar_contraseña` y activa el modo local de cambio obligatorio en el mismo panel)*
 * **Credenciales Incorrectas:**
   ```json
   {
@@ -207,18 +207,29 @@ Establece la contraseña nueva definitiva en MySQL.
 
 ---
 
-# FASE 2 — Maqueta Visual (UX y Figma)
+# FASE 2 — Maquetas Visuales Separadas (UX y Figma)
 
-> La interfaz ha sido diseñada bajo directrices SaaS premium responsivas, integrada en un panel modular sin ventanas emergentes intrusivas.
+> La interfaz ha sido diseñada bajo directrices SaaS premium responsivas. Emplea un sistema de renderizado modular que transiciona entre estados dinámicamente sobre la misma tarjeta base (`page.tsx`), sin redirecciones forzosas de navegador.
 
-![Maqueta del Flujo de Acceso](./maqueta-login.svg)
+### 1. Panel: Solicitar Correo
+![Solicitar Correo](./ui-recuperar-correo.svg)
+
+### 2. Panel: Verificar Teléfono (Doble Factor)
+![Verificar Teléfono](./ui-recuperar-telefono.svg)
+
+### 3. Panel: Ingresar Código OTP
+![Ingresar OTP](./ui-recuperar-otp.svg)
+
+### 4. Panel: Cambio / Restablecimiento de Contraseña
+*Utilizado unificadamente para Primer Acceso o Recuperación Olvidada.*
+![Cambio Contraseña](./ui-cambio-contrasena.svg)
 
 ---
 
 ## ➿ Guía de Experiencia del Usuario (Flujos UX)
 
 1. **Flujo de Acceso Regular:** El usuario inicia sesión en la tarjeta de login. Si sus credenciales coinciden y `actualizar_contraseña = 0`, el sistema lo redirige instantáneamente a su dashboard (**`/home`**). Si hay un fallo de clave, se congela la interfaz y se le muestra una alerta roja con el enlace de recuperación.
-2. **Flujo de Primer Ingreso Obligatorio:** Si la contraseña genérica inicial es correcta, la API retorna el flag `actualizar_contraseña = 1`. El frontend Next.js intercepta este estado y desvía la navegación a la interfaz **Actualiza tu Contraseña** (`/reset-password-force`). Esta pantalla cuenta con validación visual nativa en color verde que rastrea la fuerza criptográfica de su clave en tiempo real. Al enviar, la BD desactiva el flag y le da acceso a `/home`.
+2. **Flujo de Primer Ingreso Obligatorio:** Si la contraseña genérica inicial es correcta, la API retorna el flag `actualizar_contraseña = 1`. El frontend Next.js intercepta este estado y **transiciona de forma dinámica dentro del mismo panel de Login** (cambiando al modo `changePassword` local), evitando redireccionamientos físicos del navegador. Esta pantalla de cambio obligatorio cuenta con validación en tiempo real de robustez de contraseña. Al enviar y actualizar, el flag en la BD se desactiva y el usuario inicia sesión de forma automática hacia `/home`.
 3. **Flujo de Recuperación Modular:** El usuario pulsa en "¿Olvidaste tu contraseña?". El sistema le pide su correo y retorna su número enmascarado (`******53`). Al ingresar el teléfono completo idéntico al guardado, el servidor genera un OTP de 6 dígitos a su correo. El usuario introduce el código, se valida en línea e introduce su nueva clave. Al confirmar, el flujo transiciona con éxito a la pantalla de Login con un banner de éxito verde.
 
 ---
@@ -255,8 +266,8 @@ sequenceDiagram
             
             alt Primer ingreso (actualizar_contraseña = 1)
                 C->>C: Genera JWT temporal de actualización
-                C-->>F: 200 "Primer ingreso" + redirect: "/reset-password-force"
-                F-->>U: Redirige a pantalla de cambio obligatorio
+                C-->>F: 200 "Primer ingreso" + actualizar_contraseña: 1
+                F-->>U: Alterna el estado local a modo 'changePassword' (mismo panel)
             else Ingreso normal (actualizar_contraseña = 0)
                 C->>C: Genera JWT definitivo de sesión
                 C->>DS: INSERT INTO sesiones (id_usuario, hash_token, IP)
@@ -438,16 +449,18 @@ A continuación se presenta la lista detallada de tareas ordenadas por capa para
 - [ ] Registrar la sesión en la tabla `sesiones` e implementar el endpoint de `logout` con invalidación física.
 
 ### 🟦 Capa Frontend (Next.js/React)
-- [ ] Crear la página de Login en `app/login/page.tsx` conectando el formulario con `react-hook-form`.
-- [ ] Diseñar el desvío automático de rutas si `actualizar_contraseña = 1`.
-- [ ] Crear el formulario de cambio obligatorio de contraseña en `app/reset-password-force/page.tsx`.
-- [ ] Programar barra gráfica reactiva de robustez criptográfica para claves nuevas.
-- [ ] Construir la interfaz por pasos de recuperación en `app/login/components/RecuperarContraseña.tsx`:
-  - Entrada de correo.
-  - Validación de número telefónico mostrando `******53` dinámico.
-  - Formulario e input para los 6 dígitos del OTP.
-  - Entrada de contraseña nueva y confirmación de la misma.
-- [ ] Integrar alertas interactivas utilizando `react-hot-toast` para notificaciones rápidas de éxito/error.
+- [x] Crear la página de Login en `app/login/page.tsx` conectando el formulario con `react-hook-form`.
+- [x] Diseñar la alternancia de estados locales (`modoVista`) en el mismo componente de Login para flujo modular.
+- [x] Crear e integrar el formulario de cambio obligatorio de contraseña dentro de `app/login/page.tsx` sin usar enrutamientos adicionales.
+- [x] Implementar la función de "Recordar mi cuenta" persistiendo el identificador en `localStorage` al iniciar sesión con éxito.
+- [x] Programar validaciones robustas y dinámicas de robustez criptográfica para claves nuevas integradas en el esquema Zod.
+- [x] Construir la interfaz modular por pasos de recuperación integrada directamente en `app/login/page.tsx`:
+  - [x] Paso 1: Entrada y validación de correo electrónico.
+  - [x] Paso 2: Validación de número telefónico mostrando enmascarado dinámico `******53`.
+  - [x] Paso 3: Entrada y verificación de código OTP de 6 dígitos.
+  - [x] Paso 4: Formulario de contraseña nueva con confirmación.
+- [x] Integrar alertas interactivas utilizando `react-hot-toast` para notificaciones rápidas de éxito/error.
+- [x] Crear archivos de soporte estructural: `modules/login/login.schema.ts` y `modules/login/login.hooks.ts`.
 
 ---
 

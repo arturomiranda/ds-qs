@@ -1,153 +1,229 @@
 # Arquitectura UML: Módulo Multiempresa (Multi-Tenant)
 
-Este documento detalla el diseño arquitectónico del motor **Multi-Tenant (Multiempresa)** dentro de DATTA ERP. A diferencia del control de permisos (que dicta *qué acciones* puede realizar un usuario), esta arquitectura dicta **el contexto y el aislamiento de los datos**.
+Este documento detalla el diseño arquitectónico del motor **Multi-Tenant (Multiempresa)** dentro de DATTA ERP. A diferencia del control de permisos, esta arquitectura dicta el contexto y el aislamiento absoluto de los datos en un entorno compartido.
 
-El objetivo principal de este módulo es garantizar que una única instancia de base de datos pueda alojar de manera segura la información de múltiples entidades legales (Empresas), asegurando que los usuarios únicamente visualicen y operen sobre los datos de la empresa en la que están "conectados" en ese momento.
-
-## Diagrama de Clases: Estructura de Datos Multi-Tenant
-
-El siguiente diagrama ilustra cómo se ligan los Usuarios con las Empresas, y cómo este diseño impone un filtro físico a las tablas transaccionales.
+El objetivo es garantizar que una única instancia de base de datos aloje de manera segura la información de múltiples entidades legales, asegurando que los usuarios operen exclusivamente sobre los datos autorizados en tiempo real.
 
 ```mermaid
 classDiagram
-    %% Relación de asignación de acceso (Muchos a Muchos)
-    001_USU "1" -- "0..*" 001_USU_EMP : Tiene acceso a
-    001_EMP "1" -- "0..*" 001_USU_EMP : Accesible por
-    
-    %% Jerarquía Organizacional Interna
-    001_EMP "1" *-- "0..*" 001_SUC : Contiene Sucursales
-    
-    %% Aislamiento de Datos (Ejemplo de Composición hacia el Tenant)
-    001_EMP "1" *-- "0..*" TABLA_TRANSACCIONAL : Aísla registros de
+    direction LR
 
-    class 001_EMP {
-        <<Maestro - Empresas (Tenants)>>
+    %% Capa de Seguridad y Acceso
+    class USU {
+        <<Maestro - Usuarios (001_USU)>>
+        +Numérico ID
+        +Alfa_256 NAME
+        +Alfa_256 PSW_ACC
+        +Numérico ENT_USU  
+    }
+    
+    class USU_EMP {
+        <<Pivote - Autorización (001_USU_EMP)>>
+        +Numérico ID
+        +Numérico USU
+        +Numérico EMP
+        +Numérico CRD_USR
+    }
+    
+    %% El Núcleo Multi-Tenant
+    class EMP {
+        <<Tenant - Empresas (001_EMP)>>
         +Numérico ID
         +Alfa_128 NAME
         +Numérico ENT
+        +Booleano ES_EMP
+        +Alfa_256 EMP_PAD
+        +Objeto_Texto CONF_SIS
         +Booleano ACT
     }
-    
-    class 001_SUC {
-        <<Detalle - Sucursales>>
-        +Numérico ID
-        +Alfa_128 NAME
-        +Numérico EMP
+
+    %% Representación resumida de la Operación
+    class TABLAS_TRANSACCIONALES {
+        <<Abstracción - Documentos/Movimientos>>
+        +Numérico EMP (FK de Aislamiento)
+        ... [CFDI, Pólizas, Asientos, etc.]
     }
+
+    %% Relaciones Multiempresa
+    USU "1" -- "0..*" USU_EMP : Tiene acceso a
+    EMP "1" -- "0..*" USU_EMP : Autoriza a
+    EMP "1" *-- "0..*" TABLAS_TRANSACCIONALES : Segmenta / Es dueña de
     
-    class 001_USU {
-        <<Maestro - Usuarios>>
-        +Numérico ID
-        +Alfa_60 NAME
-    }
-    
-    class 001_USU_EMP {
-        <<Tabla Puente - Acceso a Tenants>>
-        +Numérico USU
-        +Numérico EMP
-    }
-    
-    class TABLA_TRANSACCIONAL {
-        <<Cualquier tabla operativa (Ej. Facturas)>>
-        +Numérico ID
-        +Numérico EMP (Llave del Tenant)
-        +... Datos()
-    }
+    %% Relación Jerárquica de Sucursales (Relación Reflexiva)
+    EMP "1" o-- "0..*" EMP : Es matriz de (EMP_PAD)
 ```
 
-### Explicación Arquitectónica (Semántica UML)
+## Explicación Arquitectónica (Semántica UML)
 
 1. **Gestión de Acceso a Tenants (`001_USU_EMP`)**
-   El acceso a una empresa es una relación de muchos-a-muchos. Un operador contable puede requerir acceso a 3 empresas distintas del corporativo, mientras que un vendedor solo a 1. Esta lógica de autorización se almacena de forma independiente a los permisos en la tabla puente `001_USU_EMP`.
+   El acceso a una empresa es una relación de muchos-a-muchos. Esta lógica de autorización se almacena de forma independiente a los permisos en la tabla puente `001_USU_EMP`, permitiendo que un mismo usuario pueda tener "puntos de vista" distintos sobre diferentes razones sociales.
 
-2. **Aislamiento de Datos por Composición (`*-- TABLA_TRANSACCIONAL`)**
-   En una arquitectura SaaS/Cloud verdadera, toda tabla transaccional o catálogo específico del negocio (Facturas, Clientes, Inventarios, Cuentas Bancarias) debe heredar obligatoriamente el ID de la Empresa (`EMP`). Esta relación de composición indica que el dato le pertenece exclusivamente a ese Tenant y, matemáticamente, no puede cruzarse con los datos de otra empresa.
+2. **Aislamiento de Datos por Composición (`*--`)**
+   Toda tabla operativa (Facturas, Inventarios, Pólizas) hereda obligatoriamente el ID de la Empresa (`EMP`). En UML, esta composición indica que el dato no tiene existencia fuera de su Tenant, garantizando que el sistema segregue físicamente los registros mediante filtros de índice.
 
-3. **Sub-Partición Espacial (`001_SUC`)**
-   Dentro del aislamiento maestro de la Empresa, existe un sub-nivel geográfico o lógico (`001_SUC`), permitiendo aislar la operación a nivel almacén o sucursal sin salir de la misma razón social.
+3. **Jerarquía Multi-Nivel (`EMP_PAD`)**
+   La relación reflexiva (`o-- hacia sí misma`) permite modelar estructuras de Holdings o Consorcios, donde una Empresa Matriz puede contener múltiples empresas hijas o sucursales, manteniendo la integridad de la herencia de datos legales.
 
 ---
 
 ## Diagrama de Casos de Uso: Gestión y Contexto
 
-A nivel de negocio, operar un sistema Multi-Tenant requiere flujos de trabajo específicos para navegar entre las diferentes empresas sin tener que cerrar sesión.
+A nivel de negocio, operar un sistema Multi-Tenant requiere flujos de trabajo específicos para navegar entre empresas y consolidar información sin cerrar la sesión activa.
 
 ```mermaid
 flowchart LR
+    %% Estilos UML
     classDef actor fill:#eceff1,stroke:#455a64,stroke-width:2px
     classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:ellipse
 
+    %% Actores Externos Reales
     Admin(("👤 Administrador")):::actor
     Operador(("🧑‍💻 Usuario Operador")):::actor
-    Sistema(("⚙️ Motor Multi-Tenant")):::actor
 
-    subgraph "DATTA ERP - Aislamiento Multiempresa"
-        Asignar(["Otorgar Acceso a Empresas"]):::usecase
-        Elegir(["Seleccionar Empresa (Cambio de Contexto)"]):::usecase
-        Filtrar(["Aplicar Filtro Espacial (Aislamiento)"]):::usecase
+    %% Límite del Sistema
+    subgraph "DATTA ERP - Gestión de Contexto Multiempresa"
+        
+        %% Casos de Uso del Administrador
+        Asignar(["Configurar Accesos a Empresas y Sucursales"]):::usecase
+        
+        %% Casos de Uso del Operador
+        Alternar(["Alternar Empresa Activa en Interfaz"]):::usecase
+        OperarCruzado(["Emitir Transacción para Empresa No Activa"]):::usecase
+        ConsultarGlobal(["Consultar Historial Consolidado (Múltiples Empresas)"]):::usecase
     end
 
-    %% Relaciones de los Actores
+    %% Interacciones
     Admin ---> Asignar
-    Operador ---> Elegir
-    Filtrar <--- Sistema
     
-    %% Inclusión Obligatoria
-    Elegir -. "<<include>>" .-> Filtrar
+    Operador ---> Alternar
+    Operador ---> OperarCruzado
+    Operador ---> ConsultarGlobal
 ```
 
 ### Lógica de Negocio Multi-Tenant
 
-1. **La Meta del Operador:** El operador no "filtra bases de datos"; su única meta de negocio es **"Seleccionar Empresa"** en la interfaz para comenzar a trabajar.
-2. **La Responsabilidad del Sistema (`<<include>>`):** Cada vez que el operador elige una empresa diferente, el Motor del ERP está obligado silenciosamente a ejecutar el caso de uso **"Aplicar Filtro Espacial"**. Esto es lo que expulsa los datos de la Empresa A de la memoria de la interfaz, e inyecta los datos de la Empresa B, asegurando la integridad visual.
+*   **Abstracción del Contexto:** El sistema permite que el operador tenga una "Empresa por Defecto" pero mantenga la capacidad de realizar transacciones cruzadas para otras empresas autorizadas sin cambiar su sesión global.
+*   **Seguridad de Capa Local:** La visibilidad de las empresas autorizadas se descarga una sola vez al inicio en el array `catalogo_EMP_AUTORIZADAS`, eliminando consultas redundantes al servidor durante la navegación.
 
 ---
 
-## Diagrama de Secuencia: Cambio de Contexto (Switch Tenant)
+## Diagrama de Secuencia: Operación Transaccional Multiempresa
 
-El siguiente diagrama detalla cómo se ejecuta técnicamente un "Cambio de Empresa" en caliente (en tiempo de ejecución). Al igual que en la seguridad de los permisos, **la variable de sesión** (`JSON_SES`) juega un rol fundamental para dictar el "Punto de Vista" actual de toda la aplicación.
+Este diagrama modela el flujo técnico para una operación cruzada, demostrando cómo el sistema valida la seguridad en RAM antes de impactar la base de datos.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor U as Operador
-    participant UI as Selector de Empresa (UI)
-    participant CS as Controlador de Contexto
-    participant MEM as JSON Sesión Local
-    participant DB as Base de Datos
+    
+    %% Definición de Participantes (Líneas de Vida)
+    actor Luis as Vendedor: Luis
+    participant UI as Interfaz (Módulo Facturas)
+    participant RAM as Variable Global RAM ($SES_DAT)
+    participant Core as Backend (Procesos Velneo 3er Plano)
+    participant DB as Motor vServer (Base de Datos)
 
-    U->>UI: Selecciona "Empresa B" en el menú
+    %% FASE 1: VISUALIZACIÓN OMNIPRESENTE
+    Note over Luis, DB: FASE 1: Visualización Cruzada Consolidada
+    Luis ->> UI: Entra al "Listado de Facturas"
     activate UI
+    UI ->> RAM: Leer catalogo_EMP_AUTORIZADAS
+    RAM -->> UI: Retorna Array de IDs Permitidos (Ej. [1, 2, 3])
     
-    UI->>CS: solicitarCambioContexto(ID_Empresa_B)
-    activate CS
-    
-    %% Validación de Integridad
-    CS->>DB: Validar acceso en 001_USU_EMP
+    UI ->> Core: Disparar Búsqueda (IDs_Empresas: [1, 2, 3])
+    activate Core
+    Core ->> DB: Resolver por Índice (IDX_EMP)
     activate DB
-    DB-->>CS: Acceso Concedido
+    DB -->> Core: Retorna Registros de A, B y C
     deactivate DB
+    Core -->> UI: Retorna JSON consolidado
+    deactivate Core
+    UI ->> Luis: Renderiza Grid con historial multiempresa
+    deactivate UI
+
+    %% FASE 2: CREACIÓN Y CONMUTACIÓN EN CALIENTE
+    Note over Luis, DB: FASE 2: Creación y Conmutación de Contexto
+    Luis ->> UI: Clic en botón "Nueva Factura"
+    activate UI
+    UI ->> RAM: Leer globalVar_EMP_ACTUAL (ID: 1)
+    RAM -->> UI: Retorna Empresa A
+    UI ->> UI: Auto-completa Emisor con Empresa A
     
-    %% Mutación del Contexto Global
-    CS->>MEM: Mutar( globalVar_CUR_EMP_ID = ID_Empresa_B )
-    Note over CS,MEM: El "Tenant" activo acaba de cambiar.<br/>Las variables globales de la aplicación apuntan ahora a la nueva Empresa.
+    Luis ->> UI: Cambia selector manual a Empresa B (ID: 2)
+    Luis ->> UI: Clic en botón "Guardar y Timbrar"
     
-    %% Recarga del Sistema
-    CS-->>UI: Ordenar Refresco Total de Interfaz
-    deactivate CS
+    %% Validación Perimetral de Seguridad en Memoria
+    UI ->> RAM: ¿ID_Empresa: 2 existe en catalogo_EMP_AUTORIZADAS?
+    RAM -->> UI: Retorna TRUE (Operación lícita)
     
-    %% El filtro cobra vida
-    UI->>DB: Cargar Tablas (Aplicando WHERE EMP = globalVar_CUR_EMP_ID)
-    activate DB
-    DB-->>UI: Retorna SOLO registros de la Empresa B
-    deactivate DB
-    
-    UI-->>U: Interfaz renderizada en el nuevo entorno
+    alt ID Autorizado Exitosamente (Camino Feliz)
+        UI ->> Core: Lanzar Proceso (Payload + EMP_DESTINO = 2)
+        activate Core
+        Note over Core: El Proceso inyecta el ID recibido<br/>antes de crear el registro físico.
+        Core ->> Core: Firmar XML usando CSD de Empresa B
+        Core ->> DB: Alta de Ficha en 003_CFDI (ID 2)
+        activate DB
+        DB -->> Core: OK
+        deactivate DB
+        Core -->> UI: Retorno Exitoso
+        deactivate Core
+        UI ->> Luis: Notifica Guardado en Empresa B
+    else ID No Autorizado
+        UI ->> Luis: Alerta: "Acceso denegado"
+    end
     deactivate UI
 ```
 
 ### Arquitectura Técnica en el Tiempo
 
-1. **Validación Previa al Cambio:** El controlador de contexto (`CS`) siempre realiza una revalidación rápida (`001_USU_EMP`) antes de conceder el cambio, previniendo ataques de inyección de IDs o vulnerabilidades por sesiones de red.
-2. **Mutación de la Persistencia Local:** Al sobrescribir la variable global `globalVar_CUR_EMP_ID` dentro del `JSON_SES`, se altera el núcleo del ERP. A partir de este nanosegundo, cualquier pantalla, reporte o proceso en segundo plano que se abra leerá esta variable y se comportará como si el ERP solo perteneciera a la "Empresa B".
-3. **Aislamiento Implícito (El Filtro):** La interfaz (`UI`) asume un diseño defensivo. Al redibujarse, automáticamente adjunta el `globalVar_CUR_EMP_ID` a las condiciones de carga de plurales y listas, logrando el efecto Multi-Tenant de forma centralizada y sin necesidad de programar el filtro en cada botón individual de la aplicación.
+1. **Visión Omnipresente:** El ERP permite cargar plurales de múltiples empresas simultáneamente mediante el paso de arrays al backend, optimizando el rendimiento mediante el uso de índices de base de datos.
+2. **Validación Fail-Fast en RAM:** La seguridad perimetral se ejecuta en la UI comparando el destino contra el catálogo autorizado en memoria local, eliminando latencia y denegando manipulaciones antes de llegar al servidor.
+
+---
+
+## Diagrama de Actividad: Algoritmo de Transacción Defensiva
+
+El diagrama de actividad representa el **algoritmo matemático** que sigue la interfaz para blindar la integridad del Tenant durante una operación de escritura.
+
+```mermaid
+flowchart TD
+    %% Estilos UML estrictos
+    classDef startEnd fill:#000,stroke:#000,color:#fff
+    classDef action fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef decision fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+
+    %% Nodos Inicial y Finales
+    Start(("Inicio: Intento de Transacción Cruzada")):::startEnd
+    EndOk(("Fin: Alta de Ficha Exitosa")):::startEnd
+    EndErr(("Fin: Operación Abortada Localmente")):::startEnd
+
+    %% Acciones de Interfaz
+    A["Capturar ID_EMP del Formulario"]:::action
+    B["Leer catalogo_EMP_AUTORIZADAS (RAM)"]:::action
+
+    %% Rombo de Decisión (Filtro de Seguridad)
+    D{"¿El ID seleccionado está<br/>incluido en el Array?"}:::decision
+
+    %% Rutas
+    Err["Bloquear UI y Mostrar Alerta"]:::action
+    Ok1["Inyectar ID_EMP y lanzar Proceso"]:::action
+    Ok2["vServer: Alta de Ficha (Asignar Tenant)"]:::action
+
+    %% Flujo
+    Start --> A
+    A --> B
+    B --> C
+    B --> D
+
+    D -->|"No (Acceso Denegado)"| Err
+    Err --> EndErr
+
+    D -->|"Sí (Autorizado)"| Ok1
+    Ok1 --> Ok2
+    Ok2 --> EndOk
+```
+
+### Análisis del Algoritmo
+
+1. **Validación en Capa de Cliente:** Ahorra latencia de red y ciclos de CPU en el servidor al denegar intentos de inyección de datos desde la interfaz de usuario.
+2. **Desacoplamiento de Contexto:** Permite que un usuario emita documentos para cualquier empresa autorizada sin necesidad de forzar un cambio de sesión global, aumentando la productividad operativa.
+3. **Persistencia Multi-Tenant:** La instrucción final garantiza que el puntero maestro de la base de datos se asigne correctamente, manteniendo el aislamiento absoluto de los registros.

@@ -207,9 +207,12 @@ Establece la contraseña nueva definitiva en MySQL.
 
 ---
 
-# FASE 2 — Maquetas Visuales Separadas (UX y Figma)
+# FASE 2 — Maquetas Visuales y UX (Figma)
 
 > La interfaz ha sido diseñada bajo directrices SaaS premium responsivas. Emplea un sistema de renderizado modular que transiciona entre estados dinámicamente sobre la misma tarjeta base (`page.tsx`), sin redirecciones forzosas de navegador.
+
+### 0. Pantalla Principal: Inicio de Sesión Regular
+![Inicio de Sesión Regular](./maqueta-login.svg)
 
 ### 1. Panel: Solicitar Correo
 ![Solicitar Correo](./ui-recuperar-correo.svg)

@@ -339,6 +339,7 @@ sequenceDiagram
             F-->>U: Redirige a Login con toast de éxito
         end
     end
+```
 
 ---
 

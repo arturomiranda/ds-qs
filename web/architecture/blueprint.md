@@ -10,11 +10,8 @@ Este documento detalla la arquitectura, el stack tecnológico y la estrategia de
 > Sigue los números del `1` al `8`. Cada número es un "mensaje" que viaja de un bloque a otro.
 > Los bloques con fondo de color son **zonas separadas** del sistema que tienen una responsabilidad distinta.
 >
-> *Piénsalo como un aeropuerto:*
-> - El **Hub (Dashboard)** es la sala de espera donde el pasajero (usuario) interactúa.
-> - El **Plano de Control** es la torre de control que valida tickets y dirige el tráfico.
-> - El **Inyector** es la puerta de embarque que conecta al pasajero con su avión específico.
-> - Los **vServers** son los aviones: cada cliente tiene el suyo, y nunca se mezclan.
+> *Piénsalo como un edificio de apartamentos:*
+> - **El Código es el edificio entero** (la infraestructura que todos comparten), pero cada cliente tiene su propia "llave" y su propio "apartamento" (su base de datos aislada) donde ningún otro vecino puede asomarse ni entrar.
 
 ```mermaid
 flowchart TD
@@ -82,22 +79,22 @@ flowchart TD
 
 ## 📖 Glosario: Las Palabras Clave Explicadas Sin Tecnicismos
 
-> *Si un cliente no entiende cómo se guardan sus datos, la arquitectura no es lo suficientemente transparente.*
+> **"Si un cliente o inversor no comprende cómo se protegen y almacenan sus datos, la arquitectura ha fallado en su transparencia. El sistema debe ser tan robusto en su código como cristalino en su explicación".**
 
-Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen en todo este documento, explicados como si se los contaras a alguien que nunca ha programado.
+Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen en todo este documento, explicados de forma conceptual:
 
-| Término técnico | ¿Qué significa en realidad? |
-| :--- | :--- |
-| **Multi-tenant** | *El edificio de apartamentos:* el sistema es el edificio, cada empresa cliente es un inquilino con su propia puerta y llave. Comparten el edificio pero nadie puede entrar al apartamento del vecino. |
-| **Velneo Cloud** | Una plataforma empresarial española especializada en ERP. Funciona como el "motor de contabilidad y operaciones" del sistema. Cada cliente tiene su propia instancia (su propio motor) completamente aislada. |
-| **vServer / Instancia** | El "apartamento" de cada cliente en Velneo Cloud. Contiene toda su base de datos, configuraciones y lógica de negocio. Crear una instancia es como asignarle un apartamento nuevo a un inquilino. |
-| **Inyector Dinámico** | El "portero inteligente" del edificio. Cuando un usuario autenticado hace una operación, el Inyector lee su credencial (JWT) y lo dirige al apartamento correcto — nunca al del vecino. Es el middleware que enruta cada petición al vServer del tenant que corresponde. |
-| **JWT (Token)** | Una "pulsera de evento": cuando el usuario inicia sesión, el sistema le entrega una pulsera digital firmada. En cada petición, el sistema lee esa pulsera para saber quién es y a qué tiene acceso, sin preguntar la contraseña de nuevo. Expira en 1 hora. |
-| **BD Maestra (MySQL)** | La "recepción del edificio": guarda el directorio de todos los inquilinos (usuarios, sus correos, y la URL de su instancia Velneo). No guarda datos contables ni empresariales, solo metadatos de gestión. |
-| **OTP (Código de verificación)** | Un código de 6 dígitos que el sistema envía al correo del usuario para confirmar que la dirección es real. Funciona como el código SMS de un banco: expira en 15 minutos y solo se puede usar una vez. |
-| **Aprovisionamiento** | El proceso automático de "preparar el apartamento": crear la carpeta del tenant, sus instancias de datos y aplicación en Velneo, el grupo de seguridad y el usuario. Se ejecuta una sola vez cuando un nuevo cliente se registra. |
-| **Pool de Conexiones** | En lugar de abrir y cerrar una puerta a la base de datos en cada petición (lento), se mantienen 10 puertas abiertas y listas. Cuando llega una petición, toma una puerta disponible, la usa y la devuelve al grupo. |
-| **Middleware** | Un "guardia de seguridad" que revisa cada petición antes de que llegue al destino. Por ejemplo: verifica que el token sea válido, que el usuario no esté haciendo demasiadas peticiones, o que los datos tengan el formato correcto. |
+| Concepto de Negocio | ¿Qué significa en realidad? | Valor de Negocio |
+| :--- | :--- | :--- |
+| **Aislamiento Multi-tenant** | *El edificio de apartamentos:* el sistema es el edificio compartido, pero cada cliente opera en su propio apartamento cerrado bajo llave. | Privacidad física absoluta de la información de tu negocio. |
+| **Almacén de Datos Externo** | Plataforma en la nube donde reside el motor de base de datos y la lógica del ERP. | Estabilidad y cumplimiento fiscal integrado con el SAT. |
+| **Instancia Dedicada** | El "apartamento" asignado en la nube. Contiene exclusivamente los registros y configuraciones de una sucursal del cliente. | Ningún vecino puede acceder a tus registros o degradar tu rendimiento. |
+| **Portero Inteligente** | El componente de seguridad que lee tu credencial y te dirige instantáneamente a tu apartamento asignado. | Garantiza que las operaciones se enruten únicamente a tu base de datos. |
+| **Pulsera de Acceso** | Una credencial digital de seguridad emitida tras iniciar sesión. El sistema la lee en cada petición para validar tu identidad. | Evita tener que reintroducir contraseñas y protege cada petición. |
+| **Recepción (Base Maestra)** | El registro central del edificio. Almacena la lista de inquilinos y las direcciones de sus apartamentos. | Organiza los accesos de forma rápida sin almacenar datos comerciales. |
+| **Código de Verificación** | Código temporal de 6 dígitos enviado por mensajería digital para validar la propiedad del correo. | Evita la creación de cuentas falsas o accesos no autorizados. |
+| **Aprovisionamiento** | El proceso automatizado que prepara tu apartamento y te entrega las llaves. | Despliegue inmediato de infraestructura en minutos sin intervención manual. |
+| **Canal de Puertas Abiertas** | Mantiene conexiones de bases de datos listas para ser usadas instantáneamente. | Acelera la velocidad de carga de la aplicación de forma drástica. |
+| **Filtro de Seguridad** | Guardia de seguridad digital que valida permisos, formatos y límites de velocidad antes de dar acceso. | Protege al sistema contra fraudes, ataques y saturación. |
 
 ---
 
@@ -122,22 +119,28 @@ Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen e
 
 ## 📊 FASE 2: Arquitectura Real del Proyecto
 
-### 1. Diagrama de Capas Lógicas
+## 📊 FASE 2: Arquitectura Real del Proyecto
 
-> *Este diagrama muestra cómo se divide el trabajo en el código de forma conceptual, sin listar cada archivo.*
+### 1. Mapa de la Casa (Capas de Diseño Limpio)
+
+> *Este mapa describe cómo se organiza el código del sistema, separando las reglas de negocio de los detalles tecnológicos:*
 
 ```mermaid
 graph TD
-    UI["🖥️ Presentación (Next.js)\nInterfaz con el usuario"]
-    API["⚙️ API y Ruteo (Express)\nRecibe peticiones y valida"]
-    NEGOCIO["💼 Reglas de Negocio\nMódulos (Auth, ERP, etc.)"]
-    CORE["🔧 Herramientas Base\n(Conexiones HTTP, SQL, Errores)"]
-    DATOS["🗄️ Fuentes de Datos\n(MySQL, Velneo, SAT)"]
+    subgraph CASA ["🏡 ESTRUCTURA DE LA CASA"]
+        direction TB
+        CORAZON["❤️ El Corazón (Dominio)<br/>Reglas esenciales de negocio que jamás cambian<br/>(ej: Un balance no puede ser menor a cero)"]
+        MENSAJERO["✉️ El Mensajero (Aplicación)<br/>Flujos que reciben órdenes del usuario y validan<br/>que cumplan las reglas del Corazón"]
+        HERRAMIENTAS["🔧 Las Herramientas (Infraestructura)<br/>Bases de datos locales, comunicación externa y servicios"]
+        
+        MENSAJERO --> CORAZON
+        HERRAMIENTAS --> MENSAJERO
+    end
 
-    UI -->|"Pide datos / Acciones"| API
-    API -->|"Delega trabajo"| NEGOCIO
-    NEGOCIO -->|"Usa conectores"| CORE
-    CORE -->|"Lee/Escribe"| DATOS
+    style CASA fill:#edf0f7,stroke:#c7cfdf,stroke-width:2px
+    style CORAZON fill:#fee2e2,stroke:#ef4444,stroke-width:1.5px,color:#991b1b
+    style MENSAJERO fill:#eff6ff,stroke:#3b82f6,stroke-width:1.5px,color:#1e3a8a
+    style HERRAMIENTAS fill:#f0fdf4,stroke:#22c55e,stroke-width:1.5px,color:#14532d
 ```
 
 ### 2. Estructura de Carpetas Real
@@ -252,18 +255,18 @@ flowchart TB
 
 ### Capas de Seguridad Implementadas
 
-| Capa | Implementación | Archivo |
+| Capa de Seguridad | Propósito y Valor de Negocio | Archivo de Control |
 | :--- | :--- | :--- |
-| **Headers HTTP** | Helmet middleware | `security.middleware.js` |
-| **Rate Limiting** | 100 req / 15 min / IP | `rateLimit.middleware.js` |
-| **CORS Dinámico** | Solo orígenes en `CLIENT_URL` | `app.js` |
-| **Errores Controlados** | Jerarquía `AppError` → 4 tipos | `core/errors/` |
-| **Pool de BD** | `waitForConnections: true`, 10 cx máx | `config/database.js` |
-| **HTTPS Resiliente** | Keep-Alive + timeout 30s + retry | `config/httpClients.js` |
+| **Escudo de Privacidad** | Bloquea ataques en el navegador del usuario inyectando cabeceras de seguridad. | `security.middleware.js` |
+| **Límite de Velocidad** | Limita las llamadas al servidor (máx. 100 peticiones cada 15 minutos) para evitar abusos o saturaciones. | `rateLimit.middleware.js` |
+| **Filtro de Origen** | Asegura que solo las llamadas desde el portal oficial de la aplicación sean aceptadas. | `app.js` |
+| **Control de Errores** | Mapea y responde ante cualquier eventualidad sin revelar detalles técnicos internos del servidor. | `core/errors/` |
+| **Conexiones Activas** | Mantiene un canal de puertas abiertas de bases de datos listas para su uso rápido. | `config/database.js` |
+| **Canal Blindado Externo** | Asegura conexiones estables con agentes externos mediante reintentos automáticos. | `config/httpClients.js` |
 
-### Resiliencia de Velneo Cloud
+### Resiliencia del Almacén de Datos Externo
 
-> *Si el servidor de Velneo Cloud no responde, el interceptor de Axios registra el error y el sistema devuelve una respuesta controlada. Se implementan 3 reintentos implícitos vía el agente HTTPS Keep-Alive antes de fallar.*
+> *"Si el almacén de datos externo no responde al primer intento, el sistema activará un protocolo de reintentos automáticos (máximo 3 veces) espaciados en milisegundos para salvar la operación antes de emitir una alerta, protegiendo la experiencia del usuario".*
 
 ---
 
@@ -501,3 +504,4 @@ Listado maestro de los vServers e instancias de datos/lógica aprovisionados en 
 ---
 
 *Última actualización automática: Mayo 2026 — Auditado por Project Blueprint Skill — Proyecto: Datta ERP*
+*Nota de Trazabilidad: **Se ha optimizado el paso de verificación para que el motor busque más rápido en los contenedores de datos individuales.***

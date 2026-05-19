@@ -222,36 +222,36 @@ pnpm add @tanstack/react-query react-hook-form lucide-react js-cookie react-hot-
 sequenceDiagram
     autonumber
     actor U as 👤 Usuario
-    participant F as 🟦 Frontend<br/>(Next.js)
-    participant V as 🟦 Zod<br/>(Validador)
-    participant RL as 🟨 RateLimit<br/>(express-rate-limit)
-    participant C as 🟨 Controller<br/>/registro/inicial
-    participant MS as 🟨 MySQL<br/>Service
-    participant OTP as 🟨 OTP<br/>Generator
-    participant M as 🟨 Mail<br/>Service
-    participant DB as 🟩 MySQL<br/>codigos_otp
-    participant DU as 🟩 MySQL<br/>usuarios
+    participant F as 🟦 Pantalla Frontend
+    participant V as 🟦 Verificación de Datos
+    participant RL as 🟨 Límite de Velocidad
+    participant C as 🟨 Servidor Lógico
+    participant MS as 🟨 Orquestador del Servicio
+    participant OTP as 🟨 Generador OTP
+    participant M as 🟨 Servicio de Mensajería
+    participant DB as 🟩 MySQL (codigos_otp)
+    participant DU as 🟩 MySQL (usuarios)
 
     rect rgb(239, 246, 255)
         Note over U,F: ── PASO 1: Formulario de Registro ──
         U->>F: Llena el formulario y hace clic en "Continuar"
-        F->>V: Valida campos con schema Zod
+        F->>V: Valida campos en pantalla
         alt Datos inválidos
             V-->>F: ❌ Errores de validación (RFC, correo, etc.)
             F-->>U: Muestra mensajes de error en campos rojos
         else Datos válidos
-            V-->>F: ✅ Datos limpios y tipados
+            V-->>F: ✅ Datos limpios y estructurados
         end
     end
 
     rect rgb(255, 251, 235)
-        Note over F,RL: ── SEGURIDAD: Rate Limit ──
+        Note over F,RL: ── SEGURIDAD: Límite de Velocidad ──
         F->>RL: POST /autenticacion/registro/inicial
         alt Más de 5 intentos/hora
-            RL-->>F: 429 Too Many Requests
+            RL-->>F: 429 Límite Excedido
             F-->>U: "Límite alcanzado. Espera 1 hora."
         else Dentro del límite
-            RL->>C: Pasa la petición al controller
+            RL->>C: Pasa la petición al controlador
         end
     end
 
@@ -289,17 +289,17 @@ sequenceDiagram
         OTP-->>C: "482917"
         C->>DB: INSERT codigos_otp (correo, codigo, tipo='registro', fecha_expiracion=+15min)
         DB-->>C: OTP guardado ✅
-        C->>M: Envía email OTP real (SMTP TLS)
+        C->>M: Envía email OTP real
         M-->>U: 📧 Correo HTML con código "482917" (expira en 15 min)
-        C-->>F: 200 "Código enviado a william@empresa.com"
-        F-->>U: Muestra paso Verificación OTP e inicia cuenta regresiva (180s)
+        C-->>F: 200 "Código enviado a correo..."
+        F-->>U: Muestra paso Verificación OTP e inicia cuenta regresiva
     end
 
     rect rgb(239, 246, 255)
         Note over U,F: ── PASO 2: Verificación OTP ──
         U->>F: Ingresa los 6 dígitos en el modal
         F->>RL: POST /autenticacion/registro/verificar
-        RL->>C: Controller /registro/verificar
+        RL->>C: Controlador /registro/verificar
         C->>DB: SELECT * FROM codigos_otp WHERE correo=? AND codigo=? AND tipo='registro'
         DB-->>C: Registro encontrado
     end
@@ -324,7 +324,7 @@ sequenceDiagram
         Note over C,DU: ── CREACIÓN AUTOMÁTICA DEL USUARIO ──
         C->>C: Genera usuario: "william.garcia847"
         C->>C: Genera contraseña: 12 chars aleatorios
-        C->>C: Bcrypt hash(contraseña, 12 rondas)
+        C->>C: Cifra clave (Caja fuerte digital)
         C->>DU: INSERT usuarios (nombres, correo, usuario, contraseña, id_rol=cliente)
         DU-->>C: Usuario creado ✅ (id asignado)
         C->>M: Envía correo de bienvenida real con credenciales
@@ -557,30 +557,30 @@ flowchart TD
 
 ## 🔐 Capas de Seguridad — De la Petición al Dato
 
-> *Antes de que cualquier dato llegue a la base de datos, pasa por 5 capas de revisión. Piénsalo como el control de seguridad de un aeropuerto.*
+> *Antes de que cualquier dato llegue a la base de datos, pasa por 5 capas de revisión. Piénsalo como el control de seguridad y portería de un edificio de apartamentos.*
 
 ```mermaid
 flowchart LR
     REQ["📡 Petición<br/>del usuario"] --> H
 
-    subgraph L1["Capa 1 🟨 — Helmet + CORS"]
-        H["Headers HTTP seguros<br/>Solo origen CLIENT_URL<br/>permitido"]
+    subgraph L1["Capa 1 🟨 — Escudo de Privacidad + CORS"]
+        H["Cabeceras seguras<br/>Solo origen oficial<br/>permitido"]
     end
 
-    subgraph L2["Capa 2 🟨 — Rate Limit & Cooldown"]
-        RL["3 intentos/hora por IP<br/>+ Cooldown de 3 min<br/>por correo"]
+    subgraph L2["Capa 2 🟨 — Límite de Velocidad + Cooldown"]
+        RL["Límite de peticiones<br/>+ Cooldown de 3 min<br/>por correo"]
     end
 
-    subgraph L3["Capa 3 🟦 — Zod (Frontend)"]
-        Z["Validación local<br/>antes de enviar<br/>la petición"]
+    subgraph L3["Capa 3 🟦 — Validación Local"]
+        Z["Validación en pantalla<br/>antes de enviar<br/>la petición"]
     end
 
-    subgraph L4["Capa 4 🟨 — Zod (Backend)"]
-        ZB["Re-validación<br/>en el servidor<br/>(no confiar en cliente)"]
+    subgraph L4["Capa 4 🟨 — Verificación Inteligente en Servidor"]
+        ZB["Re-validación lógica<br/>en el servidor<br/>(cero confianza en cliente)"]
     end
 
-    subgraph L5["Capa 5 🟩 — Bcrypt + MySQL"]
-        B["Contraseña hasheada<br/>12 rondas<br/>Antes del INSERT"]
+    subgraph L5["Capa 5 🟩 — Encriptación + MySQL"]
+        B["Cifrado de contraseña<br/>en caja fuerte digital<br/>antes del INSERT"]
     end
 
     H --> RL

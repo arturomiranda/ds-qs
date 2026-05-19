@@ -257,24 +257,24 @@ Registra la contraseña definitiva cifrada en la base de datos y desactiva la ba
 sequenceDiagram
     autonumber
     actor U as 👤 Usuario
-    participant F as 🟦 Frontend (Next.js)
-    participant C as 🟨 Servidor (Express)
+    participant F as 🟦 Pantalla Frontend
+    participant C as 🟨 Servidor Lógico
     participant DU as 🟩 MySQL (usuarios)
     participant DO as 🟩 MySQL (codigos_otp)
-    participant M as 📧 Mailer (SMTP)
+    participant M as 🟨 Servicio de Mensajería
 
     rect rgb(239, 246, 255)
         Note over U,DU: ── FLUJO A: INICIO DE SESIÓN (LOGIN) ──
-        U->>F: Ingresa correo (identifier) y contraseña (password)
+        U->>F: Ingresa correo y contraseña
         F->>C: POST /autenticacion/iniciar-sesion
         C->>DU: SELECT * FROM usuarios WHERE correo = ? OR usuario = ?
-        DU-->>C: Datos del usuario (con hash Bcrypt)
+        DU-->>C: Datos del usuario (con hash de clave cifrada)
         
         alt Credenciales incorrectas
             C-->>F: 401 {"mensaje": "Credenciales incorrectas"}
             F-->>U: Banner rojo + enlace "¿Olvidaste tu contraseña?"
         else Credenciales correctas
-            C->>C: Compara Bcrypt hash de contraseña
+            C->>C: Valida contraseña contra caja fuerte digital
             
             alt Primer ingreso (actualizar_contraseña = 1)
                 C-->>F: 200 {"user": { ..., "mustChangePassword": true }}
@@ -298,13 +298,12 @@ sequenceDiagram
             F-->>U: Alterna a vista 'primerIngreso' con opción de reenviar credenciales
             U->>F: Hace clic en "Reenviar credenciales por correo"
             F->>C: POST /autenticacion/recuperar/reenviar-credenciales
-            C->>C: Genera nueva contraseña temporal aleatoria y la cifra
+            C->>C: Genera nueva clave temporal y la cifra
             C->>DU: UPDATE usuarios SET contraseña = ? (actualizar_contraseña = 1)
-            C->>M: Envía correo con usuario y contraseña temporal (SMTP)
+            C->>M: Envía correo con credenciales temporales
             C-->>F: 200 {"mensaje": "Credenciales reenviadas con éxito"}
             F-->>U: Muestra toast de éxito y regresa a vista de Login
         else Usuario con Cuenta Activada (actualizar_contraseña = 0)
-            C->>C: Enmascara número (deja solo últimos dos dígitos: ******53)
             C-->>F: 200 {"telefonoEnmascarado": "******53"}
             F-->>U: Muestra "Confirma tu teléfono: ******53" y solicita número completo
             
@@ -317,7 +316,7 @@ sequenceDiagram
             else Teléfono coincide perfectamente
                 C->>C: Genera OTP aleatorio de 6 dígitos
                 C->>DO: INSERT INTO codigos_otp (correo, codigo, tipo='reset_contrasena')
-                C->>M: Envía correo con código OTP (SMTP)
+                C->>M: Envía correo con código OTP
                 C-->>F: 200 {"mensaje": "El código OTP ha sido enviado"}
                 F-->>U: Solicita ingresar el código de 6 dígitos
             end
@@ -332,7 +331,7 @@ sequenceDiagram
             
             U->>F: Ingresa y confirma su nueva contraseña definitiva
             F->>C: POST /autenticacion/cambiar-contrasena
-            C->>C: Valida e incrementa seguridad, cifra con Bcrypt
+            C->>C: Valida e incrementa seguridad, cifra clave
             C->>DU: UPDATE usuarios SET contraseña = ?, actualizar_contraseña = 0 WHERE id = ?
             C-->>F: 200 {"message": "Contraseña actualizada con éxito"}
             F-->>U: Redirige a Login con toast de éxito

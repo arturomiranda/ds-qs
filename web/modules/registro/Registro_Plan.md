@@ -40,62 +40,27 @@ El flujo se divide en **tres fases visuales (2 secuenciales de acción)**:
 
 ### Tablas que participan en este módulo
 
-#### 1. `usuarios` — El Directorio Principal
+#### 1. `usuarios` — Directorio Principal de Accesos
+Este flujo inserta un nuevo registro de usuario una vez verificado su correo. Los campos recopilados del formulario frontend y persistidos en base de datos son:
+* **Datos básicos del cliente:** `nombres`, `apellido_paterno`, `apellido_materno`, `empresa`, `rfc`, `correo`, y `telefono`.
+* **Datos auto-generados por backend:** `usuario` (ej. `william.garcia847`), `contraseña` (hash Bcrypt temporal) e `id_rol` (asigna por defecto el rol de `cliente`).
+* **Flags de estado de registro:** `verificado` (cambia de `0` a `1` al confirmar OTP) y `actualizar_contraseña` (setea en `1` para forzar cambio en primer inicio de sesión).
 
-*Piensa en esta tabla como la **ficha de empleado** del sistema. Cada fila es una persona con acceso al ERP.*
-
-| Campo | Tipo | ¿Qué guarda? | Nota clave |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT UNSIGNED AUTO_INCREMENT` | Número de identificación único e irrepetible | PK — se asigna automáticamente |
-| `nombres` | `VARCHAR(100)` | El o los nombres del usuario | Obligatorio, viene del formulario |
-| `apellido_paterno` | `VARCHAR(100)` | Primer apellido | Obligatorio |
-| `apellido_materno` | `VARCHAR(100)` | Segundo apellido | Obligatorio |
-| `empresa` | `VARCHAR(100)` | Razón social o nombre del negocio | Opcional |
-| `rfc` | `VARCHAR(13)` | Clave fiscal (RFC mexicano) | Opcional, máx. 13 chars |
-| `correo` | `VARCHAR(100)` | Email de acceso (único en todo el sistema) | `UNIQUE` — es el login |
-| `telefono` | `VARCHAR(20)` | Número de contacto | Opcional |
-| `usuario` | `VARCHAR(50)` | Nombre de usuario generado auto (`nombre.apellido+3_num`) | `UNIQUE` — generado por el backend |
-| `contraseña` | `VARCHAR(255)` | **Hash Bcrypt** de la contraseña de 12 caracteres | Nunca se guarda en texto plano |
-| `id_rol` | `INT UNSIGNED` | Nivel de acceso (Admin, Cliente...) | FK → tabla `roles` |
-| `verificado` | `TINYINT(1)` | `0` = pendiente, `1` = correo confirmado | Cambia a `1` al verificar OTP |
-| `actualizar_contraseña` | `TINYINT(1)` | `1` = debe cambiar su pass al primer login | Siempre `1` en el registro inicial |
-| `fecha_creacion` | `TIMESTAMP` | Cuándo se creó el registro | Auto |
-| `fecha_actualizacion` | `TIMESTAMP` | Última modificación del perfil | Auto, actualiza en cada cambio |
-
-> 🔒 **Regla de seguridad:** El campo `verificado` comienza en `0`. El usuario queda "en sala de espera" hasta que confirme su OTP. Si no confirma en 15 minutos, el registro **no se crea** (el OTP expira, no hay usuario fantasma).
+> 📘 El diccionario de datos detallado con tipos, índices y restricciones completas de la tabla `usuarios` se encuentra definido en el [Blueprint de Arquitectura](../../architecture/blueprint.md#1-tabla-usuarios).
 
 ---
 
-#### 2. `codigos_otp` — El Sobre con el Código Secreto
+#### 2. `codigos_otp` — Registro de Verificaciones
+Almacena temporalmente los códigos de verificación de 6 dígitos vinculados a cada correo, regulando el cooldown de 3 minutos y la expiración rígida de 15 minutos.
 
-*Esta tabla es como el **buzón de códigos de verificación**. Cada vez que alguien pide registrarse, el sistema guarda aquí el código que le mandó por correo, junto con una fecha de vencimiento y audita el tiempo de creación para aplicar límites de velocidad.*
-
-| Campo | Tipo | ¿Qué guarda? | Nota clave |
-| :--- | :--- | :--- | :--- |
-| `id` | `INT UNSIGNED AUTO_INCREMENT` | ID del registro OTP | PK |
-| `correo` | `VARCHAR(100)` | El email al que se envió el código | No es FK — soporta OTPs antes de que el usuario exista |
-| `codigo` | `VARCHAR(6)` | Los 6 dígitos secretos (ej: `482917`) | Generado aleatoriamente |
-| `tipo` | `ENUM('registro','reset_contrasena','2fa')` | Para qué sirve este código | Para este módulo: `'registro'` |
-| `fecha_expiracion` | `DATETIME` | Fecha y hora límite de validez | **15 minutos** desde la creación |
-| `usado` | `TINYINT(1)` | `1` = ya fue validado, no se puede usar de nuevo | Protege contra ataques de reutilización |
-| `fecha_creacion` | `TIMESTAMP` | Cuándo se generó el OTP | Auto (`DEFAULT CURRENT_TIMESTAMP`) |
-
-> 🔑 **¿Por qué `correo` no tiene FK a `usuarios`?** Porque el OTP se genera *antes* de crear el usuario. El sistema primero valida el correo, y solo si el código es correcto crea el registro en `usuarios`. Así nunca hay usuarios "a medias".
+> 📘 La definición técnica del esquema y ciclo de vida de la tabla `codigos_otp` se encuentra centralizada en la [Documentación del Servicio de Correo y OTP](../../servicios/correo_servicio.md#9-estructura-de-datos-tabla-codigos_otp).
 
 ---
 
-#### 3. `roles` — El Nivel de Acceso
+#### 3. `roles` — Niveles de Permiso
+Catálogo de perfiles. En este módulo se consulta la tabla para validar y asignar de forma segura el rol de `cliente` (el nivel de privilegios por defecto) sin delegar esta decisión al cliente frontend.
 
-*Esta tabla es el **catálogo de pases de acceso**. Para el registro, todo nuevo usuario recibe automáticamente el rol de `cliente` (el nivel más básico).*
-
-| Campo | ¿Qué guarda? |
-| :--- | :--- |
-| `id` | ID del rol (ej: `1` = admin, `2` = cliente) |
-| `nombre_rol` | Nombre legible (ej: `"cliente"`) |
-| `descripcion` | Qué puede hacer ese rol |
-| `es_activo` | Si el rol está disponible para asignarse |
-
-> 📌 En el registro automático: `id_rol` se asigna como `cliente` por defecto.
+> 📘 El esquema detallado de la tabla `roles` está disponible en el [Blueprint de Arquitectura](../../architecture/blueprint.md#2-tabla-roles).
 
 ---
 

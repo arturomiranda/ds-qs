@@ -29,27 +29,26 @@ Asimismo, gestiona la restauración autónoma de contraseñas olvidadas de forma
 
 ## 🗄️ Tablas de la Base de Datos (MySQL)
 
-Las tablas involucradas en el módulo residen en la base de datos maestra MySQL y son las siguientes:
+Las tablas involucradas en este módulo residen en la base de datos maestra MySQL:
 
 ### 1. `usuarios`
-Contiene la ficha técnica del usuario y sus banderas de estado.
-* **`correo` (VARCHAR):** Identificador exclusivo de inicio de sesión.
-* **`contraseña` (VARCHAR):** Hash encriptado con Bcrypt (12 rondas de costo).
-* **`telefono` (VARCHAR):** Número telefónico completo utilizado para la comprobación de propiedad física.
-* **`actualizar_contraseña` (TINYINT):**
-  * `1` = Clave genérica (fuerza redirección al formulario de cambio obligatorio al ingresar).
-  * `0` = Clave definitiva (acceso normal).
-* **`verificado` (TINYINT):** `1` = Cuenta autorizada para el login. `0` = Cuenta en sala de espera.
+Se validan las credenciales contra esta tabla durante el inicio de sesión.
+* **Campos clave leídos/modificados:** `correo` (identificador principal), `contraseña` (hash Bcrypt), `telefono` (enmascarado y usado para recuperación de contraseña) y `actualizar_contraseña` (si es `1`, se fuerza la redirección al formulario de cambio obligatorio).
+* **Restricción:** El campo `verificado` debe ser `1` para permitir el inicio de sesión.
+
+> 📘 El diccionario de datos detallado de la tabla `usuarios` se encuentra definido en el [Blueprint de Arquitectura](../../architecture/blueprint.md#1-tabla-usuarios).
 
 ### 2. `codigos_otp`
-Registra los OTPs generados para la restauración de claves.
-* **`tipo` (ENUM):** Para este flujo se creará bajo el tipo `'reset_contrasena'`.
-* **`usado` (TINYINT):** Evita la reutilización de códigos obsoletos una vez finalizada la confirmación de restauración.
+Registra y valida los códigos OTP temporales de 6 dígitos utilizados únicamente para el flujo de restauración de contraseña.
+* **Flujo reset:** Se genera bajo el tipo `'reset_contrasena'`. Al consumirse con éxito, cambia a `usado = 1`.
+
+> 📘 La definición del esquema y ciclo de vida de la tabla `codigos_otp` se encuentra centralizada en la [Documentación del Servicio de Correo y OTP](../../servicios/correo_servicio.md#9-estructura-de-datos-tabla-codigos_otp).
 
 ### 3. `sesiones`
-Audita las sesiones JWT abiertas.
-* **`hash_token` (VARCHAR):** SHA-256 de la firma JWT.
-* **`fecha_expiracion` (DATETIME):** Límite temporal de validez de la sesión activa.
+Registra las firmas de los tokens JWT emitidos con el fin de auditar accesos y permitir mecanismos de cierre de sesión global (logout).
+* **Campos clave:** `id_usuario`, `hash_token` (SHA-256 de la firma JWT) y `fecha_expiracion` de la sesión.
+
+> 📘 El esquema detallado de la tabla `sesiones` está disponible en el [Blueprint de Arquitectura](../../architecture/blueprint.md#4-tabla-sesiones).
 
 ---
 

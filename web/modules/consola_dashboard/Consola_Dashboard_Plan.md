@@ -27,26 +27,13 @@ El Dashboard de Control es el **centro de operaciones** para el cliente (rol `cl
 
 Para lograr este aislamiento, la base de datos se divide en dos capas:
 
-### Capa A: Ruteador y Metadata Central (MySQL - `Proyectos/bd.sql`)
+### Capa A: Ruteador y Metadata Central (MySQL)
 Consolida el inventario de entornos contratados por el usuario y los endpoints a los que se debe conectar:
 
-#### Tabla: `velneo` (Tabla Maestra de Conexión)
-*   `id` (INT PK AUTO_INCREMENT): Identificador único de configuración del tenant.
-*   `id_usuario` (INT FK ➡️ `usuarios`): El dueño y administrador del entorno.
-*   `id_instancia_dat` (INT FK ➡️ `velneo_instancias`): Instancia física de datos en Velneo Cloud.
-*   `id_instancia_app` (INT FK ➡️ `velneo_instancias`): Instancia física de aplicación en Velneo Cloud.
-*   `id_group` (VARCHAR 100): Alias del grupo de seguridad asignado al tenant en el vServer.
-*   `id_user_velneo` (VARCHAR 100): Identificador del usuario técnico para la conexión API.
-*   `url_api` (VARCHAR 255 - UK): La dirección IP o dominio aislada para las peticiones REST de este cliente (ej: `https://mty-api.dattaerp.com/v1`).
-*   `id_group_check` (TINYINT): Confirmación de creación del grupo en Velneo (1 = Sí).
-*   `id_user_check` (TINYINT): Confirmación de creación del usuario técnico en Velneo (1 = Sí).
-*   `fecha_creacion` (TIMESTAMP): Alta de aprovisionamiento.
+*   **Tabla `velneo` (Tabla Maestra de Conexión):** Asocia cada usuario administrador con sus respectivas instancias de datos y aplicación, e inyecta la variable clave `url_api` (ej: `https://mty-api.dattaerp.com/v1`) para dirigir las peticiones REST.
+*   **Tabla `velneo_instancias` (Servidores Velneo):** Inventario maestro de servidores dedicados de datos (`'dat'`) o de aplicación (`'app'`) creados en la nube.
 
-#### Tabla: `velneo_instancias` (Tabla Maestra de Servidores Velneo)
-*   `id` (INT PK): Identificador único.
-*   `id_instancia` (VARCHAR 100): Identificador único devuelto por la API de Velneo (ej: `PROD_DAT`).
-*   `nombre` (VARCHAR 100): Nombre amigable (ej: *Sucursal Monterrey*).
-*   `tipo` (ENUM: `'dat'`, `'app'`): Clasifica si es de datos o aplicación.
+> 📘 Las descripciones de campos, restricciones y llaves foráneas detalladas para las tablas `velneo` y `velneo_instancias` se encuentran en el [Blueprint de Arquitectura](../../architecture/blueprint.md#5-tabla-velneo).
 
 ---
 

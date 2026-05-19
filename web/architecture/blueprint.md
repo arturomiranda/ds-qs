@@ -118,30 +118,6 @@ Antes de entrar en detalles técnicos, aquí están los conceptos que aparecen e
 | **Tiempo Real** | Socket.io *(configurado, pendiente de módulo)* | ⏳ Pendiente |
 | **Gestor de paquetes** | pnpm (workspace monorepo) | ✅ Activo |
 
-### 3. Librerías Verificadas en el Código
-
-#### Backend (`/backend`)
-| Librería | ¿Para qué la usamos aquí? |
-| :--- | :--- |
-| `express 5.x` | Servidor HTTP principal |
-| `mysql2/promise` | Pool de conexiones async a MySQL |
-| `axios` | Cliente HTTP para Velneo Cloud y SAT |
-| `https` (Node built-in) | Agente HTTPS con Keep-Alive para Velneo |
-| `dotenv` | Carga de variables de entorno |
-| `cors`, `cookie-parser` | Seguridad de peticiones y cookies |
-| `morgan` | Logging de peticiones (solo en desarrollo) |
-| `helmet` | Seguridad de headers HTTP |
-| `express-rate-limit` | Límite de intentos (100 req/15 min) |
-
-#### Frontend (`/frontend`)
-| Librería | ¿Para qué la usamos aquí? |
-| :--- | :--- |
-| `next 16` + `react 19` | Framework UI con App Router |
-| `typescript 5` + `tailwindcss 4` | Tipado y estilos |
-| `lucide-react` | Iconos (Rocket, Shield, BarChart3, etc.) |
-
-> ⚠️ **Detección de cambio:** Las librerías `bcryptjs`, `nodemailer`, `zod` (en backend/package.json), `@tanstack/react-query`, `react-hook-form`, `react-hot-toast`, `js-cookie` y `zod` (en frontend/package.json) **ya se encuentran 100% instaladas y configuradas**. Se creó una declaración de tipos local en `frontend/types/js-cookie.d.ts` para resolver las firmas ambientales de `js-cookie` bajo el compilador estricto de TypeScript. La única librería del Blueprint de diseño pendiente de instalación es `jspdf` (para generación de reportes).
-
 ---
 
 ## 📊 FASE 2: Arquitectura Real del Proyecto
@@ -421,6 +397,75 @@ classDiagram
 | `VELNEO` | El "Mapa de Conexión" de cada cliente. | `url_api` → Endpoint único |
 | `V_CARPETAS` | Organización física en Velneo Cloud. | `limite_maximo` |
 | `V_INSTANCIAS` | Inventario de instancias DAT/APP desplegadas. | `id_instancia` |
+
+### 📚 Diccionario de Datos Detallado (MySQL)
+
+#### 1. Tabla: `usuarios`
+Contiene el directorio principal de accesos y perfiles del sistema ERP.
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): Identificador único del usuario (PK).
+*   **`nombres`** (`VARCHAR(100)`): Nombre(s) del usuario.
+*   **`apellido_paterno`** (`VARCHAR(100)`): Primer apellido.
+*   **`apellido_materno`** (`VARCHAR(100)`): Segundo apellido.
+*   **`empresa`** (`VARCHAR(100)`): Razón social o nombre comercial del cliente.
+*   **`rfc`** (`VARCHAR(13)`): Registro Federal de Contribuyentes (México).
+*   **`correo`** (`VARCHAR(100)`): Dirección de email de acceso principal (UK).
+*   **`telefono`** (`VARCHAR(20)`): Número de contacto o teléfono móvil.
+*   **`usuario`** (`VARCHAR(50)`): Identificador único generado por sistema (UK).
+*   **`contraseña`** (`VARCHAR(255)`): Contraseña encriptada en hash Bcrypt.
+*   **`id_rol`** (`INT UNSIGNED`): Rol asignado (FK ➡️ `roles`).
+*   **`verificado`** (`TINYINT(1)`): Indica si la cuenta completó la verificación OTP (0 = No, 1 = Sí).
+*   **`actualizar_contraseña`** (`TINYINT(1)`): Indica si se debe forzar el cambio de clave en el próximo login (1 = Sí).
+*   **`fecha_creacion`** (`TIMESTAMP`): Fecha y hora de alta del registro.
+*   **`fecha_actualizacion`** (`TIMESTAMP`): Última actualización del registro.
+
+#### 2. Tabla: `roles`
+Define los niveles de permisos y capacidades dentro del ecosistema ERP.
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): Identificador del rol (PK).
+*   **`nombre_rol`** (`VARCHAR(50)`): Nombre del rol (UK) (ej: `'admin'`, `'cliente'`, `'usuario'`).
+*   **`descripcion`** (`VARCHAR(255)`): Detalle de facultades del rol.
+*   **`es_activo`** (`TINYINT(1)`): Indica si el rol está habilitado (1 = Sí).
+
+#### 3. Tabla: `codigos_otp`
+Almacena códigos temporales de verificación para registro, login 2FA y recuperación de contraseñas. Referencia extendida en [otp_servicio.md](../../servicios/otp_servicio.md).
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): Identificador único (PK).
+*   **`correo`** (`VARCHAR(100)`): Correo del destinatario (sin FK para permitir flujos pre-registro).
+*   **`codigo`** (`VARCHAR(6)`): Código numérico autogenerado de 6 dígitos.
+*   **`tipo`** (`ENUM('registro','reset_contrasena','2fa')`): Propósito de verificación.
+*   **`fecha_expiracion`** (`DATETIME`): Tiempo límite de validez (15 minutos).
+*   **`usado`** (`TINYINT(1)`): Bandera de estado (0 = Disponible, 1 = Consumido).
+*   **`fecha_creacion`** (`TIMESTAMP`): Fecha de creación física (usada para control de cooldown de 3 minutos).
+
+#### 4. Tabla: `sesiones`
+Audita e invalida de forma persistente los tokens JWT activos.
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): ID único (PK).
+*   **`id_usuario`** (`INT UNSIGNED`): Usuario propietario de la sesión (FK ➡️ `usuarios`).
+*   **`hash_token`** (`VARCHAR(255)`): SHA-256 de la firma del JWT para validación rápida (UK).
+*   **`fecha_expiracion`** (`DATETIME`): Expiración del token (normalmente 1 hora).
+*   **`direccion_ip`** (`VARCHAR(45)`): Dirección IP de origen del login.
+*   **`agente_usuario`** (`VARCHAR(512)`): User-Agent del dispositivo cliente.
+*   **`fecha_creacion`** (`TIMESTAMP`): Inicio de la sesión.
+
+#### 5. Tabla: `velneo`
+Mapea la configuración técnica y endpoint remoto API de cada tenant.
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): ID de mapeo (PK).
+*   **`id_usuario`** (`INT UNSIGNED`): Dueño del tenant (FK ➡️ `usuarios`).
+*   **`id_carpeta`** (`INT UNSIGNED`): Carpeta contenedora física (FK ➡️ `velneo_carpetas`).
+*   **`id_instancia_dat`** (`INT UNSIGNED`): Instancia de base de datos asignada (FK ➡️ `velneo_instancias`).
+*   **`id_instancia_app`** (`INT UNSIGNED`): Instancia de lógica/app asignada (FK ➡️ `velneo_instancias`).
+*   **`id_group`** (`VARCHAR(100)`): Grupo de seguridad del cliente en el vServer.
+*   **`id_user_velneo`** (`VARCHAR(100)`): Usuario del vServer técnico para peticiones API.
+*   **`url_api`** (`VARCHAR(255)`): Endpoint absoluto para las llamadas REST de este tenant (UK).
+*   **`id_group_check`** (`TINYINT(1)`): Flag de aprovisionamiento del grupo (0 = No, 1 = Sí).
+*   **`id_user_check`** (`TINYINT(1)`): Flag de aprovisionamiento del usuario (0 = No, 1 = Sí).
+*   **`fecha_creacion`** (`TIMESTAMP`): Fecha de aprovisionamiento.
+
+#### 6. Tabla: `velneo_instancias`
+Listado maestro de los vServers e instancias de datos/lógica aprovisionados en Velneo Cloud.
+*   **`id`** (`INT UNSIGNED AUTO_INCREMENT`): ID de instancia (PK).
+*   **`id_instancia`** (`VARCHAR(100)`): ID único retornado por Velneo API (ej: `'MTY_DAT'`).
+*   **`nombre`** (`VARCHAR(100)`): Nombre visual (ej: `'Monterrey Base'`).
+*   **`tipo`** (`ENUM('dat','app')`): Tipo de instancia.
+*   **`fecha_creacion`** (`TIMESTAMP`): Alta física.
 
 ---
 

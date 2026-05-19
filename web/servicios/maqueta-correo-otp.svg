@@ -1,0 +1,120 @@
+<svg width="600" height="740" viewBox="0 0 600 740" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definiciones de estilos y fuentes -->
+  <defs>
+    <style type="text/css">
+      <![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+      .font-sans { font-family: 'Montserrat', sans-serif; }
+      .text-title { font-weight: 700; fill: #001344; }
+      .text-body { font-weight: 400; fill: #4f4f4f; font-size: 13px; line-height: 1.6; }
+      .text-bold { font-weight: 600; fill: #001344; }
+      .text-red { font-weight: 700; fill: #c0392b; }
+      .text-muted { font-weight: 400; fill: #9aa0b0; font-size: 11px; }
+      .otp-digit { font-weight: 700; fill: #001344; font-size: 26px; text-anchor: middle; }
+      ]]>
+    </style>
+    
+    <!-- Degradados -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001a5c" />
+      <stop offset="100%" stop-color="#000922" />
+    </linearGradient>
+    <linearGradient id="bannerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#002366" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#002366" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo General de la maqueta -->
+  <rect width="600" height="740" fill="#edf0f7"/>
+
+  <!-- Contenedor del Correo (Card Principal) -->
+  <rect x="20" y="20" width="560" height="700" rx="14" fill="#ffffff" stroke="#d5daea" stroke-width="1"/>
+  
+  <!-- Borde superior de acento -->
+  <path d="M20 34 A 14 14 0 0 1 34 20 L 566 20 A 14 14 0 0 1 580 34 L 580 25 L 20 25 Z" fill="#001344"/>
+
+  <!-- Encabezado con imagen cid:background (Simulación de Banner Corporativo) -->
+  <g>
+    <rect x="20" y="25" width="560" height="150" fill="url(#headerGrad)"/>
+    <!-- Patrón geométrico abstracto de fondo -->
+    <path d="M20 175 L180 80 L320 140 L450 60 L580 120 L580 175 Z" fill="url(#bannerGrad)" opacity="0.4"/>
+    <circle cx="500" cy="70" r="40" fill="#ffffff" opacity="0.05"/>
+    <circle cx="150" cy="120" r="60" fill="#ffffff" opacity="0.03"/>
+    
+    <!-- Logo/Texto Central del Header -->
+    <text x="300" y="105" class="font-sans" font-size="28" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="4">DATTA ERP</text>
+    <text x="300" y="125" class="font-sans" font-size="10" font-weight="600" fill="#3b82f6" text-anchor="middle" letter-spacing="2">CLOUD ENTERPRISE SYSTEM</text>
+  </g>
+
+  <!-- Cuerpo del Correo -->
+  <!-- Badge: Verificación de cuenta -->
+  <rect x="50" y="205" width="180" height="26" rx="13" fill="#e8eaf2"/>
+  <circle cx="65" cy="218" r="4" fill="#001344"/>
+  <text x="78" y="222" class="font-sans" font-size="9" font-weight="700" fill="#001344" letter-spacing="1">VERIFICACIÓN DE CUENTA</text>
+
+  <!-- Línea de acento lateral y Título -->
+  <rect x="50" y="245" width="4" height="42" rx="2" fill="#001344"/>
+  <text x="70" y="262" class="font-sans text-title" font-size="18">Tu código de acceso</text>
+  
+  <!-- Descripción -->
+  <text x="70" y="293" class="font-sans text-body" font-size="13">
+    Hola. Para completar tu registro en <tspan font-weight="600" fill="#001344">DattaErp</tspan>, utiliza el siguiente código.
+  </text>
+  <text x="70" y="311" class="font-sans text-body" font-size="13">
+    Este código tiene una validez rígida de <tspan class="text-red">15 minutos</tspan>.
+  </text>
+
+  <!-- Tarjeta de Contenedor de OTP -->
+  <rect x="50" y="340" width="500" height="135" rx="10" fill="#f4f6fb" stroke="#d5daea" stroke-width="1"/>
+  <text x="300" y="370" class="font-sans" font-size="10" font-weight="700" fill="#001344" opacity="0.5" text-anchor="middle" letter-spacing="3">CÓDIGO DE VERIFICACIÓN</text>
+
+  <!-- Celdas de Dígitos OTP (Simulación de _renderizarCeldasCodigo) -->
+  <g transform="translate(85, 390)">
+    <!-- Dígito 1 -->
+    <rect x="0" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="23" y="38" class="font-sans otp-digit">4</text>
+
+    <!-- Dígito 2 -->
+    <rect x="54" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="77" y="38" class="font-sans otp-digit">8</text>
+
+    <!-- Dígito 3 -->
+    <rect x="108" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="131" y="38" class="font-sans otp-digit">2</text>
+
+    <!-- Dígito 4 -->
+    <rect x="162" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="185" y="38" class="font-sans otp-digit">7</text>
+
+    <!-- Dígito 5 -->
+    <rect x="216" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="239" y="38" class="font-sans otp-digit">3</text>
+
+    <!-- Dígito 6 -->
+    <rect x="270" y="0" width="46" height="58" rx="8" fill="#ffffff" stroke="#c7cfdf" stroke-width="1.5"/>
+    <text x="293" y="38" class="font-sans otp-digit">9</text>
+  </g>
+
+  <!-- Nota de seguridad al pie de tarjeta -->
+  <text x="300" y="505" class="font-sans text-muted" text-anchor="middle">Si no has solicitado este código, puedes ignorar este mensaje sin problemas.</text>
+
+  <!-- Divisor -->
+  <line x1="50" y1="535" x2="550" y2="535" stroke="#e8eaf2" stroke-width="1"/>
+
+  <!-- Firma Electrónica (cid:firma) -->
+  <g transform="translate(140, 555)">
+    <!-- Caja firma corporativa simulada -->
+    <rect x="0" y="0" width="320" height="55" rx="6" fill="#fafafa" stroke="#e8eaf2" stroke-dasharray="4 2"/>
+    <text x="160" y="24" class="font-sans" font-size="11" font-weight="700" fill="#001344" text-anchor="middle">Soporte Técnico Dattasoft</text>
+    <text x="160" y="40" class="font-sans" font-size="9" font-weight="400" fill="#7a8499" text-anchor="middle">Firma Electrónica Autorizada y Encriptada</text>
+  </g>
+
+  <!-- Footer del Correo (Fondo Azul Oscuro) -->
+  <g>
+    <path d="M20 675 L 580 675 L 580 706 A 14 14 0 0 1 566 720 L 34 720 A 14 14 0 0 1 20 706 Z" fill="#001344"/>
+    <text x="300" y="702" class="font-sans" font-size="10" fill="#8c9ab8" text-anchor="middle">
+      © 2026 Dattasoft Consultores · Todos los derechos reservados
+    </text>
+  </g>
+</svg>

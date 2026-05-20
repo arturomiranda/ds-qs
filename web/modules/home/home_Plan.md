@@ -1,13 +1,13 @@
-# 🏗️ Plan de Diseño Técnico: Consola de Control e Instancias SaaS (Multi-tenant)
+# 🏗️ Plan de Diseño Técnico: Consola Home e Instancias SaaS (Multi-tenant)
 
-Este documento detalla la planificación arquitectónica, los flujos de comunicación, la resiliencia operativa y la matriz de seguridad del módulo **Consola de Control de Instancias** de Datta ERP. 
+Este documento detalla la planificación arquitectónica, los flujos de comunicación, la resiliencia operativa y la matriz de seguridad del módulo **Home (Consola de Control de Instancias)** de Datta ERP.
 
-Este módulo permite a los administradores principales autogestionar su infraestructura dedicada en Velneo Cloud, conmutar dinámicamente sus bases de datos asociadas mediante la inyección del endpoint `url_api` y coordinar colaboradores y agendas de forma aislada.
+Este módulo permite a los administradores principales autogestionar su infraestructura dedicada en Velneo Cloud, y conmutar dinámicamente sus bases de datos asociadas mediante la inyección del endpoint `url_api` y coordinar colaboradores de forma aislada.
 
 ---
 
 ## 📄 Información General
-- **Módulo:** Consola de Control de Instancias (`consola_dashboard`)
+- **Módulo:** Consola de Control de Instancias (`home`)
 - **Ecosistema:** Datta ERP SaaS
 - **Última Actualización:** Mayo 2026
 - **Diseño Visual:** Modo Claro (Light Mode) integrado con Navbar y Sidebar corporativo.
@@ -16,9 +16,9 @@ Este módulo permite a los administradores principales autogestionar su infraest
 
 ## 1. 🧩 El Corazón del Módulo (Explicación de Negocio)
 
-El Dashboard de Control es el **centro de operaciones** para el cliente (rol `cliente`). En lugar de requerir asistencia técnica manual de soporte, este módulo le permite:
+La consola **Home** es el **centro de operaciones** para el cliente (rol `cliente`). En lugar de requerir asistencia técnica manual de soporte, este módulo le permite:
 1.  **Visualizar su Infraestructura:** Conocer qué sucursales u oficinas virtuales (instancias de Velneo) tiene aprovisionadas en la nube.
-2.  **Ruteo Dinámico de Datos (Aislamiento Puro):** Al seleccionar una instancia del listado, el frontend extrae su endpoint único `url_api`. De forma inmediata, el sistema redirige todas las llamadas de negocio (ver empleados locales, organizar roles en vServer y programar agenda) hacia ese endpoint remoto aislado de Velneo Cloud, garantizando un rendimiento óptimo y aislamiento físico total.
+2.  **Ruteo Dinámico de Datos (Aislamiento Puro):** Al seleccionar una instancia del listado, el frontend extrae su endpoint único `url_api`. De forma inmediata, el sistema redirige todas las llamadas de negocio (ver empleados locales y organizar roles en vServer) hacia ese endpoint remoto aislado de Velneo Cloud, garantizando un rendimiento óptimo y aislamiento físico total.
 3.  **Aprovisionamiento Automatizado:** Iniciar la creación de una nueva sucursal SaaS rellenando un breve formulario.
 
 ---
@@ -38,10 +38,9 @@ Consolida el inventario de entornos contratados por el usuario y los endpoints a
 ---
 
 ### Capa B: Datos del Tenant Específico (Consultados dinámicamente vía `url_api`)
-Al seleccionar la instancia en el Dashboard, toda la lógica de negocio de la derecha consume directamente el endpoint `url_api` del cliente:
+Al seleccionar la instancia en la Home, toda la lógica de negocio de la derecha consume directamente el endpoint `url_api` del cliente:
 *   **Grupos y Roles del vServer (`GET {url_api}/grupos`):** Organigrama de seguridad local de esa base de datos (ej: *Administración*, *Ventas*, *Soporte*).
 *   **Usuarios de la Instancia (`GET {url_api}/usuarios`):** Empleados que tienen credenciales y acceso exclusivo a este subentorno.
-*   **Calendario de la Instancia (`GET {url_api}/eventos`):** Agenda de juntas, recordatorios y tareas operativas exclusivas de esa sucursal.
 
 ---
 
@@ -49,20 +48,18 @@ Al seleccionar la instancia en el Dashboard, toda la lógica de negocio de la de
 
 El módulo utiliza un diseño en Modo Claro integrado al Navbar superior y el Sidebar lateral de Datta ERP.
 
-![Maqueta del Dashboard](./maqueta-consola-dashboard.svg)
+![Maqueta de la Consola Home](./maqueta-home.svg)
 
 ### 🧭 Guía de la Experiencia del Usuario (UX):
 1.  **🚀 Carga Inicial (Ruta por Defecto):**
-    *   Al ingresar al Dashboard, el sistema consulta en MySQL (`GET /consola-dashboard/instancias`) las sucursales vinculadas al usuario.
+    *   Al ingresar a la Home, el sistema consulta en MySQL (`GET /home/instancias`) las sucursales vinculadas al usuario.
     *   Por defecto, se preselecciona la **primera instancia activa** encontrada (ej: *Sucursal Monterrey*) y se ilumina su fila en color azul transparente en la tabla.
 2.  **🔀 Conmutación Dinámica de Instancia (La Magia Multi-tenant):**
     *   Al hacer clic en el botón **"Ver"** de otra instancia (ej: *Cancún (Distribución)*), la fila se ilumina y el frontend actualiza dinámicamente el estado global con su `url_api` (`https://cun-api.dattaerp.com/v1`).
-    *   Inmediatamente, el **Calendario** y los **Grupos en vServer** de la derecha parpadean con una sutil animación de *loading skeleton* y se vuelven a renderizar consumiendo las APIs aisladas de esa sucursal.
+    *   Inmediatamente, los **Grupos en vServer** de la derecha parpadean con una sutil animación de *loading skeleton* y se vuelven a renderizar consumiendo las APIs aisladas de esa sucursal.
 3.  **➕ Aprovisionamiento de Nueva Instancia:**
     *   Al presionar el botón **"+ Nueva Instancia"**, se despliega un formulario modal que solicita: *Nombre Alias*, *Subdominio* y *Base de Datos Base (VCD)*.
     *   Al enviar, se crea la fila en MySQL con estado `'creando'` (mostrando la animación de rayo naranja `⚡ CREANDO` en la tabla) e inicia el micro-servicio que levanta el vServer de forma asíncrona.
-4.  **📅 Interacción con el Calendario:**
-    *   Al pasar el cursor sobre los días destacados en el calendario, se despliega un *tooltip* flotante con el título y la hora del evento registrado en Velneo para esa sucursal.
 
 ---
 
@@ -82,7 +79,7 @@ sequenceDiagram
 
     rect rgb(239, 246, 255)
         Note over U,MC: ── FLUJO A: CARGA INICIAL (LISTADO DE INSTANCIAS) ──
-        U->>C: GET /consola-dashboard/instancias?id_usuario=12
+        U->>C: GET /home/instancias?id_usuario=12
         C->>MC: SELECT v.*, vi.nombre FROM velneo v JOIN velneo_instancias vi ON v.id_instancia_dat = vi.id WHERE v.id_usuario = 12
         MC-->>C: Registros de instancias (incluye "url_api", "id_group", etc.)
         C-->>U: JSON 200 (Listado de entornos con sus url_api únicas)
@@ -96,11 +93,6 @@ sequenceDiagram
         TI->>V: Consulta usuarios en el vServer (id_group = 'GRP_01')
         V-->>TI: Lista de usuarios registrados en el vServer
         TI-->>U: JSON 200 (Colaboradores locales del tenant Monterrey)
-        
-        U->>TI: GET https://mty-api.dattaerp.com/v1/eventos
-        TI->>V: SELECT * FROM eventos_calendario WHERE id_instancia = 'PROD_DAT'
-        V-->>TI: Eventos y agenda de Monterrey
-        TI-->>U: JSON 200 (Agenda y cierre de caja)
     end
 ```
 
@@ -195,13 +187,12 @@ La validación de permisos se ejecuta en el backend mediante el descifrado del J
 
 | Endpoint | Método | Capacidad Operativa | `admin` | `cliente` | `usuario` | `soporte` |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: |
-| `/consola-dashboard/instancias` | `GET` | Listar entornos de su cuenta | 🟩 Sí | 🟩 Sí | ❌ No | 🟩 Sí |
-| `/consola-dashboard/instancias/crear` | `POST` | Aprovisionar nuevo subdominio | 🟩 Sí | 🟩 Sí | ❌ No | ❌ No |
-| `/consola-dashboard/instancias/resync` | `POST` | Forzar reintento de creación | 🟩 Sí | 🟩 Sí | ❌ No | 🟩 Sí |
+| `/home/instancias` | `GET` | Listar entornos de su cuenta | 🟩 Sí | 🟩 Sí | ❌ No | 🟩 Sí |
+| `/home/instancias/crear` | `POST` | Aprovisionar nuevo subdominio | 🟩 Sí | 🟩 Sí | ❌ No | ❌ No |
+| `/home/instancias/resync` | `POST` | Forzar reintento de creación | 🟩 Sí | 🟩 Sí | ❌ No | 🟩 Sí |
 | `{url_api}/usuarios` | `GET` | Ver colaboradores de la sucursal | 🟩 Sí | 🟩 Sí | 🟩 Sí | ❌ No |
 | `{url_api}/usuarios/crear` | `POST` | Dar de alta empleado en vServer | ❌ No | 🟩 Sí | ❌ No | ❌ No |
 | `{url_api}/grupos` | `GET` | Ver grupos en vServer | 🟩 Sí | 🟩 Sí | 🟩 Sí | ❌ No |
-| `{url_api}/eventos` | `GET` | Ver calendario de la sucursal | 🟩 Sí | 🟩 Sí | 🟩 Sí | ❌ No |
 
 ---
 
@@ -210,16 +201,15 @@ La validación de permisos se ejecuta en el backend mediante el descifrado del J
 A continuación se presenta la lista detallada de tareas para llevar a cabo el desarrollo de este módulo:
 
 ### 🟨 Capa Backend (Node.js/Express)
-- [ ] Configurar las rutas del ruteador central en `backend/src/modules/consola_dashboard/consola_dashboard.routes.js`.
-- [ ] Implementar los endpoints de consulta de MySQL y creación de registros en `consola_dashboard.controller.js`.
-- [ ] Desarrollar consultas transaccionales con control de `START TRANSACTION` / `ROLLBACK` en `consola_dashboard.repository.js`.
+- [ ] Configurar las rutas del ruteador central en `backend/src/modules/home/home.routes.js`.
+- [ ] Implementar los endpoints de consulta de MySQL y creación de registros en `home.controller.js`.
+- [ ] Desarrollar consultas transaccionales con control de `START TRANSACTION` / `ROLLBACK` en `home.repository.js`.
 - [ ] Construir el inyector de proxy dinámico que lee `url_api` y reenvía las peticiones a Velneo Cloud de forma segura.
 
 ### 🟦 Capa Frontend (Next.js/React)
-- [ ] Diseñar el panel completo del Dashboard en `frontend/app/consola_dashboard/page.tsx` reutilizando el Navbar superior e incorporando el Sidebar lateral.
+- [ ] Diseñar el panel completo de la Home en `frontend/app/home/page.tsx` reutilizando el Navbar superior e incorporando el Sidebar lateral.
 - [ ] Programar el selector de instancia activa que inyecta en el estado global el endpoint `url_api` seleccionado.
 - [ ] Desarrollar la tabla responsiva de instancias con badges dinámicos (`🟢 ACTIVO`, `⚡ CREANDO`).
-- [ ] Crear el componente de Calendario Mensual interactivo (`components/CalendarioInstancia.tsx`) que consume `{url_api}/eventos`.
 - [ ] Crear la barra lateral de grupos y roles que consume `{url_api}/grupos`.
 - [ ] Diseñar el modal interactivo de creación de nueva sucursal con validaciones vía `react-hook-form`.
 

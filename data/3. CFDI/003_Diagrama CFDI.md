@@ -89,7 +89,7 @@ classDiagram
     `003_CFDI` "1" *-- "1..*" `003_CFDI_CON` : Contiene
     `003_CFDI` "1" *-- "0..*" `003_CPLM` : Anexa
     `003_CFDI` "1" *-- "0..*" `003_CFDIS_REL` : Relaciona
-    
+
     %% Relaciones UML: Impuestos
     `003_CFDI` "1" *-- "0..1" `003_IMP` : Resume Totales
     `003_CFDI` "1" *-- "0..*" `003_IMP_TRSL` : Traslada
@@ -97,14 +97,14 @@ classDiagram
 ```
 
 **Análisis Técnico Fiscal del Diagrama:**
-- **Composición (Rombo negro *--)**: En UML, esto indica que las tablas hijas "mueren" si eliminas la cabecera. Es exacto al XML del SAT: un nodo Concepto o Traslado no puede existir flotando solo, pertenece intrínsecamente a un Comprobante.
+
+- **Composición (Rombo negro \*--)**: En UML, esto indica que las tablas hijas "mueren" si eliminas la cabecera. Es exacto al XML del SAT: un nodo Concepto o Traslado no puede existir flotando solo, pertenece intrínsecamente a un Comprobante.
 
 - **Participantes (003_PAR)**: Aquí se guarda la "fotografía" del RFC y Régimen Fiscal en el momento exacto en que se emitió el CFDI. Esto es vital para el Anexo 20 (versión 4.0), donde el Código Postal (CP_PAR) y el Régimen Fiscal (REG_FIS) del receptor deben coincidir exactamente con la Constancia de Situación Fiscal.
 
 - **Desglose granular de Impuestos (003_IMP_TRSL y 003_IMP_RET)**: El estándar del SAT obliga a desglosar los impuestos por cada tasa y tipo (ej. separar el IVA al 16% del IVA al 8%). Por eso, no se guarda un simple campo "Total IVA" en la cabecera, sino que cada impuesto tiene su propio registro en estas tablas hijas para armar los nodos Traslados y Retenciones.
 
 - **Complementos en JSON (003_CPLM)**: En lugar de hacer una tabla inmensa para cada complemento del SAT (Pagos, Carta Porte, Nómina), tu arquitectura es brillante al utilizar un campo JSN_DAT (Objeto Texto). Esto permite inyectar cualquier estructura técnica del Anexo 20 sin modificar el esquema de base de datos.
-
 
 ## Diagrama de Casos de Uso UML: Módulo CFDI (DS-QS)
 
@@ -115,10 +115,10 @@ flowchart LR
     NodeJS((🤖 Microservicio\nNode.js / IA))
     SAT((🏛️ API del SAT))
 
-    %% Límite del Sistema
+    %% Límite del Sistema (Frontera UML)
     subgraph Sistema_ERP_DS_QS ["📦 Módulo CFDI (Base de Datos Velneo)"]
         direction TB
-        
+
         %% Casos de Uso Principales
         UC1([Descargar CFDIs Masivamente])
         UC2([Procesar Estructura XML del CFDI])
@@ -126,7 +126,7 @@ flowchart LR
         UC4([Consultar CFDI y Totales])
         UC5([Gestionar Complementos Anexos])
         UC6([Asignar CFDI Relacionado])
-        
+
         %% Casos de Uso Incluidos (Obligatorios según Anexo 20)
         UC_PAR([Extraer Participantes y Régimen])
         UC_CON([Extraer Conceptos y Claves SAT])
@@ -145,25 +145,31 @@ flowchart LR
     Usuario --- UC6
 
     %% Relaciones UML estandarizadas (include / extend)
-    %% Un procesamiento de XML del SAT OBLIGA a extraer nodos (include)
     UC2 -. "<<include>>" .-> UC_PAR
     UC2 -. "<<include>>" .-> UC_CON
     UC2 -. "<<include>>" .-> UC_IMP
-    
+
     %% La IA es un proceso que extiende el procesamiento básico del XML
     UC3 -. "<<extend>>" .-> UC2
-    
+
     %% Complementos y Relaciones son opcionales para un CFDI (extend)
     UC5 -. "<<extend>>" .-> UC2
     UC6 -. "<<extend>>" .-> UC2
 
-    classDef actor fill:#f5f5f5,stroke:#333,stroke-width:2px;
-    classDef usecase fill:#e1f5fe,stroke:#01579b,stroke-width:1px;
+    %% --- SECCIÓN DE ESTILOS ADAPTATIVOS MULTI-TEMA ---
+    %% Forzamos 'color' oscuro en las clases para blindar el texto ante el modo oscuro
+    classDef actor fill:#f5f5f5,stroke:#333333,stroke-width:2px,color:#212121;
+    classDef usecase fill:#e1f5fe,stroke:#01579b,stroke-width:1px,color:#00365c;
+
     class Usuario,NodeJS,SAT actor;
     class UC1,UC2,UC3,UC4,UC5,UC6,UC_PAR,UC_CON,UC_IMP usecase;
+
+    %% Contenedor transparente con borde discontinuo gris neutro para resaltar en ambos temas
+    style Sistema_ERP_DS_QS fill:none,stroke:#78909c,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 ## Análisis Fiscal y Arquitectónico del Diagrama UML
+
 - **Relaciones <<include>> (Lo Obligatorio del SAT):** En UML, un <<include>> significa que un caso de uso no puede existir sin ejecutar el otro. Físicamente en tu ERP, cuando Node.js ejecuta "Procesar Estructura XML", está obligado a separar la información en tus tablas maestras para cumplir el Anexo 20:
 
 - **Extraer Participantes:** Llena la tabla 003_PAR con el RFC y Código Postal.
@@ -187,7 +193,7 @@ flowchart LR
 ```mermaid
 stateDiagram-v2
     direction TB
-    
+
     %% Nodo de Inicio UML
     [*] --> Descargar_XML_SAT
 
@@ -225,7 +231,7 @@ stateDiagram-v2
     Join_Sincronizacion --> Clasificacion_IA_NodeJS
     Clasificacion_IA_NodeJS --> Enviar_JSON_a_Velneo
     Enviar_JSON_a_Velneo --> Insertar_Transaccion_Velneo
-    
+
     %% Nodo de Fin UML
     Insertar_Transaccion_Velneo --> [*]
 ```
@@ -259,7 +265,7 @@ stateDiagram-v2
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     participant API as ⚙️ Controlador Velneo (API REST)
     participant T_CFDI as 🗂️ Tabla: 003_CFDI (Maestro)
     participant T_PAR as 🗂️ Tabla: 003_PAR (Participantes)
@@ -268,12 +274,12 @@ sequenceDiagram
     participant T_OPC as 🗂️ Tablas Opcionales (CPLM/REL)
 
     API->>API: 🔒 Iniciar Transacción de Base de Datos (ACID)
-    
+
     %% INSERCIÓN DEL MAESTRO
     Note over API, T_CFDI: 1. Creación del Registro Padre (Indispensable)
     API->>+T_CFDI: Insertar (UUID, SER, FOL, FECH_EMI, FRM_PAG)
     T_CFDI-->>-API: Retorna ID_CFDI_Creado
-    
+
     %% INSERCIÓN DE PARTICIPANTES
     Note over API, T_PAR: 2. Resolución de Identidad
     loop Por cada Emisor y Receptor
@@ -287,7 +293,7 @@ sequenceDiagram
         API->>+T_CON: Insertar (CFDI_CON = ID_CFDI_Creado, COD_SAT, CANT, VAL_UNI, IMPO)
         T_CON-->>-API: OK
     end
-    
+
     %% INSERCIÓN DE IMPUESTOS
     Note over API, T_IMP: 4. Sumatización y Desglose Fiscal
     API->>+T_IMP: Insertar 003_IMP (CFDI_IMP = ID_CFDI_Creado, TOT_TRAS, CFDI_RET_TRAS)
@@ -297,19 +303,19 @@ sequenceDiagram
         API->>+T_IMP: Insertar 003_IMP_TRSL / 003_IMP_RET (CFDI_PAD = ID_CFDI_Creado, CLV_IMP_SAT, TAS_CUO, NUM_IMP)
         T_IMP-->>-API: OK
     end
-    
+
     %% INSERCIÓN DE NODOS OPCIONALES
     Note over API, T_OPC: 5. Extensiones y Relaciones
     opt Si contiene Complemento (Ej. Pago/Nómina)
         API->>+T_OPC: Insertar 003_CPLM (CFDI = ID_CFDI_Creado, TIP, JSN_DAT)
         T_OPC-->>-API: OK
     end
-    
+
     opt Si contiene CFDI Relacionados
         API->>+T_OPC: Insertar 003_CFDIS_REL (CFDI_PAD = ID_CFDI_Creado, UUID_REL, TIP)
         T_OPC-->>-API: OK
     end
-    
+
     API->>API: ✅ Commit Transacción (Escritura final en Disco)
 ```
 
@@ -324,4 +330,3 @@ Este diagrama explica por qué la estructura de tus tablas está diseñada con c
 - **El Desglose Impositivo (Pasos 5 y 6):** Primero guardas los totales en la tabla de apoyo 003_IMP. Luego, debes hacer un bucle para insertar en 003_IMP_TRSL y 003_IMP_RET la tasa exacta (TAS_CUO) y el importe (NUM_IMP) de cada impuesto separado.
 
 - **Transaccionalidad (Commit/Rollback):** Nota que todo está envuelto entre "Iniciar Transacción" y "Commit Transacción". Si por alguna razón la tabla de Conceptos (003_CFDI_CON) falla al guardarse, el controlador aborta (hace un Rollback) y no se guarda nada. Esto evita que queden cabeceras huérfanas sin conceptos o impuestos a medias en tu base de datos.
-    

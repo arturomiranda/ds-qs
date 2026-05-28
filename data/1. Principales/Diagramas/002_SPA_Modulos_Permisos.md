@@ -28,17 +28,17 @@ La pantalla se divide en tres secciones visuales que trabajan juntas de forma in
 ```mermaid
 graph TD
     subgraph "El Panel en un Vistazo"
-        Col1["👥 Columna 1: Grupos<br/>(¿Quién solicita el acceso?)"]
-        Col2["🛡️ Columna 2: Matriz de Control<br/>(¿Qué permisos otorgamos?)"]
-        Col3["🖥️ Columna 3: Simulador ERP<br/>(¿Cómo lo verá el usuario?)"]
+        Col1["<span style='font-weight:bold;'>👥 Columna 1: Grupos</span><br/><span style='color:#c4b5fd;font-size:11px;'>(¿Quién solicita el acceso?)</span>"]
+        Col2["<span style='font-weight:bold;'>🛡️ Columna 2: Matriz de Control</span><br/><span style='color:#93c5fd;font-size:11px;'>(¿Qué permisos otorgamos?)</span>"]
+        Col3["<span style='font-weight:bold;'>🖥️ Columna 3: Simulador ERP</span><br/><span style='color:#6ee7b7;font-size:11px;'>(¿Cómo lo verá el usuario?)</span>"]
 
         Col1 -->|Seleccionar Grupo| Col2
         Col2 -->|Actualización Instantánea| Col3
     end
 
-    style Col1 fill:#f5f3ff,stroke:#8b5cf6,stroke-width:2px
-    style Col2 fill:#eff6ff,stroke:#3b82f6,stroke-width:2px
-    style Col3 fill:#ecfdf5,stroke:#10b981,stroke-width:2px
+    style Col1 fill:#2e1065,stroke:#8b5cf6,stroke-width:2px,color:#ffffff
+    style Col2 fill:#172554,stroke:#3b82f6,stroke-width:2px,color:#ffffff
+    style Col3 fill:#022c22,stroke:#10b981,stroke-width:2px,color:#ffffff
 ```
 
 ### 👥 Columna 1: Galería de Grupos de Usuarios

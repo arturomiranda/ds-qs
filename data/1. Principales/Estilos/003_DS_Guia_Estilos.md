@@ -1,55 +1,83 @@
 # 🎨 Sistema de Diseño (Design System)
 
-Este documento es la **Guía de Estilos Maestra** del sistema. Sirve como referencia para desarrolladores y diseñadores sobre cómo deben verse y comportarse los componentes de la interfaz de usuario en los dos entornos principales:
-
-1. **El Entorno Nativo (Qt/Velneo)**: Controlado por el archivo `TEM_CLARO.css`.
-2. **El Entorno Web (SPA)**: Utilizado en el Panel Inteligente de Permisos y otros módulos web.
+Este documento es la **Guía de Estilos Maestra** del sistema. Refleja fiel y técnicamente la configuración definida en el archivo central de hojas de estilo `TEM_CLARO.css` (Qt/Velneo), garantizando la consistencia visual y de comportamiento en todos los módulos nativos.
 
 ---
 
-## 1️⃣ Paleta de Colores Global
+## 1️⃣ Paleta de Colores (TEM_CLARO)
 
-El sistema utiliza colores definidos semánticamente para mantener la coherencia. A continuación se presentan las paletas maestras para ambos entornos:
+Los colores están definidos para mantener un contraste limpio, moderno y enfocado en la usabilidad de un ERP.
 
 > **Ilustración de referencia:**
-> ![Paletas de Colores](003_DS_Paleta_Colores.svg)
+> ![Paletas de Colores](./003_DS_Paleta_Colores.svg)
 
-### Reglas de Uso de Color
-- **Tema Claro:** El color primario es el **Azul (`#00ACFF`)**. Se utiliza exclusivamente para acciones principales (guardar, seleccionar). Los fondos descansan sobre grises neutros (`#F5F5F5`).
-- **Tema Oscuro:** El acento principal es el **Índigo (`#6366f1`)**, y los fondos utilizan la paleta Slate de Tailwind (`#0f172a`, `#1b2537`) para reducir la fatiga visual.
+### Colores de Acción e Interacción
+- **Primario (`#00ACFF`):** Color de marca y foco. Utilizado en bordes al hacer foco, selección en árboles/listas y botones principales de acción (Aceptar).
+- **Primario Activo/Hover (`#0090D6`):** Estado de presión y 'hover' profundo para los botones primarios.
+- **Selección de Texto (`#ADE4FF`):** Color de fondo al seleccionar texto dentro de un `QLineEdit` o `QTextEdit`.
+
+### Escala de Grises y Fondos
+- **Fondo Base y Cajas (`#F5F5F5`):** Utilizado para casi todas las superficies planas: formularios, ventanas principales (`QMainWindow`), tablas (`QTableView`) y cajas de edición.
+- **Superficies Deshabilitadas (`#EBEBEF`):** Fondo para controles bloqueados (`disabled`) y áreas inertes (separadores, barras de progreso).
+- **Bordes Estándar (`#D1D1DB`):** Contornos de botones, combos y cajas de texto en estado inactivo.
+
+### Tipografía y Elementos de Interfaz
+- **Texto Principal (`#121217`):** Texto de alto contraste para inputs, combos y celdas de tabla.
+- **Texto Secundario (`#3F3F50`):** Texto para botones estándar e ítems de grillas.
+- **Etiquetas e Inactivos (`#6C6C89` y `#8A8AA3`):** Para textos de búsqueda, labels, títulos de paneles y pestañas no seleccionadas.
+- **Advertencias (`#FDD8E1`):** Fondo rosa/rojo suave para los botones de suprimir o advertencia, conservando el texto oscuro.
+- **Modo Inmersivo (`#282833`):** Utilizado en el Menú General (`MEN_APP`) y notificaciones del sistema (Toasts).
 
 ---
 
-## 2️⃣ Componentes del Tema Claro (Nativo Qt)
-
-Estos componentes están definidos en el archivo maestro `TEM_CLARO.css` y se aplican automáticamente a todos los formularios y widgets nativos de Velneo.
+## 2️⃣ Catálogo de Componentes Estándar
 
 > **Ilustración de referencia:**
-> ![Catálogo de Componentes Claro](003_DS_Componentes_Claro.svg)
+> ![Catálogo de Componentes Claro](./003_DS_Componentes_Claro.svg)
 
-### Especificaciones Técnicas (TEM_CLARO.css)
-- **Tipografía Base:** `Roboto, sans-serif` a `13px`.
-- **Botones (`QPushButton`):** Altura estándar de `36px`, con un `border-radius` máximo de `18px` para hacerlos completamente redondeados (pills).
-- **Entradas de Texto (`QLineEdit`):** Altura de `36px` con bordes ligeramente redondeados de `6px`. Cuando el usuario hace foco en ellos, el borde se ilumina en azul (`#00ACFF` a `2px` de grosor).
+### Tipografía Base Global
+Todo el sistema está estructurado sobre la fuente **`Roboto`**, con un tamaño base de **`13px`**. Excepciones:
+- Títulos de grupo (`QGroupBox`): `11px` en negrita.
+- Títulos de formulario (`QLabel#TXT_TIT`): `20px`.
+- Área de Notificaciones: Texto a `13px` color `#F5F5F5`.
+
+### Botones (`QPushButton` y `QToolButton`)
+Los botones presentan un diseño tipo "Pill" (completamente redondeados).
+- **Altura Standard:** `36px`.
+- **Border Radius:** `18px` (la mitad de la altura, creando los bordes redondos).
+- **Botón Estándar:** Fondo `#F5F5F5`, borde `#D1D1DB`, texto `#3F3F50`. En foco cambia el borde a `2px solid #00ACFF`.
+- **Botón Aceptar (`#BTN_ACE`):** Fondo `#00ACFF`, texto `#FFFFFF`. Borde invisible, al presionarlo cambia a `#0090D6`.
+- **Botón Advertencia (`#BTN_ADV`):** Fondo `#FDD8E1`.
+- Los botones sin texto (solo iconos) manejan medidas de `36x36px` con iconos de `18px`.
+
+### Controles de Entrada (Inputs, Combos, Spinners)
+Cajas de texto (`QLineEdit`, `QTextEdit`), combos (`QComboBox`) y calendarios/fechas.
+- **Altura Standard:** `36px`.
+- **Border Radius:** `6px`.
+- **Estados:**
+  - *Inactivo:* Fondo `#F5F5F5`, borde de `1px` sólido en `#D1D1DB`.
+  - *Hover:* El borde cambia a `#00ACFF`.
+  - *Foco:* El grosor del borde se duplica a `2px solid #00ACFF` y ajusta su relleno interior.
+  - *Deshabilitado:* Fondo pasa a `#EBEBEF`, borde desaparece o se vuelve del mismo color, texto `#3F3F50`.
+
+### Toggles, Radios y Checkboxes
+Se rediseñan completamente las marcas tradicionales mediante imágenes en caché, o CSS para el control personalizado.
+- **Checkbox / Radio (`QCheckBox` / `QRadioButton`):** 
+  - Altura reservada de `36px`.
+  - Iconos SVG/PNG inyectados en la seudoclase `::indicator` (dimensión `16x16px`).
+  - Color de texto `#6C6C89`, al recibir hover o foco el texto se ilumina a `#00ACFF`.
+- **Interruptor (`VSwitch`):**
+  - Dimensiones: `36px` de ancho por `24px` de alto.
+  - *Off:* Fondo gris (`#D1D1DB`), botón (perilla) blanca (`#FFFFFF`).
+  - *On:* Fondo azul primario (`#00ACFF`), perilla blanca (`#FFFFFF`).
+  - Al ganar el foco (Focus On), se dibuja un halo azul claro sobre la perilla.
+
+### Pestañas (`QTabWidget`)
+- Separador sin bordes de caja exterior. La barra de tabs se recarga hacia el estilo "Underline".
+- *Tab Inactiva:* Letra `#8A8AA3`, borde inferior sutil de `2px solid #D1D1DB`.
+- *Tab Hover:* El borde inferior se oscurece a `#8A8AA3`.
+- *Tab Activa (Selected):* El borde inferior se pinta de oscuro intenso `#3F3F50`, manteniendo la fuente neutra `#8A8AA3`.
 
 ---
 
-## 3️⃣ Componentes del Tema Oscuro (Módulo Web)
-
-Estos componentes se construyen utilizando HTML/CSS dentro de los WebViews, específicamente diseñados para experiencias inmersivas como la gestión de permisos.
-
-> **Ilustración de referencia:**
-> ![Catálogo de Componentes Web](003_DS_Componentes_Web.svg)
-
-### Especificaciones Técnicas (Web / SPA)
-- **Tipografía Base:** Fuentes del sistema modernas (`'Segoe UI', system-ui, sans-serif`).
-- **Badges CRUD:** Son elementos fundamentales de la UI. Utilizan una combinación de texto vibrante sobre un fondo muy oscuro del mismo matiz para alto contraste en modo oscuro.
-  - **C (Crear):** Familia Verde (`#4ade80` sobre `#14532d`).
-  - **R (Leer):** Familia Azul (`#93c5fd` sobre `#1e3a8a`).
-  - **U (Editar):** Familia Ámbar (`#fcd34d` sobre `#78350f`).
-  - **D (Eliminar):** Familia Roja (`#fca5a5` sobre `#7f1d1d`).
-- **Tarjetas (Cards):** Utilizan sombras suaves (`drop-shadow`) y bordes muy sutiles (`1px solid #334155`) para crear profundidad sin necesidad de alto contraste.
-
----
-
-*Nota: Esta guía es un documento vivo. Si se añaden nuevos componentes globales al CSS o al módulo Web, deben documentarse aquí y en sus SVGs respectivos.*
+*La documentación anterior refleja rigurosamente el código CSS fuente del tema. Si se introducen modificaciones en `TEM_CLARO.css`, este documento y los diagramas visuales adjuntos deberán actualizarse en sintonía.*

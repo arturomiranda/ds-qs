@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" font-family="'Inter', 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <!-- Sombras Tailwind-like -->
+    <filter id="shadow-panel" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="4" dy="0" stdDeviation="15" flood-color="#000000" flood-opacity="0.03"/>
+    </filter>
+    <filter id="shadow-sm" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.05"/>
+    </filter>
+    <filter id="shadow-md" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+    <filter id="shadow-btn" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#4f46e5" flood-opacity="0.3"/>
+    </filter>
+    <filter id="shadow-card-note" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#cbd5e1" flood-opacity="0.2"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect width="900" height="680" fill="#f8fafc"/>
+
+  <!-- ==========================================
+       SECCIÓN IZQUIERDA: MOCKUP INTERFAZ
+       ========================================== -->
+  <g transform="translate(30, 20)">
+    
+    <!-- Pestaña Qt / Velneo -->
+    <rect x="0" y="0" width="380" height="40" fill="#f3f4f6"/>
+    <!-- Tab Activa -->
+    <rect x="10" y="10" width="160" height="30" fill="#f8fafc"/>
+    <path d="M 10 40 L 170 40" stroke="#334155" stroke-width="2"/>
+    <text x="25" y="30" fill="#64748b" font-size="13">Grupos de Usuarios</text>
+    <!-- Icono X -->
+    <path d="M 145 22 L 153 30 M 153 22 L 145 30" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Contenedor -->
+    <rect x="0" y="40" width="380" height="600" fill="#ffffff" filter="url(#shadow-panel)"/>
+    <path d="M 379 40 L 379 640" stroke="#e2e8f0" stroke-width="1"/>
+
+    <!-- Cabecera -->
+    <path d="M 0 130 L 380 130" stroke="#f1f5f9" stroke-width="2"/>
+    <text x="25" y="85" font-weight="800" fill="#1e293b" font-size="15" letter-spacing="1.5">GRUPOS DE USUARIO</text>
+    <text x="25" y="105" fill="#64748b" font-size="13">Seleccione un grupo para configurar</text>
+    <text x="25" y="122" fill="#64748b" font-size="13">sus accesos</text>
+    
+    <!-- Contador -->
+    <rect x="310" y="70" width="45" height="24" fill="#e0e7ff" rx="12" filter="url(#shadow-sm)"/>
+    <text x="332.5" y="86" text-anchor="middle" font-weight="bold" fill="#4338ca" font-size="12">2</text>
+
+    <!-- Zona de Búsqueda -->
+    <rect x="0" y="130" width="380" height="70" fill="#f8fafc" opacity="0.5"/>
+    <path d="M 0 200 L 380 200" stroke="#f1f5f9" stroke-width="2"/>
+    
+    <!-- Input -->
+    <rect x="25" y="145" width="330" height="40" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" rx="8" filter="url(#shadow-sm)"/>
+    <!-- Icono Buscar -->
+    <circle cx="45" cy="162" r="6" fill="none" stroke="#94a3b8" stroke-width="2"/>
+    <path d="M 49 166 L 56 173" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+    <text x="70" y="170" fill="#94a3b8" font-size="14">Buscar grupo...</text>
+
+    <!-- TARJETA 1 (Activa) -->
+    <rect x="25" y="225" width="330" height="110" fill="#eef2ff" stroke="#6366f1" stroke-width="2" rx="12" filter="url(#shadow-md)"/>
+    
+    <!-- Badge ID -->
+    <rect x="45" y="240" width="35" height="18" fill="#e0e7ff" rx="4"/>
+    <text x="50" y="253" font-weight="bold" fill="#6366f1" font-size="10">ID: 1</text>
+    
+    <text x="45" y="282" font-weight="bold" fill="#3730a3" font-size="17">Administradores</text>
+    <text x="45" y="305" fill="#64748b" font-size="13">Administradores del Sistema</text>
+    
+    <!-- Badge Sistema -->
+    <rect x="275" y="265" width="55" height="20" fill="#e2e8f0" rx="4"/>
+    <text x="283" y="279" font-weight="bold" fill="#475569" font-size="11">Sistema</text>
+
+
+    <!-- TARJETA 2 (Inactiva) -->
+    <rect x="25" y="355" width="330" height="110" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" rx="12" filter="url(#shadow-sm)"/>
+    
+    <!-- Badge ID -->
+    <rect x="45" y="370" width="35" height="18" fill="#e0e7ff" rx="4"/>
+    <text x="50" y="383" font-weight="bold" fill="#6366f1" font-size="10">ID: 2</text>
+    
+    <text x="45" y="412" font-weight="bold" fill="#334155" font-size="17">Vendedores</text>
+    <text x="45" y="435" fill="#64748b" font-size="13">Usuarios de ventas</text>
+    
+    <!-- Icono Eliminar -->
+    <g transform="translate(315, 395)">
+      <path d="M 2 4 L 14 4 M 6 4 L 6 2 C 6 1 7 1 8 1 C 9 1 10 1 10 2 L 10 4 M 3 4 L 4 14 C 4 15 5 15 8 15 C 11 15 12 15 12 14 L 13 4" fill="none" stroke="#f43f5e" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M 6 7 L 6 11 M 10 7 L 10 11" stroke="#f43f5e" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Fondo inferior y Botón -->
+    <path d="M 0 550 L 380 550" stroke="#f1f5f9" stroke-width="2"/>
+    <rect x="25" y="575" width="330" height="50" fill="#4f46e5" rx="12" filter="url(#shadow-btn)"/>
+    <!-- Icono + -->
+    <path d="M 115 600 L 135 600 M 125 590 L 125 610" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <text x="145" y="605" font-weight="bold" fill="#ffffff" font-size="16">Crear Nuevo Grupo</text>
+    
+  </g>
+
+  <!-- ==========================================
+       SECCIÓN DERECHA: ANOTACIONES FUNCIONALES (NO TÉCNICAS)
+       ========================================== -->
+       
+  <!-- Anotación 0: Tab ERP -->
+  <path d="M 200 35 Q 400 35 480 65" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <rect x="500" y="30" width="330" height="70" fill="#ffffff" stroke="#e2e8f0" rx="6" filter="url(#shadow-card-note)"/>
+  <text x="520" y="55" font-weight="bold" fill="#1e293b" font-size="14">🖥️ Pestaña del Sistema</text>
+  <text x="520" y="77" fill="#64748b" font-size="13">El panel inteligente se abre como una pestaña</text>
+  <text x="520" y="95" fill="#64748b" font-size="13">más de su ERP, sin necesidad de salir del sistema.</text>
+
+  <!-- Anotación 1: Buscador -->
+  <path d="M 360 185 Q 420 185 480 170" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <rect x="500" y="130" width="330" height="70" fill="#ffffff" stroke="#e2e8f0" rx="6" filter="url(#shadow-card-note)"/>
+  <text x="520" y="155" font-weight="bold" fill="#1e293b" font-size="14">🔍 Búsqueda Rápida</text>
+  <text x="520" y="177" fill="#64748b" font-size="13">Escriba aquí para encontrar al instante el rol</text>
+  <text x="520" y="195" fill="#64748b" font-size="13">que desea modificar, sin tener que buscar uno por uno.</text>
+
+  <!-- Anotación 2: Tarjeta Activa -->
+  <path d="M 370 300 Q 430 300 480 280" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <rect x="500" y="240" width="330" height="85" fill="#ffffff" stroke="#e2e8f0" rx="6" filter="url(#shadow-card-note)"/>
+  <text x="520" y="265" font-weight="bold" fill="#1e293b" font-size="14">🔵 Perfil Seleccionado</text>
+  <text x="520" y="287" fill="#64748b" font-size="13">El perfil resaltado en azul es con el que está</text>
+  <text x="520" y="305" fill="#64748b" font-size="13">trabajando. Los permisos que asigne al lado</text>
+  <text x="520" y="323" fill="#64748b" font-size="13">derecho aplicarán exclusivamente a él.</text>
+
+  <!-- Anotación 3: Eliminar y Sistema -->
+  <path d="M 370 435 Q 450 435 480 405" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <rect x="500" y="360" width="330" height="85" fill="#ffffff" stroke="#e2e8f0" rx="6" filter="url(#shadow-card-note)"/>
+  <text x="520" y="385" font-weight="bold" fill="#1e293b" font-size="14">🗑️ Protección y Eliminación</text>
+  <text x="520" y="407" fill="#64748b" font-size="13">Presione la papelera roja para borrar un rol.</text>
+  <text x="520" y="425" fill="#64748b" font-size="13">Los roles vitales para el negocio tienen la etiqueta</text>
+  <text x="520" y="443" fill="#64748b" font-size="13">"Sistema" y están protegidos contra eliminación.</text>
+
+  <!-- Anotación 4: Botón Crear -->
+  <path d="M 370 615 Q 430 615 480 575" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+  <rect x="500" y="530" width="330" height="70" fill="#ffffff" stroke="#e2e8f0" rx="6" filter="url(#shadow-card-note)"/>
+  <text x="520" y="555" font-weight="bold" fill="#1e293b" font-size="14">✨ Dar de Alta un Nuevo Puesto</text>
+  <text x="520" y="577" fill="#64748b" font-size="13">Presione este botón morado para crear un nuevo</text>
+  <text x="520" y="595" fill="#64748b" font-size="13">perfil de usuario desde cero o clonar uno existente.</text>
+
+</svg>

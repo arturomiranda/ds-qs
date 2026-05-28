@@ -49,6 +49,8 @@ Ubicada al extremo izquierdo de la pantalla. Su objetivo es listar y gestionar l
 - **Crear Nuevo Grupo:** Un botón destacado que abre un formulario sencillo para registrar un nuevo grupo de acceso. Al crearlo, puedes elegir una "Plantilla Base" para no empezar desde cero (por ejemplo, copiar la configuración de un grupo existente o crear uno en blanco).
 - **Eliminar Grupo:** Al pasar el cursor sobre un grupo (que no sea del sistema), aparecerá un icono de bote de basura para eliminarlo, solicitando una confirmación segura antes de realizar la acción.
 
+![Mockup Columna 1](./002_ui_col1_grupos.svg)
+
 ---
 
 ### 🛡️ Columna 2: El Tablero de Control de Permisos
@@ -60,6 +62,8 @@ Es el centro de operaciones. Muestra una lista organizada de los módulos de la 
 - **Regla Inteligente de Seguridad:** Si el interruptor principal de "Acceso" está **apagado**, todas las casillas CRUD se bloquearán y desactivarán automáticamente. ¡No puedes realizar acciones en una habitación a la que ni siquiera tienes permitido entrar!
 - **Botones Masivos de Módulo:** Cada módulo principal tiene botones rápidos para **Habilitar** o **Bloquear** todas sus opciones con un solo clic, ahorrándote tiempo.
 - **Botones Globales:** En la parte superior existen controles para "Habilitar Todo" o "Bloquear Todo" a nivel general del grupo de usuario.
+
+![Mockup Columna 2](./002_ui_col2_permisos.svg)
 
 ---
 
@@ -74,6 +78,8 @@ Esta columna representa la gran innovación del panel. Te permite **"ver con los
   - <span style="background-color:#d1fae5; color:#065f46; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px">R</span> **(Consultar):** El usuario puede entrar y ver la información.
   - <span style="background-color:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px">U</span> **(Editar):** El usuario puede modificar registros.
   - <span style="background-color:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px">D</span> **(Eliminar):** El usuario puede borrar información física del sistema.
+
+![Mockup Columna 3](./002_ui_col3_preview.svg)
 
 ---
 
@@ -118,5 +124,7 @@ Aunque la pantalla es sumamente simple de usar, por detrás cuenta con tecnolog�
 
 Para comprender mejor de forma visual el funcionamiento de cada elemento de este panel interactivo, consulta las siguientes ilustraciones vectoriales adjuntas:
 
-- **[Mockup Explicado de la Interfaz (3 Columnas)](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Diagramas/002_ui_mockup.svg):** Ilustración detallada que identifica cada sección de la pantalla y sus controles con flechas y globos explicativos.
-- **[Diagrama del Flujo del Negocio](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Diagramas/002_flujo_negocio.svg):** Mapa conceptual simple del ciclo de administración de accesos.
+- **[Columna 1: Grupos de Usuarios](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Manuales/002_ui_col1_grupos.svg):** Diseño de la columna izquierda con búsqueda y lista de roles.
+- **[Columna 2: Matriz de Control](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Manuales/002_ui_col2_permisos.svg):** Tablero central con switches y permisos CRUD exactos.
+- **[Columna 3: Simulador ERP](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Manuales/002_ui_col3_preview.svg):** Vista en vivo (Dark Mode) de cómo el usuario final verá el menú.
+- **[Diagrama del Flujo del Negocio](file:///c:/Users/LuisKC/Proyectos/vERP%20Y%20DATTA_ERP/ds-qs/data/1.%20Principales/Manuales/002_flujo_negocio.svg):** Mapa conceptual simple del ciclo de administración de accesos.

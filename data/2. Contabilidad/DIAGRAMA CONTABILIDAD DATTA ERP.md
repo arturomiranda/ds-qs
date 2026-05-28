@@ -1,22 +1,22 @@
-## DIAGRAMA DE FLUJO CONTABILIDAD DATTA ERP 
+## DIAGRAMA DE FLUJO CONTABILIDAD DATTA ERP
 
 ```mermaid
 flowchart LR
-    %% Definición de Actores
-    SAT["🏢 SAT\n<<Actor Externo>>"]
-    IA["🤖 Motor IA (Node.js)\n<<Actor de Sistema>>"]
-    USUARIO["👤 Usuario Contable\n<<Actor Humano>>"]
+    %% Definición de Actores con sus respectivas clases ajustadas
+    SAT["🏢 SAT\n<<Actor Externo>>"]:::actorExt
+    IA["🤖 Motor IA (Node.js)\n<<Actor de Sistema>>"]:::actorSys
+    USUARIO["👤 Usuario Contable\n<<Actor Humano>>"]:::actorHum
 
     %% Límite del Sistema (System Boundary)
     subgraph DSQS ["DS-QS: ERP Intelligent Suite (Velneo + Node.js)"]
         direction TB
-        UC1(["Descargar CFDI masivamente"])
-        UC2(["Analizar XML y extraer UUID"])
-        UC3(["Generar Póliza Automática"])
-        UC4(["Validar Límite de Presupuesto"])
-        UC5(["Actualizar Saldos en Tiempo Real"])
-        UC6(["Consultar Estados Financieros"])
-        UC7(["Configurar Catálogo de Cuentas"])
+        UC1(["Descargar CFDI masivamente"]):::usecase
+        UC2(["Analizar XML y extraer UUID"]):::usecase
+        UC3(["Generar Póliza Automática"]):::usecase
+        UC4(["Validar Límite de Presupuesto"]):::usecase
+        UC5(["Actualizar Saldos en Tiempo Real"]):::usecase
+        UC6(["Consultar Estados Financieros"]):::usecase
+        UC7(["Configurar Catálogo de Cuentas"]):::usecase
     end
 
     %% Asociaciones Principales (Actores interactuando con Casos de Uso)
@@ -24,7 +24,7 @@ flowchart LR
     IA --- UC1
     IA --- UC2
     IA --- UC3
-    
+
     USUARIO --- UC6
     USUARIO --- UC7
     USUARIO --- UC3
@@ -34,16 +34,22 @@ flowchart LR
     UC2 -. "<<include>>\n" .-> UC3
     UC3 -. "<<include>>\n" .-> UC4
     UC3 -. "<<include>>\n" .-> UC5
-    
-    %% Estilos para respetar la estética UML
-    style SAT fill:#f5f5f5,stroke:#333,stroke-width:2px
-    style IA fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style USUARIO fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style DSQS fill:#ffffff,stroke:#000000,stroke-width:2px,stroke-dasharray: 5 5
+
+    %% --- SECCIÓN DE ESTILOS ADAPTATIVOS MULTI-TEMA ---
+    %% Forzamos 'color' oscuro en los nodos para evitar que GitHub vuelva las letras blancas
+    classDef actorExt fill:#f5f5f5,stroke:#333333,stroke-width:2px,color:#212121
+    classDef actorSys fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
+    classDef actorHum fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+
+    %% Estilo unificado para los Casos de Uso (estética UML limpia)
+    classDef usecase fill:#fffde7,stroke:#fbc02d,stroke-width:2px,color:#f57f17
+
+    %% El contenedor ahora es transparente (fill:none) y el borde es gris neutro para resaltar en negro y blanco
+    style DSQS fill:none,stroke:#78909c,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
-
 # DIAGRAMA DE CASO DE ACTIVIDADES CONTABILIDAD DATTA ERP
+
 ```mermaid
 flowchart TD
     %% Actores/Sistemas
@@ -125,7 +131,7 @@ classDiagram
         +Float Limite_Mensual
         +Float Monto_Ejercido
     }
-    
+
     class Centro_Costo {
         <<Control Interno>>
         +String Departamento

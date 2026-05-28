@@ -14,9 +14,9 @@ classDiagram
         +Numérico ID
         +Alfa_256 NAME
         +Alfa_256 PSW_ACC
-        +Numérico ENT_USU  
+        +Numérico ENT_USU
     }
-    
+
     class USU_EMP {
         <<Pivote - Autorización (001_USU_EMP)>>
         +Numérico ID
@@ -24,7 +24,7 @@ classDiagram
         +Numérico EMP
         +Numérico CRD_USR
     }
-    
+
     %% El Núcleo Multi-Tenant
     class EMP {
         <<Tenant - Empresas (001_EMP)>>
@@ -48,7 +48,7 @@ classDiagram
     USU "1" -- "0..*" USU_EMP : Tiene acceso a
     EMP "1" -- "0..*" USU_EMP : Autoriza a
     EMP "1" *-- "0..*" TABLAS_TRANSACCIONALES : Segmenta / Es dueña de
-    
+
     %% Relación Jerárquica de Sucursales (Relación Reflexiva)
     EMP "1" o-- "0..*" EMP : Es matriz de (EMP_PAD)
 ```
@@ -72,29 +72,32 @@ A nivel de negocio, operar un sistema Multi-Tenant requiere flujos de trabajo es
 
 ```mermaid
 flowchart LR
-    %% Estilos UML
-    classDef actor fill:#eceff1,stroke:#455a64,stroke-width:2px
-    classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:ellipse
+    %% Estilos UML corregidos para modo oscuro (se añade 'color')
+    classDef actor fill:#eceff1,stroke:#455a64,stroke-width:2px,color:#1c313a
+    classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:ellipse,color:#0d47a1
 
     %% Actores Externos Reales
     Admin(("👤 Administrador")):::actor
     Operador(("🧑‍💻 Usuario Operador")):::actor
 
-    %% Límite del Sistema
-    subgraph "DATTA ERP - Gestión de Contexto Multiempresa"
-        
+    %% Límite del Sistema (con ID asignado para poder estilizarlo)
+    subgraph sistema ["DATTA ERP - Gestión de Contexto Multiempresa"]
+
         %% Casos de Uso del Administrador
         Asignar(["Configurar Accesos a Empresas y Sucursales"]):::usecase
-        
+
         %% Casos de Uso del Operador
         Alternar(["Alternar Empresa Activa en Interfaz"]):::usecase
         OperarCruzado(["Emitir Transacción para Empresa No Activa"]):::usecase
         ConsultarGlobal(["Consultar Historial Consolidado (Múltiples Empresas)"]):::usecase
     end
 
+    %% Estilo adaptativo para el recuadro del sistema (sin fondo fijo)
+    style sistema fill:none,stroke:#78909c,stroke-width:2px,stroke-dasharray: 5 5
+
     %% Interacciones
     Admin ---> Asignar
-    
+
     Operador ---> Alternar
     Operador ---> OperarCruzado
     Operador ---> ConsultarGlobal
@@ -102,8 +105,8 @@ flowchart LR
 
 ### Lógica de Negocio Multi-Tenant
 
-*   **Abstracción del Contexto:** El sistema permite que el operador tenga una "Empresa por Defecto" pero mantenga la capacidad de realizar transacciones cruzadas para otras empresas autorizadas sin cambiar su sesión global.
-*   **Seguridad de Capa Local:** La visibilidad de las empresas autorizadas se descarga una sola vez al inicio en el array `catalogo_EMP_AUTORIZADAS`, eliminando consultas redundantes al servidor durante la navegación.
+- **Abstracción del Contexto:** El sistema permite que el operador tenga una "Empresa por Defecto" pero mantenga la capacidad de realizar transacciones cruzadas para otras empresas autorizadas sin cambiar su sesión global.
+- **Seguridad de Capa Local:** La visibilidad de las empresas autorizadas se descarga una sola vez al inicio en el array `catalogo_EMP_AUTORIZADAS`, eliminando consultas redundantes al servidor durante la navegación.
 
 ---
 
@@ -114,7 +117,7 @@ Este diagrama modela el flujo técnico para una operación cruzada, demostrando 
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     %% Definición de Participantes (Líneas de Vida)
     actor Luis as Vendedor: Luis
     participant UI as Interfaz (Módulo Facturas)
@@ -128,7 +131,7 @@ sequenceDiagram
     activate UI
     UI ->> RAM: Leer catalogo_EMP_AUTORIZADAS
     RAM -->> UI: Retorna Array de IDs Permitidos (Ej. [1, 2, 3])
-    
+
     UI ->> Core: Disparar Búsqueda (IDs_Empresas: [1, 2, 3])
     activate Core
     Core ->> DB: Resolver por Índice (IDX_EMP)
@@ -147,14 +150,14 @@ sequenceDiagram
     UI ->> RAM: Leer globalVar_EMP_ACTUAL (ID: 1)
     RAM -->> UI: Retorna Empresa A
     UI ->> UI: Auto-completa Emisor con Empresa A
-    
+
     Luis ->> UI: Cambia selector manual a Empresa B (ID: 2)
     Luis ->> UI: Clic en botón "Guardar y Timbrar"
-    
+
     %% Validación Perimetral de Seguridad en Memoria
     UI ->> RAM: ¿ID_Empresa: 2 existe en catalogo_EMP_AUTORIZADAS?
     RAM -->> UI: Retorna TRUE (Operación lícita)
-    
+
     alt ID Autorizado Exitosamente (Camino Feliz)
         UI ->> Core: Lanzar Proceso (Payload + EMP_DESTINO = 2)
         activate Core
@@ -186,10 +189,10 @@ El diagrama de actividad representa el **algoritmo matemático** que sigue la in
 
 ```mermaid
 flowchart TD
-    %% Estilos UML estrictos
-    classDef startEnd fill:#000,stroke:#000,color:#fff
-    classDef action fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    classDef decision fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+    %% Estilos UML optimizados para modo claro y oscuro
+    classDef startEnd fill:#263238,stroke:#cfd8dc,stroke-width:2px,color:#fff
+    classDef action fill:#fff3e0,stroke:#ff9800,stroke-width:2px,color:#4e342e
+    classDef decision fill:#e1bee7,stroke:#8e24aa,stroke-width:2px,color:#4a148c
 
     %% Nodos Inicial y Finales
     Start(("Inicio: Intento de Transacción Cruzada")):::startEnd
@@ -211,7 +214,6 @@ flowchart TD
     %% Flujo
     Start --> A
     A --> B
-    B --> C
     B --> D
 
     D -->|"No (Acceso Denegado)"| Err

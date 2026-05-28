@@ -98,17 +98,17 @@ Para complementar la estructura técnica, a continuación se presenta un **Diagr
 
 ```mermaid
 flowchart LR
-    %% Estilos simulando UML
-    classDef actor fill:#eceff1,stroke:#455a64,stroke-width:2px
-    classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:ellipse
+    %% Estilos UML corregidos para modo oscuro (se añade 'color')
+    classDef actor fill:#eceff1,stroke:#455a64,stroke-width:2px,color:#1c313a
+    classDef usecase fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,shape:ellipse,color:#0d47a1
 
     %% Actores
     Admin(("👤 Administrador")):::actor
     Operador(("🧑‍💻 Usuario")):::actor
     Sistema(("⚙️ Motor de Seguridad")):::actor
 
-    %% Frontera del Sistema
-    subgraph "ERP - Gestión de Accesos y Seguridad"
+    %% Frontera del Sistema (Con ID para estilizado adaptativo)
+    subgraph seguridad ["ERP - Gestión de Accesos y Seguridad"]
 
         %% Casos de Uso: Configuración (Admin)
         CrearGrupo(["Registrar Grupo de Usuario"]):::usecase
@@ -123,6 +123,9 @@ flowchart LR
         ValidarVisibilidad(["Validar Permiso de Solo Lectura ('VER')"]):::usecase
         ValidarAccion(["Validar Privilegios CRUD (Agregar, Editar, etc)"]):::usecase
     end
+
+    %% Estilo adaptativo para el contenedor (sin fondo rígido)
+    style seguridad fill:none,stroke:#78909c,stroke-width:2px,stroke-dasharray: 5 5
 
     %% Conexiones Administrador
     Admin ---> CrearGrupo
@@ -204,10 +207,10 @@ Aquí se evidencia el comportamiento _polimórfico_ del motor: la evaluación ca
 
 ```mermaid
 flowchart TD
-    %% Estilos UML estrictos
-    classDef startEnd fill:#000,stroke:#000,color:#fff
-    classDef action fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    classDef decision fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+    %% Estilos UML optimizados para modo claro y oscuro
+    classDef startEnd fill:#263238,stroke:#cfd8dc,stroke-width:2px,color:#fff
+    classDef action fill:#fff3e0,stroke:#ff9800,stroke-width:2px,color:#4e342e
+    classDef decision fill:#e1bee7,stroke:#8e24aa,stroke-width:2px,color:#4a148c
 
     %% Nodos Inicial y Finales (Formato Seguro)
     Start(("Inicio: Llamada a Seguridad")):::startEnd

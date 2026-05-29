@@ -1,4 +1,5 @@
 # Tabla: ID: 003_IMP_TRSL
+# Nombre: 003: Impuestos Traslados
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

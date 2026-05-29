@@ -1,4 +1,5 @@
 # Tabla: ID: 004_CAT_TAB
+# Nombre: 004: Catalogo de Tablas
 
 ## 📄 Información General
 - Tipo de tabla: Maestro

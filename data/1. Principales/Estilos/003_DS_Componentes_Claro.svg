@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 800" font-family="'Roboto', 'Segoe UI', system-ui, sans-serif">
+  <rect width="900" height="800" fill="#ffffff"/>
+
+  <!-- Título -->
+  <text x="40" y="50" font-size="24" font-weight="bold" fill="#121217">CATÁLOGO DE COMPONENTES</text>
+  <path d="M 40 70 L 860 70" stroke="#D1D1DB" stroke-width="1"/>
+
+  <!-- SECCIÓN: BOTONES -->
+  <text x="40" y="110" font-size="16" font-weight="bold" fill="#3F3F50">BOTONES DE ACCIÓN (QPushButton)</text>
+  <text x="40" y="130" font-size="12" fill="#6C6C89">Altura: 36px | Border-radius: 18px (Completamente redondeados)</text>
+
+  <g transform="translate(40, 150)">
+    <!-- Normal -->
+    <rect x="0" y="0" width="120" height="36" fill="#F5F5F5" stroke="#D1D1DB" rx="18"/>
+    <text x="60" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#3F3F50">Estándar</text>
+
+    <!-- Hover -->
+    <rect x="150" y="0" width="120" height="36" fill="#F5F5F5" stroke="#8A8AA3" rx="18"/>
+    <text x="210" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#3F3F50">Hover</text>
+
+    <!-- Focus -->
+    <rect x="300" y="0" width="120" height="36" fill="#F5F5F5" stroke="#00ACFF" stroke-width="2" rx="18"/>
+    <text x="360" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#3F3F50">En Foco</text>
+    
+    <!-- Primary (Aceptar) -->
+    <rect x="450" y="0" width="120" height="36" fill="#00ACFF" rx="18"/>
+    <text x="510" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#FFFFFF">Primario</text>
+
+    <!-- Primary (Hover/Pressed) -->
+    <rect x="600" y="0" width="120" height="36" fill="#0090D6" rx="18"/>
+    <text x="660" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#FFFFFF">Prim. Hover</text>
+
+    <!-- Warning (Advertencia) -->
+    <rect x="750" y="0" width="100" height="36" fill="#FDD8E1" stroke="#FDD8E1" rx="18"/>
+    <text x="800" y="23" text-anchor="middle" font-size="13" font-weight="normal" fill="#121217">Advertencia</text>
+  </g>
+
+
+  <!-- SECCIÓN: ENTRADAS DE TEXTO Y COMBOS -->
+  <text x="40" y="240" font-size="16" font-weight="bold" fill="#3F3F50">ENTRADAS DE TEXTO Y COMBOS (QLineEdit / QComboBox)</text>
+  <text x="40" y="260" font-size="12" fill="#6C6C89">Altura: 36px | Border-radius: 6px | Fondo Base: #F5F5F5</text>
+
+  <g transform="translate(40, 280)">
+    <!-- Normal Input -->
+    <text x="0" y="10" font-size="12" fill="#8A8AA3">Estado Inactivo</text>
+    <rect x="0" y="20" width="250" height="36" fill="#F5F5F5" stroke="#D1D1DB" rx="6"/>
+    <text x="15" y="43" font-size="13" fill="#121217">Texto introducido...</text>
+
+    <!-- Focused Input -->
+    <text x="300" y="10" font-size="12" fill="#8A8AA3">Estado con Foco (Borde 2px Azul)</text>
+    <rect x="300" y="20" width="250" height="36" fill="#F5F5F5" stroke="#00ACFF" stroke-width="2" rx="6"/>
+    <!-- Simulated selection background -->
+    <rect x="313" y="27" width="120" height="22" fill="#ADE4FF" />
+    <text x="315" y="43" font-size="13" fill="#121217">Texto seleccionado</text>
+
+    <!-- Disabled Input -->
+    <text x="600" y="10" font-size="12" fill="#8A8AA3">Estado Deshabilitado</text>
+    <rect x="600" y="20" width="250" height="36" fill="#EBEBEF" stroke="#EBEBEF" rx="6"/>
+    <text x="615" y="43" font-size="13" fill="#3F3F50">No disponible</text>
+  </g>
+
+  <!-- SECCIÓN: SWITCHES Y CHECKBOXES -->
+  <text x="40" y="400" font-size="16" font-weight="bold" fill="#3F3F50">TOGGLES Y CONTROLES BOOLEANOS (VSwitch / QCheckBox)</text>
+
+  <g transform="translate(40, 420)">
+    <text x="0" y="10" font-size="12" fill="#8A8AA3">Interruptor VSwitch (36x24px)</text>
+    <!-- Switch OFF -->
+    <rect x="0" y="30" width="36" height="24" fill="#D1D1DB" rx="12"/>
+    <circle cx="12" cy="42" r="10" fill="#FFFFFF"/>
+    <text x="45" y="47" font-size="13" fill="#6C6C89">Apagado</text>
+
+    <!-- Switch ON -->
+    <rect x="150" y="30" width="36" height="24" fill="#00ACFF" rx="12"/>
+    <circle cx="174" cy="42" r="10" fill="#FFFFFF"/>
+    <text x="195" y="47" font-size="13" fill="#121217">Encendido</text>
+
+    <text x="320" y="10" font-size="12" fill="#8A8AA3">Casilla de Verificación (QCheckBox)</text>
+    <!-- Checkbox OFF -->
+    <rect x="320" y="34" width="16" height="16" fill="transparent" stroke="#D1D1DB" stroke-width="2" rx="3"/>
+    <text x="345" y="47" font-size="13" fill="#6C6C89">Opción desmarcada</text>
+
+    <!-- Checkbox ON -->
+    <rect x="500" y="34" width="16" height="16" fill="#00ACFF" rx="3"/>
+    <!-- Check mark -->
+    <path d="M 503 42 L 506 46 L 513 38" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <text x="525" y="47" font-size="13" fill="#00ACFF">Opción marcada</text>
+  </g>
+
+
+  <!-- SECCIÓN: PESTAÑAS (TABS) -->
+  <text x="40" y="550" font-size="16" font-weight="bold" fill="#3F3F50">SEPARADOR DE PESTAÑAS (QTabWidget)</text>
+  
+  <g transform="translate(40, 570)">
+    <!-- Línea divisoria global -->
+    <path d="M 0 35 L 800 35" stroke="#EBEBEF" stroke-width="1"/>
+
+    <!-- Pestaña Inactiva -->
+    <text x="20" y="20" font-size="13" fill="#8A8AA3">Configuración General</text>
+    <path d="M 5 35 L 160 35" stroke="#D1D1DB" stroke-width="2"/>
+
+    <!-- Pestaña Hover -->
+    <text x="180" y="20" font-size="13" fill="#8A8AA3">Datos de Contacto</text>
+    <path d="M 170 35 L 305 35" stroke="#8A8AA3" stroke-width="2"/>
+    
+    <!-- Pestaña Seleccionada -->
+    <text x="330" y="20" font-size="13" fill="#8A8AA3">Permisos de Usuario</text>
+    <path d="M 320 35 L 470 35" stroke="#3F3F50" stroke-width="2"/>
+  </g>
+
+
+  <!-- SECCIÓN: AGRUPADORES -->
+  <text x="40" y="660" font-size="16" font-weight="bold" fill="#3F3F50">CAJA DE GRUPO (QGroupBox)</text>
+
+  <g transform="translate(40, 680)">
+    <rect x="0" y="10" width="800" height="70" fill="transparent" stroke="#D1D1DB" stroke-width="1" rx="6"/>
+    <!-- Título con fondo blanco para tapar el borde de la caja -->
+    <rect x="10" y="2" width="140" height="16" fill="#ffffff"/>
+    <text x="12" y="15" font-size="11" font-weight="bold" fill="#A9A9BC">INFORMACIÓN FISCAL</text>
+
+    <!-- Contenido falso dentro del grupo -->
+    <rect x="20" y="30" width="200" height="36" fill="#F5F5F5" stroke="#D1D1DB" rx="6"/>
+    <text x="35" y="53" font-size="13" fill="#6C6C89">Razón Social...</text>
+  </g>
+
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="'Segoe UI', system-ui, sans-serif">
+  <rect width="800" height="400" fill="#f8fafc"/>
+  
+  <text x="400" y="40" text-anchor="middle" font-size="20" font-weight="bold" fill="#334155">FLUJO DE NEGOCIO: ASIGNACIÓN DE PERMISOS</text>
+
+  <!-- Paso 1 -->
+  <rect x="50" y="150" width="180" height="80" fill="#eef2ff" stroke="#6366f1" stroke-width="2" rx="8"/>
+  <text x="140" y="185" text-anchor="middle" font-weight="bold" fill="#334155" font-size="14">1. Seleccionar Grupo</text>
+  <text x="140" y="205" text-anchor="middle" fill="#64748b" font-size="12">Se filtran los permisos</text>
+
+  <!-- Flecha 1 -->
+  <path d="M 230 190 L 280 190" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Paso 2 -->
+  <rect x="290" y="150" width="220" height="80" fill="#f0fdf4" stroke="#22c55e" stroke-width="2" rx="8"/>
+  <text x="400" y="185" text-anchor="middle" font-weight="bold" fill="#334155" font-size="14">2. Modificar CRUD / Menús</text>
+  <text x="400" y="205" text-anchor="middle" fill="#64748b" font-size="12">Vista previa en tiempo real</text>
+
+  <!-- Flecha 2 -->
+  <path d="M 510 190 L 560 190" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Paso 3 -->
+  <rect x="570" y="150" width="180" height="80" fill="#fff7ed" stroke="#f97316" stroke-width="2" rx="8"/>
+  <text x="660" y="185" text-anchor="middle" font-weight="bold" fill="#334155" font-size="14">3. Guardar en Lote</text>
+  <text x="660" y="205" text-anchor="middle" fill="#64748b" font-size="12">Persistencia en BD</text>
+
+  <!-- Marker para flechas -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+    </marker>
+  </defs>
+</svg>

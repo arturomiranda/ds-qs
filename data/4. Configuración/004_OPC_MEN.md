@@ -1,4 +1,5 @@
 # Tabla: ID: 004_OPC_MEN
+# Nombre: 004: Opciones de menú
 
 ## 📄 Información General
 - Tipo de tabla: Maestro con clave arbolada

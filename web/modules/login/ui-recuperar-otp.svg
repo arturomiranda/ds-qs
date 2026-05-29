@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <defs>
+    <!-- Actual Datta ERP background gradient matching bg-gradient-to-br from-blue-950 to-slate-950 -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#172554" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Credit card gradient -->
+    <linearGradient id="creditCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    
+    <!-- Real glowing blobs representing sky-500/10 and blue-500/10 in the app layout -->
+    <radialGradient id="glowSky" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowBlue" cx="90%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Professional card shadow filter matching shadow-2xl shadow-black/45 -->
+    <filter id="sombraSuave" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="20" stdDeviation="25" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- ================= SPLIT LAYOUT CONTAINER ================= -->
+  <!-- Left Side: White Background Form Panel -->
+  <rect x="0" y="0" width="640" height="720" fill="#ffffff" />
+
+  <!-- Right Side: Dark Blue Presentation Panel -->
+  <rect x="640" y="0" width="640" height="720" fill="url(#bgGrad)" />
+  <rect x="640" y="0" width="640" height="720" fill="url(#glowSky)" />
+  <rect x="640" y="0" width="640" height="720" fill="url(#glowBlue)" />
+
+  <!-- Abstract brand grid lines on the right panel -->
+  <path d="M640,80 L1280,80 M640,160 L1280,160 M640,240 L1280,240 M640,320 L1280,320 M640,400 L1280,400 M640,480 L1280,480 M640,560 L1280,560 M640,640 L1280,640" stroke="#ffffff" stroke-opacity="0.01" stroke-width="1" />
+  <path d="M800,0 L800,720 M960,0 L960,720 M1120,0 L1120,720" stroke="#ffffff" stroke-opacity="0.01" stroke-width="1" />
+
+  <!-- ================= LEFT PANEL CONTENT (ACTIVE FORM) ================= -->
+  <!-- Brand Logo at Top Left -->
+  <g transform="translate(80, 50)">
+    <rect x="0" y="0" width="36" height="36" rx="8" fill="#2563eb" />
+    <path d="M10,8 L10,28 L15,28 C20,28 23,25 23,18 C23,11 20,8 15,8 Z" fill="#ffffff" />
+    <path d="M13,12 L13,24 L16,24 C18,24 20,22 20,18 C20,14 18,12 16,12 Z" fill="#2563eb" />
+    <text x="46" y="21" font-family="sans-serif" font-weight="900" font-size="18" fill="#0f172a" letter-spacing="0.5">DATTA <tspan fill="#2563eb" font-weight="500">ERP</tspan></text>
+    <text x="46" y="30" font-family="sans-serif" font-weight="700" font-size="7" fill="#94a3b8" letter-spacing="1">SOCIOS DE TU CRECIMIENTO</text>
+  </g>
+
+  <!-- Paso 3 - Formulario de Recuperación OTP -->
+  <g transform="translate(80, 170)">
+    <text x="0" y="30" font-family="sans-serif" font-weight="800" font-size="34" fill="#0f172a" letter-spacing="-0.5">Código de verificación</text>
+    
+    <text x="0" y="55" font-family="sans-serif" font-size="13.5" fill="#64748b">Hemos enviado un código de 6 dígitos a <tspan fill="#0f172a" font-weight="700">william@empresa.com</tspan></text>
+
+    <!-- Campo de Entrada (OTP Input) -->
+    <g transform="translate(0, 105)">
+      <text x="5" y="12" font-family="sans-serif" font-weight="bold" font-size="11" fill="#94a3b8" letter-spacing="0.5">CÓDIGO OTP</text>
+      <rect x="0" y="20" width="460" height="50" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+      <text x="230" y="54" font-family="monospace" font-weight="bold" font-size="24" fill="#0f172a" letter-spacing="8" text-anchor="middle">482917</text>
+    </g>
+
+    <!-- Botón Verificar -->
+    <g transform="translate(0, 195)">
+      <rect x="0" y="0" width="460" height="50" rx="16" fill="#2563eb" />
+      <text x="230" y="29" font-family="sans-serif" font-weight="bold" font-size="15" fill="#ffffff" text-anchor="middle">Verificar Código</text>
+    </g>
+
+    <!-- Botón de Regresar -->
+    <g transform="translate(0, 270)">
+      <!-- Back Arrow -->
+      <path d="M210,13 L204,18 L210,23" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      <line x1="205" y1="18" x2="217" y2="18" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" />
+      <text x="226" y="22" font-family="sans-serif" font-weight="bold" font-size="13" fill="#94a3b8">Regresar</text>
+    </g>
+  </g>
+
+  <!-- Copyright Footer Left Panel -->
+  <text x="80" y="670" font-family="sans-serif" font-size="11" fill="#94a3b8">© 2026 Dattasoft Consultores. Todos los derechos reservados.</text>
+
+
+  <!-- ================= RIGHT PANEL CONTENT (3D CORPORATE DESIGNS) ================= -->
+  <!-- Overlapping Cards Group -->
+  <g transform="translate(720, 140)">
+    
+    <!-- 1. Main White Control Card -->
+    <g filter="url(#sombraSuave)">
+      <rect x="0" y="0" width="340" height="260" rx="28" fill="#ffffff" stroke="#f1f5f9" stroke-width="1" />
+      <text x="30" y="55" font-family="sans-serif" font-weight="800" font-size="22" fill="#0f172a" letter-spacing="-0.5">Toma el control</text>
+      <text x="30" y="80" font-family="sans-serif" font-weight="800" font-size="22" fill="#0f172a" letter-spacing="-0.5">inteligente</text>
+      <text x="30" y="115" font-family="sans-serif" font-size="13" fill="#64748b">Simplifica inventarios, facturación y</text>
+      <text x="30" y="132" font-family="sans-serif" font-size="13" fill="#64748b">finanzas en una sola plataforma.</text>
+      
+      <!-- Saber Más Button Inside Card -->
+      <rect x="30" y="170" width="100" height="36" rx="18" fill="#0f172a" />
+      <text x="80" y="192" font-family="sans-serif" font-weight="bold" font-size="11" fill="#ffffff" text-anchor="middle">Saber más</text>
+    </g>
+
+    <!-- 2. Dark Credit Card Overlapping Right -->
+    <g transform="translate(190, 110)" filter="url(#sombraSuave)">
+      <rect x="0" y="0" width="190" height="120" rx="18" fill="url(#creditCardGrad)" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+      <text x="20" y="25" font-family="sans-serif" font-weight="900" font-size="10" fill="#ffffff" letter-spacing="1" opacity="0.6">DATTA ERP</text>
+      <rect x="145" y="16" width="25" height="15" rx="3" fill="#fbbf24" fill-opacity="0.8" />
+      
+      <text x="20" y="75" font-family="monospace" font-size="12" fill="#ffffff" letter-spacing="3">•••• 4820</text>
+      <text x="20" y="100" font-family="sans-serif" font-size="8" fill="#ffffff" opacity="0.5">DATTASOFT</text>
+      <text x="145" y="100" font-family="sans-serif" font-size="8" fill="#ffffff" opacity="0.5">05/29</text>
+    </g>
+
+    <!-- 3. Small Stats Card Overlapping Bottom -->
+    <g transform="translate(30, 215)" filter="url(#sombraSuave)">
+      <rect x="0" y="0" width="160" height="60" rx="16" fill="#ffffff" />
+      <circle cx="30" cy="30" r="16" fill="#f0f9ff" />
+      <!-- Trending Up Arrow -->
+      <path d="M22,34 L28,28 L32,32 L38,26" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M34,26 L38,26 L38,30" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      
+      <text x="58" y="25" font-family="sans-serif" font-weight="bold" font-size="9" fill="#94a3b8" letter-spacing="0.5">CRECIMIENTO</text>
+      <text x="58" y="42" font-family="sans-serif" font-weight="bold" font-size="14" fill="#0f172a">+45.2%</text>
+    </g>
+  </g>
+
+  <!-- Corporate Bottom Texts on Right Panel -->
+  <g transform="translate(720, 520)">
+    <text x="0" y="0" font-family="sans-serif" font-weight="800" font-size="20" fill="#ffffff">Presentamos nuevas características</text>
+    <text x="0" y="25" font-family="sans-serif" font-size="13.5" fill="#94a3b8" opacity="0.8">El análisis avanzado y en tiempo real asegura decisiones</text>
+    <text x="0" y="43" font-family="sans-serif" font-size="13.5" fill="#94a3b8" opacity="0.8">inteligentes. Y a medida que tu negocio escala, Datta ERP</text>
+    <text x="0" y="61" font-family="sans-serif" font-size="13.5" fill="#94a3b8" opacity="0.8">se adapta a tus necesidades de manera fluida.</text>
+  </g>
+</svg>
